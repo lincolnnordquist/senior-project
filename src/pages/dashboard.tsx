@@ -1,19 +1,47 @@
 import React, { Component } from "react";
+import SkiResortsMap from "../components/SkiResortsMap";
+import Button from '@mui/material/Button';
 
-interface User {
+type User = {
   id: string;
   email: string;
+  firstName: string;
+  lastName: string;
+};
+
+type SelectedResort = {
+  id: string;
+  name: string;
+  state: string;
+  website: string;
+  latitude: number;
+  longitude: number;
 }
 
-interface DashboardState {
+type SkiResort = {
+  id: string;
+  name: string;
+  state: string;
+  website: string;
+  latitude: number;
+  longitude: number;
+};
+
+type DashboardState = {
   user: User | null;
-}
+  resorts: SkiResort[];
+  resortDetailPage: boolean;
+  selectedResort: SelectedResort | null;
+};
 
 class Dashboard extends Component<{}, DashboardState> {
   constructor(props: {}) {
     super(props);
     this.state = {
       user: null,
+      resorts: [],
+      resortDetailPage: false,
+      selectedResort: null,
     };
   }
 
@@ -27,115 +55,97 @@ class Dashboard extends Component<{}, DashboardState> {
         const data = await res.json();
         this.setState({ user: data.user });
       } else {
-        console.warn("User not authenticated. Redirecting to login.");
-        window.location.href = "/login";
+        console.warn("User not authenticated. Redirecting to homepage.");
+        window.location.href = "/";
       }
     } catch (error) {
       console.error("Error fetching user:", error);
     }
   }
 
+  async fetchResorts() {
+    try {
+      const res = await fetch("/api/ski_resorts");
+      if (res.ok) {
+        const data = await res.json();
+        this.setState({ resorts: data });
+      } else {
+        console.error("Failed to fetch ski resorts");
+      }
+    } catch (error) {
+      console.error("Error fetching ski resorts:", error);
+    }
+  }
+
   componentDidMount() {
     this.fetchUser();
+    this.fetchResorts();
   }
 
   render() {
-    const { user } = this.state;
+    const { user, resorts } = this.state;
 
     return (
-      <div style={styles.container}>
-        <div style={styles.header}>
-          <h1 style={styles.title}>Ski Resort Dashboard</h1>
-        </div>
+      <div className="d-flex flex-column align-items-center" style={{ background: "linear-gradient(to bottom, #cce0ff, #ffffff)", minHeight: "100vh" }}>
+        <div className="container text-center mt-5">
+          {/* <div className="bg-white p-4 rounded shadow" style={{ maxWidth: "600px", margin: "0 auto" }}>
+            {user ? (
+              <>
+                <h2 className="text-secondary">Welcome, {user.email}!</h2>
+                <Button className="btn btn-primary mt-3" onClick={() => (window.location.href = "/logout")}>
+                  Logout
+                </Button>
+              </>
+            ) : (
+              <p className="text-muted">Loading user data...</p>
+            )}
+          </div> */}
 
-        <div style={styles.content}>
-          {user ? (
-            <>
-              <h2 style={styles.welcomeText}>Welcome, {user.email}!</h2>
-              <p style={styles.description}>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in 
-                eros elementum tristique. 
-              </p>
+          <div className="container text-center py-5 d-flex justify-content-center" style={{ width: "100%" }}>
+            {/* Left Column - Resort List */}
+            { !this.state.resortDetailPage ? (
+              <div className="p-3 bg-white rounded shadow" style={{ width: "50%", maxHeight: "500px", overflowY: "auto" }}>
+                <h2 className="text-primary">Resorts</h2>
+                {resorts.length > 0 ? (
+                  <ul className="list-group">
+                    {resorts.map((resort) => (
+                      <li 
+                        key={resort.id} 
+                        className="list-group-item d-flex justify-content-between align-items-center" 
+                        style={{ cursor: 'pointer' }} 
+                        onClick={() => this.setState({ resortDetailPage: true, selectedResort: resort })}
+                      >
+                        {resort.name}, {resort.state}
+                        <span className="badge bg-primary">{resort.latitude.toFixed(2)}, {resort.longitude.toFixed(2)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-muted">No resorts available.</p>
+                )}
+              </div>
+            ) : (
+              <div className="p-3 bg-white rounded shadow" style={{ width: "50%", maxHeight: "500px", overflowY: "auto", display: "flex", flexDirection: "column", alignItems: 'center' }}>
+                <h2 className="text-primary">{this.state.selectedResort?.name}</h2>
+                {/* <button className='btn btn-secondary' onClick={() => {window.open(`https://www.google.com/maps/search/?api=1&query=${this.state.selectedResort?.latitude},${this.state.selectedResort?.longitude}`);}}>Website</button> */}
+                <Button style={{width: '100px'}} className='btn btn-secondary self-center' onClick={() => {
+                  window.open(this.state.selectedResort?.website);
+                }}>Website</Button>
 
-              <p style={styles.description}>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in 
-                eros elementum tristique. Duis cursus, mi quis viverra ornare, eros dolor interdum nulla, 
-                ut commodo diam libero vitae erat.
-              </p>
 
-              <button style={styles.logoutButton} onClick={() => (window.location.href = "/logout")}>
-                Logout
-              </button>
-            </>
-          ) : (
-            <p style={styles.loadingText}>Loading user data...</p>
-          )}
+                <Button style={{width: '100px', marginTop: '200px'}} className="btn btn-primary" onClick={() => this.setState({ resortDetailPage: false, selectedResort: null })}>Back</Button>
+              </div>
+            )}
+
+            {/* Right Column - Map */}
+            <div style={{ width: "50%", marginLeft: "5%" }}>
+              <SkiResortsMap selectedResort={this.state.selectedResort ? `${this.state.selectedResort.latitude},${this.state.selectedResort.longitude}` : ""}/>
+            </div>
+          </div>
         </div>
       </div>
     );
   }
 }
-
-// Styles for a ski resort theme
-const styles: { [key: string]: React.CSSProperties } = {
-  container: {
-    height: "100vh",
-    background: "linear-gradient(to bottom, #cce0ff, #ffffff)",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    fontFamily: "'Arial', sans-serif",
-  },
-  header: {
-    background: "rgba(255, 255, 255, 0.8)",
-    padding: "15px",
-    borderRadius: "10px",
-    boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
-    textAlign: "center",
-    width: "80%",
-  },
-  title: {
-    margin: 0,
-    color: "#2a5f9e",
-  },
-  content: {
-    background: "rgba(255, 255, 255, 0.9)",
-    padding: "30px",
-    borderRadius: "12px",
-    boxShadow: "0px 5px 10px rgba(0, 0, 0, 0.15)",
-    textAlign: "center",
-    width: "60%",
-    marginTop: "20px",
-  },
-  welcomeText: {
-    fontSize: "22px",
-    fontWeight: "bold",
-    color: "#1b4b8e",
-  },
-  description: {
-    fontSize: "16px",
-    color: "#444",
-    margin: "10px 0",
-  },
-  loadingText: {
-    fontSize: "18px",
-    color: "#666",
-  },
-  logoutButton: {
-    marginTop: "20px",
-    backgroundColor: "#1b4b8e",
-    color: "white",
-    padding: "10px 20px",
-    border: "none",
-    borderRadius: "5px",
-    fontSize: "16px",
-    cursor: "pointer",
-    transition: "background 0.3s",
-  },
-  logoutButtonHover: {
-    backgroundColor: "#154073",
-  },
-};
 
 export default Dashboard;

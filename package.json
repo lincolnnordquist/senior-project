@@ -9,10 +9,16 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@mui/material": "^6.4.6",
     "@prisma/client": "^6.3.0",
+    "@react-google-maps/api": "^2.20.6",
     "@supabase/supabase-js": "^2.48.1",
+    "bootstrap": "^5.3.3",
     "cookie": "^1.0.2",
     "next": "15.1.6",
+    "nookies": "^2.5.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
