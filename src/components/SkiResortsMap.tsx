@@ -47,7 +47,7 @@ class SkiResortsMap extends Component<MapProps, MapState> {
     if (prevProps.selectedResort !== this.props.selectedResort) {
       if (this.props.selectedResort) {
         const [lat, lng] = this.props.selectedResort.split(",").map(Number);
-        this.setState({ center: { lat, lng }, zoom: 12 });
+        this.setState({ center: { lat, lng }, zoom: 16 });
       } else {
         this.setState({ center: { lat: 39.5, lng: -111.5 }, zoom: 7 });
       }
