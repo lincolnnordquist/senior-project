@@ -68,7 +68,7 @@ class SkiResortsMap extends Component<MapProps, MapState> {
           className="rounded shadow"
           style={{
             width: "100%",
-            height: "500px",
+            height: "80vh",
             overflow: "hidden",
             ...this.props.style,
           }}

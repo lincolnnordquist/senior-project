@@ -1,13 +1,10 @@
+import { GetServerSideProps } from "next";
+import { createPagesServerClient } from "@supabase/auth-helpers-nextjs";
 import React, { Component } from "react";
 import SkiResortsMap from "../components/SkiResortsMap";
 import Button from '@mui/material/Button';
-
-type User = {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-};
+import Icon from '@mdi/react';
+import { mdiStar, mdiStarOutline } from '@mdi/js';
 
 type SelectedResort = {
   id: string;
@@ -16,6 +13,7 @@ type SelectedResort = {
   website: string;
   latitude: number;
   longitude: number;
+  address: string;
 }
 
 type SkiResort = {
@@ -26,10 +24,20 @@ type SkiResort = {
   latitude: number;
   longitude: number;
   address: string;
+  average_rating: number;
 };
 
-type DashboardState = {
-  user: User | null;
+type ReviewType = {
+  id: string;
+  resort_id: string;
+  rating: number;
+  review: string;
+  users: {
+    first_name: string;
+  };
+}
+
+type StateType = {
   resorts: SkiResort[];
   resortDetailPage: boolean;
   selectedResort: SelectedResort | null;
@@ -41,13 +49,24 @@ type DashboardState = {
 
   reviewInput: string;
   ratingInput: number;
+
+  myReviews: ReviewType[];
+  resortReviews: ReviewType[];
+  userId: string | null;
 };
 
-class Dashboard extends Component<{}, DashboardState> {
-  constructor(props: {}) {
+interface DashboardProps {
+  user: {
+    id: string;
+    email?: string;
+    first_name?: string;
+  } | null;
+}
+
+class Dashboard extends Component<DashboardProps, StateType> {
+  constructor(props: DashboardProps) {
     super(props);
     this.state = {
-      user: null,
       resorts: [],
       resortDetailPage: false,
       selectedResort: null,
@@ -59,25 +78,30 @@ class Dashboard extends Component<{}, DashboardState> {
       errorMessage: "",
       successOccurred: false,
       successMessage: "",
+
+      myReviews: [],
+      resortReviews: [],
+      userId: null,
     };
   }
 
-  async fetchUser() {
+  async fetchUserReviews() {
     try {
-      const res = await fetch("/api/auth/user", {
+      const res = await fetch("/api/reviews/user", {
+        method: "GET",
         credentials: "include",
       });
 
       if (res.ok) {
         const data = await res.json();
-        console.log("User authenticated:", data.user);
-        this.setState({ user: data.user });
+        this.setState({ myReviews: data.reviews }, () => {
+          console.log("User reviews fetched:", this.state.myReviews);
+        });
       } else {
-        console.warn("User not authenticated. Redirecting to homepage.");
-        window.location.href = "/";
+        console.error("Failed to fetch user reviews");
       }
     } catch (error) {
-      console.error("Error fetching user:", error);
+      console.error("Error fetching user reviews:", error);
     }
   }
 
@@ -140,8 +164,8 @@ class Dashboard extends Component<{}, DashboardState> {
           successOccurred: true,
           successMessage: "Review submitted successfully.",
           errorOccurred: false,
-          reviewInput: "",
-          ratingInput: 0,
+        }, () => {
+          this.fetchEverything();
         });
       } else {
         const error = await res.json();
@@ -161,13 +185,35 @@ class Dashboard extends Component<{}, DashboardState> {
     }
   }
 
-  componentDidMount() {
-    this.fetchUser();
+  async fetchResortReviews(resortId: string) {
+    try {
+      const res = await fetch(`/api/reviews/resort?resort_id=${resortId}`);
+      if (res.ok) {
+        const data = await res.json();
+        this.setState({ resortReviews: data.reviews }, () => {
+          console.log("Resort reviews fetched:", this.state.resortReviews);
+        });
+      } else {
+        console.error("Failed to fetch resort reviews");
+      }
+    } catch (error) {
+      console.error("Error fetching resort reviews:", error);
+    }
+  }
+
+  async fetchEverything() {
     this.fetchResorts();
+    this.fetchUserReviews();
+  }
+
+  componentDidMount() {
+    this.fetchEverything();
+    console.log("User from componentDidMount:", this.props.user);
   }
 
   render() {
-    const { user, resorts } = this.state;
+    const { resorts } = this.state;
+    const { user } = this.props;
 
     return (
       <div
@@ -180,7 +226,7 @@ class Dashboard extends Component<{}, DashboardState> {
           margin: 0,
           padding: 0,
           boxSizing: "border-box",
-          overflowX: "hidden"
+          overflowX: "hidden",
         }}
       >
         <div
@@ -203,7 +249,8 @@ class Dashboard extends Component<{}, DashboardState> {
                 borderRadius: "0.5rem",
                 boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
                 width: "52%",
-                maxHeight: "500px",
+                height: "80vh",
+                // maxHeight: "500px",
                 overflowY: "auto"
               }}
             >
@@ -212,11 +259,20 @@ class Dashboard extends Component<{}, DashboardState> {
                   {resorts.map((resort) => (
                     <div
                       key={resort.id}
-                      onClick={() =>
+                      onClick={() => {
+                        const existingReview = this.state.myReviews.find(
+                          (review) => review.resort_id === resort.id
+                          
+                        );
+
                         this.setState({
                           resortDetailPage: true,
-                          selectedResort: resort
-                        })}
+                          selectedResort: resort,
+                          reviewInput: existingReview?.review || "",
+                          ratingInput: existingReview?.rating || 0,
+                        });
+                        this.fetchResortReviews(resort.id);
+                      }}
                       style={{
                         backgroundColor: "#f8f9fa",
                         borderRadius: "0.5rem",
@@ -225,6 +281,7 @@ class Dashboard extends Component<{}, DashboardState> {
                         boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
                         cursor: "pointer",
                         transition: "transform 0.2s ease-in-out",
+                        textAlign: "left",
                       }}
                       onMouseEnter={e => e.currentTarget.style.transform = "scale(1.01)"}
                       onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
@@ -235,6 +292,20 @@ class Dashboard extends Component<{}, DashboardState> {
                       <div style={{ color: "#6c757d", marginBottom: "0.5rem" }}>
                         {resort.address}
                       </div>
+                      <hr style={{margin: '10px 0'}}/>
+                      <div style={{ color: "#6c757d" }}>
+                        {resort.average_rating != 0 ? <div style={{ display: "flex", gap: "0.25rem" }}>
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Icon
+                            key={star}
+                            path={resort.average_rating >= star ? mdiStar : mdiStarOutline}
+                            size={1}
+                            color="#FFD700"
+                          />
+                        ))}
+                      </div> : "No reviews yet"}
+                        </div>
+                      
                     </div>
                   ))}
                 </ul>
@@ -251,15 +322,49 @@ class Dashboard extends Component<{}, DashboardState> {
                 borderRadius: "0.5rem",
                 boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
                 width: "52%",
+                // maxHeight: "500px",
+                height: "80vh",
                 overflowY: "auto",
-                display: "flex",
-                flexDirection: "column",
                 alignItems: "center",
               }}
             >
-              <h2 style={{ color: "#0d6efd", marginBottom: "1rem" }}>
+              <h2 style={{ color: "#0d6efd", marginBottom: "1rem", fontWeight: "bold", fontSize: "32px" }}>
                 {this.state.selectedResort?.name}
               </h2>
+              <h2 style={{ color: "black", marginBottom: "1rem", fontWeight: "bold", fontSize: "18px" }}>
+                {this.state.selectedResort?.address}
+              </h2>
+
+
+                <div style={{ 
+                    textAlign: "left",
+                }}>
+                {this.state.resortReviews.length === 0 ? (
+                  <p>No reviews for this resort yet.</p>
+                ) : (
+                  this.state.resortReviews.map((review) => (
+                    <div key={review.id} style={{ marginBottom: "1rem", borderRadius: "8px",
+                      backgroundColor: "#ededed",
+                    padding: "1rem",
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
+                    transition: "transform 0.2s ease-in-out",
+                     }}>
+                      <div>{review.users.first_name}</div>
+                      <div style={{ display: "flex", gap: "0.25rem" }}>
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Icon
+                            key={star}
+                            path={review.rating >= star ? mdiStar : mdiStarOutline}
+                            size={1}
+                            color="#FFD700"
+                          />
+                        ))}
+                      </div>
+                      <div>{review.review}</div>
+                    </div>
+                  ))
+                )}
+              </div>
 
               <p style={{ alignSelf: "flex-start", fontWeight: "bold", marginBottom: "0.25rem" }}>
                 Write a Review:
@@ -276,27 +381,28 @@ class Dashboard extends Component<{}, DashboardState> {
                   marginBottom: "1rem",
                   resize: "vertical",
                 }}
+                value={this.state.reviewInput}
                 onChange={(e) => this.setState({ reviewInput: e.target.value })}
               />
 
               <p style={{ alignSelf: "flex-start", fontWeight: "bold", marginBottom: "0.25rem" }}>
                 Rating:
               </p>
-              <input
-                id="rating"
-                type="number"
-                min="1"
-                max="5"
-                placeholder="Enter a rating (1–5)"
-                style={{
-                  width: "100%",
-                  padding: "0.5rem",
-                  border: "1px solid #ccc",
-                  borderRadius: "0.5rem",
-                  marginBottom: "1.5rem",
-                }}
-                onChange={(e) => this.setState({ ratingInput: parseInt(e.target.value) })}
-              />
+              <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1.5rem" }}>
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <div
+                    key={star}
+                    style={{ cursor: "pointer" }}
+                    onClick={() => this.setState({ ratingInput: star })}
+                  >
+                    <Icon
+                      path={this.state.ratingInput >= star ? mdiStar : mdiStarOutline}
+                      size={1.5}
+                      color="#FFD700"
+                    />
+                  </div>
+                ))}
+              </div>
               {
                 this.state.errorOccurred ?  <span style={{ color: "red", marginBottom: '16px' }}>{this.state.errorMessage}</span> : null
               }
@@ -331,7 +437,7 @@ class Dashboard extends Component<{}, DashboardState> {
                     height: '40px'
                   }}
                   onClick={() =>
-                    this.setState({ resortDetailPage: false, selectedResort: null })
+                    this.setState({ resortDetailPage: false, selectedResort: null, errorOccurred: false, successOccurred: false, errorMessage: "", successMessage: "" })
                   }
                 >
                   Back
@@ -358,3 +464,18 @@ class Dashboard extends Component<{}, DashboardState> {
 }
 
 export default Dashboard;
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const supabase = createPagesServerClient(context);
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  console.log("User from getServerSideProps:", user);
+
+  return {
+    props: {
+      user,
+    },
+  };
+};
