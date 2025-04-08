@@ -24,6 +24,7 @@ type SkiResort = {
   address: string;
   average_rating: number;
   weather: WeatherType | null;
+  photoURL: string;
 };
 
 type ReviewType = {
@@ -355,10 +356,21 @@ class Dashboard extends Component<DashboardProps, StateType> {
                       onMouseEnter={e => e.currentTarget.style.transform = "scale(1.01)"}
                       onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
                     >
-                      <div style={{ fontWeight: "bold", fontSize: "1.1rem", color: "#16435d" }}>
-                        {resort.name}
+                      <div style={{ display: "flex", alignItems: "center", marginBottom: "0.5rem" }}>
+                        <img
+                          src={resort.photoURL}
+                          alt="resort photo"
+                          style={{
+                            width: "45px",
+                            height: "45px",
+                            borderRadius: "8px",
+                          }}
+                        />
+                        <div style={{ fontWeight: "bold", fontSize: "1.1rem", color: "#16435d", justifyContent: "center", marginLeft: "0.5rem" }}>
+                          {resort.name}
+                        </div>
                       </div>
-                      <div style={{ display: "flex", alignItems: "center", marginTop: "0.25rem" }}>
+                      <div style={{ display: "flex", alignItems: "center", margin: "0.5rem 0" }}>
                         <Icon path={mdiWeatherCloudy} size={1} color="#6c757d" />
                         <span style={{ marginLeft: "0.5rem", color: "#6c757d" }}>
                           {resort.weather?.temperature !== undefined ? `${resort.weather.temperature}°F` : "N/A"}
@@ -404,6 +416,17 @@ class Dashboard extends Component<DashboardProps, StateType> {
                 alignItems: "center",
               }}
             >
+              <img
+                          src={this.state.selectedResort?.photoURL}
+                          alt="resort photo"
+                          style={{
+                            width: "100px",
+                            height: "100px",
+                            borderRadius: "8px",
+                            display: "block",
+                            margin: "0 auto",
+                          }}
+                        />
               <h2 style={{ color: "#16435d", marginBottom: "0.25rem", fontWeight: "bold", fontSize: "32px" }}>
                 {this.state.selectedResort?.name}
               </h2>
