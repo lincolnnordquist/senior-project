@@ -85,7 +85,13 @@ class NavBar extends Component<NavBarProps, NavBarState> {
           <Image src={Logo} alt="Ski Scape Logo" width={90} height={90} />
           <span style={titleStyle}>Ski Scape</span>
         </Link>
+        {user?.first_name && (
+            <li style={{ ...navItemStyle, color: "white", display: "flex", alignItems: "center" }}>
+              <span>Welcome, {user.first_name}</span>
+            </li>
+          )}
         <ul style={navListStyle}>
+
           <li style={navItemStyle}>
             <Link href="/dashboard" style={navLinkStyle} onMouseEnter={e => {
               e.currentTarget.style.fontWeight = "bold";
@@ -97,12 +103,10 @@ class NavBar extends Component<NavBarProps, NavBarState> {
               Dashboard
             </Link>
           </li>
-          {user?.first_name && (
-            <li style={{ ...navItemStyle, color: "white", display: "flex", alignItems: "center" }}>
-              <span>Welcome, {user.first_name}</span>
-            </li>
-          )}
-          <li style={navItemStyle}>
+            
+             {
+              this.state.user ? 
+              <li style={navItemStyle}>
             <Link href="/logout" style={navLinkStyle} onMouseEnter={e => {
               e.currentTarget.style.fontWeight = "bold";
               e.currentTarget.style.textDecoration = "underline";
@@ -113,17 +117,20 @@ class NavBar extends Component<NavBarProps, NavBarState> {
               Logout
             </Link>
           </li>
-          <li style={navItemStyle}>
-            <Link href="/login" style={navLinkStyle} onMouseEnter={e => {
-              e.currentTarget.style.fontWeight = "bold";
-              e.currentTarget.style.textDecoration = "underline";
-            }} onMouseLeave={e => {
-              e.currentTarget.style.fontWeight = "normal";
-              e.currentTarget.style.textDecoration = "none";
-            }}>
-              Login
-            </Link>
-          </li>
+              :
+              <li style={navItemStyle}>
+              <Link href="/login" style={navLinkStyle} onMouseEnter={e => {
+                e.currentTarget.style.fontWeight = "bold";
+                e.currentTarget.style.textDecoration = "underline";
+              }} onMouseLeave={e => {
+                e.currentTarget.style.fontWeight = "normal";
+                e.currentTarget.style.textDecoration = "none";
+              }}>
+                Login
+              </Link>
+            </li>
+             }
+         
         </ul>
       </nav>
     );

@@ -1,20 +1,27 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { supabase } from "../../../utils/supabase";
-import { parse } from "cookie";
+import { createPagesServerClient } from "@supabase/auth-helpers-nextjs";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const cookies = parse(req.headers.cookie || "");
-  const token = cookies.supabaseToken;
+  const supabase = createPagesServerClient({ req, res });
 
-  if (!token) {
-    return res.status(401).json({ message: "No active session" });
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return res.status(401).json({ message: "Unauthorized", error: authError });
   }
 
-  const { data, error } = await supabase.auth.getUser(token);
+  const { data: fullUser, error: userError } = await supabase
+    .from("users")
+    .select("id, email, first_name, last_name")
+    .eq("id", user.id)
+    .single();
 
-  if (error || !data.user) {
-    return res.status(401).json({ message: "Unauthorized", error });
+  if (userError || !fullUser) {
+    return res.status(404).json({ message: "User not found", error: userError });
   }
 
-  res.status(200).json({ user: data.user });
+  res.status(200).json({ user: fullUser });
 }
