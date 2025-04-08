@@ -5,15 +5,13 @@ import SkiResortsMap from "../components/SkiResortsMap";
 import Button from '@mui/material/Button';
 import Icon from '@mdi/react';
 import { mdiStar, mdiStarOutline } from '@mdi/js';
+import { mdiWeatherCloudy } from '@mdi/js';
+import { mdiThermometer, mdiWeatherWindy } from '@mdi/js';
 
-type SelectedResort = {
-  id: string;
-  name: string;
-  state: string;
-  website: string;
-  latitude: number;
-  longitude: number;
-  address: string;
+type WeatherType = {
+  temperature: number;
+  description: string;
+  windSpeed: number;
 }
 
 type SkiResort = {
@@ -25,6 +23,7 @@ type SkiResort = {
   longitude: number;
   address: string;
   average_rating: number;
+  weather: WeatherType | null;
 };
 
 type ReviewType = {
@@ -40,7 +39,7 @@ type ReviewType = {
 type StateType = {
   resorts: SkiResort[];
   resortDetailPage: boolean;
-  selectedResort: SelectedResort | null;
+  selectedResort: SkiResort | null;
 
   errorOccurred: boolean;
   errorMessage: string;
@@ -94,9 +93,7 @@ class Dashboard extends Component<DashboardProps, StateType> {
 
       if (res.ok) {
         const data = await res.json();
-        this.setState({ myReviews: data.reviews }, () => {
-          console.log("User reviews fetched:", this.state.myReviews);
-        });
+        this.setState({ myReviews: data.reviews });
       } else {
         console.error("Failed to fetch user reviews");
       }
@@ -201,14 +198,83 @@ class Dashboard extends Component<DashboardProps, StateType> {
     }
   }
 
+  async fetchWeatherForAllResorts() {
+    const updatedResorts = await Promise.all(
+      this.state.resorts.map(async (resort) => {
+        try {
+          const res = await fetch(`/api/weather?lat=${resort.latitude}&lon=${resort.longitude}`);
+          if (!res.ok) {
+            console.warn(`Failed to fetch weather for resort ${resort.name}`);
+            return { ...resort, weather: null };
+          }
+
+          const weatherData = await res.json();
+          return {
+            ...resort,
+            weather: weatherData,
+          };
+        } catch (error) {
+          console.error(`Error fetching weather for ${resort.name}:`, error);
+          return { ...resort, weather: null };
+        }
+      })
+    );
+
+    this.setState({ resorts: updatedResorts });
+  }
+
+  async fetchWeatherForOneResort() {
+    if (!this.state.selectedResort) {
+      console.error("No resort selected for weather fetch.");
+      return;
+    }
+
+    try {
+      const res = await fetch(
+        `/api/weather?lat=${this.state.selectedResort.latitude}&lon=${this.state.selectedResort.longitude}`
+      );
+      if (res.ok) {
+        const weatherData = await res.json();
+        this.setState((prevState) => ({
+          resorts: prevState.resorts.map((resort) =>
+            resort.id === this.state.selectedResort?.id ? { ...resort, weather: weatherData } : resort
+          ),
+        }));
+      } else {
+        console.error("Failed to fetch weather for selected resort");
+      }
+    } catch (error) {
+      console.error("Error fetching weather for selected resort:", error);
+    }
+  }
+
   async fetchEverything() {
-    this.fetchResorts();
-    this.fetchUserReviews();
+    await this.fetchResorts();
+    await this.fetchUserReviews();
+    await this.fetchWeatherForAllResorts();
+    await console.log("Resorts after fetching everything:", this.state.resorts);
   }
 
   componentDidMount() {
-    this.fetchEverything();
     console.log("User from componentDidMount:", this.props.user);
+
+    this.createSnowflakes();
+    this.fetchEverything();
+  }
+
+  createSnowflakes() {
+    const snowflakeContainer = document.querySelector('.snowfall-container');
+
+    if (snowflakeContainer) {
+      for (let i = 0; i < 100; i++) {
+        const snowflake = document.createElement('div');
+        snowflake.classList.add('snowflake');
+        snowflake.style.left = `${Math.random() * 100}%`;
+        snowflake.style.animationDuration = `${Math.random() * 25 + 25}s`;
+        snowflake.style.animationDelay = `-${Math.random() * 25}s`;
+        snowflakeContainer.appendChild(snowflake);
+      }
+    }
   }
 
   render() {
@@ -220,7 +286,7 @@ class Dashboard extends Component<DashboardProps, StateType> {
         style={{
           display: "flex",
           flexDirection: "column",
-          background: "linear-gradient(to bottom, #cce0ff, #ffffff)",
+          background: "#eaf4fb",
           minHeight: "100vh",
           width: "100%",
           margin: 0,
@@ -265,20 +331,23 @@ class Dashboard extends Component<DashboardProps, StateType> {
                           
                         );
 
+                        const updatedResort = this.state.resorts.find(r => r.id === resort.id) || resort;
+                        
                         this.setState({
                           resortDetailPage: true,
-                          selectedResort: resort,
+                          selectedResort: updatedResort,
                           reviewInput: existingReview?.review || "",
                           ratingInput: existingReview?.rating || 0,
                         });
                         this.fetchResortReviews(resort.id);
                       }}
                       style={{
-                        backgroundColor: "#f8f9fa",
-                        borderRadius: "0.5rem",
+                        backgroundColor: "#ffffff",
+                        border: "1px solid #d4e3f0",
                         padding: "1rem",
                         marginBottom: "1rem",
-                        boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
+                        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
+                        color: "#4a6b82",
                         cursor: "pointer",
                         transition: "transform 0.2s ease-in-out",
                         textAlign: "left",
@@ -286,8 +355,14 @@ class Dashboard extends Component<DashboardProps, StateType> {
                       onMouseEnter={e => e.currentTarget.style.transform = "scale(1.01)"}
                       onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
                     >
-                      <div style={{ fontWeight: "bold", fontSize: "1.1rem", color: "#0d6efd" }}>
+                      <div style={{ fontWeight: "bold", fontSize: "1.1rem", color: "#16435d" }}>
                         {resort.name}
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", marginTop: "0.25rem" }}>
+                        <Icon path={mdiWeatherCloudy} size={1} color="#6c757d" />
+                        <span style={{ marginLeft: "0.5rem", color: "#6c757d" }}>
+                          {resort.weather?.temperature !== undefined ? `${resort.weather.temperature}°F` : "N/A"}
+                        </span>
                       </div>
                       <div style={{ color: "#6c757d", marginBottom: "0.5rem" }}>
                         {resort.address}
@@ -318,9 +393,10 @@ class Dashboard extends Component<DashboardProps, StateType> {
             <div
               style={{
                 padding: "1rem",
-                backgroundColor: "white",
+                background: "#ffffff",
+                border: "1px solid #d4e3f0",
                 borderRadius: "0.5rem",
-                boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
                 width: "52%",
                 // maxHeight: "500px",
                 height: "80vh",
@@ -328,23 +404,41 @@ class Dashboard extends Component<DashboardProps, StateType> {
                 alignItems: "center",
               }}
             >
-              <h2 style={{ color: "#0d6efd", marginBottom: "1rem", fontWeight: "bold", fontSize: "32px" }}>
+              <h2 style={{ color: "#16435d", marginBottom: "0.25rem", fontWeight: "bold", fontSize: "32px" }}>
                 {this.state.selectedResort?.name}
               </h2>
-              <h2 style={{ color: "black", marginBottom: "1rem", fontWeight: "bold", fontSize: "18px" }}>
+              <h2 style={{ color: "#4a6b82", marginBottom: "1rem", fontSize: "16px" }}>
                 {this.state.selectedResort?.address}
               </h2>
+              {this.state.selectedResort?.weather && (
+                <div style={{ display: "flex", flexDirection: "column", marginBottom: "1rem" }}>
+                  <div style={{ display: "flex", alignItems: "center", color: "#6c757d", marginBottom: "0.5rem" }}>
+                    <Icon path={mdiWeatherCloudy} size={1} color="#6c757d" />
+                    <span style={{ marginLeft: "0.5rem" }}>
+                      {this.state.selectedResort.weather.temperature}°F
+                    </span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", color: "#6c757d" }}>
+                    <Icon path={mdiWeatherWindy} size={1} color="#6c757d" />
+                    <span style={{ marginLeft: "0.5rem" }}>
+                      Wind Speed: {this.state.selectedResort.weather.windSpeed} mph
+                    </span>
+                  </div>
+                </div>
+              )}
 
 
                 <div style={{ 
                     textAlign: "left",
                 }}>
+                  <h3 style={{ fontWeight: "bold", color: "#2a5f9e", marginTop: "2rem", marginBottom: "1rem" }}>Reviews</h3>
                 {this.state.resortReviews.length === 0 ? (
                   <p>No reviews for this resort yet.</p>
                 ) : (
                   this.state.resortReviews.map((review) => (
                     <div key={review.id} style={{ marginBottom: "1rem", borderRadius: "8px",
-                      backgroundColor: "#ededed",
+                      backgroundColor: "#f8f9fa",
+                      border: "1px solid #cce0ff",
                     padding: "1rem",
                     boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
                     transition: "transform 0.2s ease-in-out",
@@ -365,8 +459,8 @@ class Dashboard extends Component<DashboardProps, StateType> {
                   ))
                 )}
               </div>
-
-              <p style={{ alignSelf: "flex-start", fontWeight: "bold", marginBottom: "0.25rem" }}>
+              
+              <p style={{ alignSelf: "flex-start", fontWeight: "bold", marginBottom: "0.25rem", color: "#2a5f9e" }}>
                 Write a Review:
               </p>
               <textarea
@@ -385,10 +479,10 @@ class Dashboard extends Component<DashboardProps, StateType> {
                 onChange={(e) => this.setState({ reviewInput: e.target.value })}
               />
 
-              <p style={{ alignSelf: "flex-start", fontWeight: "bold", marginBottom: "0.25rem" }}>
+              <p style={{ alignSelf: "flex-start", fontWeight: "bold", marginBottom: "0.25rem", color: "#2a5f9e" }}>
                 Rating:
               </p>
-              <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1.5rem" }}>
+              <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1.5rem", justifyContent: 'center' }}>
                 {[1, 2, 3, 4, 5].map((star) => (
                   <div
                     key={star}
@@ -458,6 +552,59 @@ class Dashboard extends Component<DashboardProps, StateType> {
             />
           </div>
         </div>
+
+
+        <div className="snowfall-container"></div>
+
+        <style>
+          {`
+            body {
+              margin: 0;
+              overflow: hidden;
+              background-color: #eaf4fb;
+              color: #16435d;
+            }
+            
+            .main-container {
+              position: relative;
+              z-index: 1;
+              /* Add your other styles for the main content container here */
+            }
+            
+            .snowfall-container {
+              position: absolute;
+              top: 0;
+              left: 0;
+              width: 100%;
+              height: 100%;
+              z-index: 0;
+              pointer-events: none;
+            }
+            
+            .snowflake {
+              position: absolute;
+              width: 10px;
+              height: 10px;
+              background-color: #ffffff;
+              border-radius: 50%;
+              opacity: 1;
+              box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+              animation: snowfall linear infinite;
+              pointer-events: none;
+            }
+            
+            @keyframes snowfall {
+              0% {
+                top: -10px;
+                transform: translateY(0);
+              }
+              100% {
+                top: 100vh;
+                transform: translateY(200vh);
+              }
+            }
+          `}
+        </style>
       </div>
     );
   }
