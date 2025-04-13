@@ -416,12 +416,12 @@ class Dashboard extends Component<PropsType, StateType> {
           display: "flex",
           flexDirection: "column",
           background: "#eaf4fb",
-          minHeight: "100vh",
+          height: "100vh",
           width: "100%",
           margin: 0,
           padding: 0,
           boxSizing: "border-box",
-          overflowX: "hidden",
+          overflow: "hidden",
         }}
       >
         <div
@@ -910,7 +910,6 @@ class Dashboard extends Component<PropsType, StateType> {
             .main-container {
               position: relative;
               z-index: 1;
-              /* Add your other styles for the main content container here */
             }
             
             .snowfall-container {
@@ -918,7 +917,7 @@ class Dashboard extends Component<PropsType, StateType> {
               top: 0;
               left: 0;
               width: 100%;
-              height: 100%;
+              height: 100vh;
               z-index: 0;
               pointer-events: none;
             }

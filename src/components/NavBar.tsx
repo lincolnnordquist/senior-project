@@ -82,7 +82,7 @@ class NavBar extends Component<NavBarProps, NavBarState> {
 
     return (
       <nav style={navStyle}>
-        <Link href="/dashboard" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
+        <Link href="/" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
           <Image src={Logo} alt="Ski Scape Logo" width={90} height={90} />
           <span style={titleStyle}>Ski Scape</span>
         </Link>

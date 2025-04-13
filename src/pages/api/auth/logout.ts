@@ -1,7 +1,12 @@
 import { NextApiRequest, NextApiResponse } from "next";
+import { createPagesServerClient } from "@supabase/auth-helpers-nextjs";
 import { serialize } from "cookie";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const supabase = createPagesServerClient({ req, res });
+
+  await supabase.auth.signOut();
+
   res.setHeader(
     "Set-Cookie",
     serialize("supabaseToken", "", {

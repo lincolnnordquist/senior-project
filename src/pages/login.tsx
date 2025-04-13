@@ -1,4 +1,8 @@
 import React, { Component } from "react";
+import { GetServerSideProps } from "next";
+import Logo from "../../public/images/logo.png";
+import { createPagesServerClient } from "@supabase/auth-helpers-nextjs";
+
 
 interface LoginState {
   email: string;
@@ -43,6 +47,12 @@ class Login extends Component<{}, LoginState> {
   render() {
     return (
       <div style={styles.container}>
+        <img
+        onClick={() => window.location.href = "/"}
+          src={Logo.src}
+          alt="Ski Scape Logo"
+          style={{ width: "200px", cursor: "pointer" }}
+        />
         <div style={styles.card}>
           <h1 style={styles.title}>Welcome</h1>
           <p style={styles.subtitle}>Log in or create an account.</p>
@@ -83,13 +93,14 @@ const styles: { [key: string]: React.CSSProperties } = {
     height: "100vh",
     background: "linear-gradient(to bottom, #cce0ff, #ffffff)",
     display: "flex",
+    flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
     fontFamily: "'Arial', sans-serif",
   },
   card: {
     background: "rgba(255, 255, 255, 0.95)",
-    padding: "30px",
+    padding: "20px",
     borderRadius: "12px",
     boxShadow: "0px 5px 10px rgba(0, 0, 0, 0.15)",
     textAlign: "center",
@@ -138,3 +149,23 @@ const styles: { [key: string]: React.CSSProperties } = {
 };
 
 export default Login;
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const supabase = createPagesServerClient(context);
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (user) {
+    return {
+      redirect: {
+        destination: "/dashboard",
+        permanent: false,
+      },
+    };
+  }
+
+  return {
+    props: {},
+  };
+};

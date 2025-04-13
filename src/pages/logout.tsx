@@ -1,8 +1,10 @@
 import { Component } from "react";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
 class Logout extends Component {
   async componentDidMount() {
-    await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+    const supabase = createClientComponentClient();
+    await supabase.auth.signOut();
     window.location.href = "/login";
   }
 
