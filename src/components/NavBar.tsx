@@ -8,6 +8,7 @@ interface User {
   email?: string;
   first_name?: string;
   [key: string]: any;
+  is_admin?: boolean;
 }
 
 interface NavBarProps {
@@ -34,7 +35,7 @@ class NavBar extends Component<NavBarProps, NavBarState> {
       if (res.ok) {
         const data = await res.json();
         this.setState({ user: data.user }, () => {
-          console.log("User data on navvv:", this.state.user);
+          // console.log("User data on navvv:", this.state.user);
         });
       }
     } catch (error) {
@@ -103,6 +104,23 @@ class NavBar extends Component<NavBarProps, NavBarState> {
               Dashboard
             </Link>
           </li>
+
+          {this.state.user?.is_admin ? 
+            <li style={navItemStyle}>
+            <Link href="/admin" style={navLinkStyle} onMouseEnter={e => {
+              e.currentTarget.style.fontWeight = "bold";
+              e.currentTarget.style.textDecoration = "underline";
+            }} onMouseLeave={e => {
+              e.currentTarget.style.fontWeight = "normal";
+              e.currentTarget.style.textDecoration = "none";
+            }}>
+              Admin Portal
+            </Link>
+          </li>
+          : 
+          null
+}
+          
             
              {
               this.state.user ? 

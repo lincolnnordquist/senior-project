@@ -6,7 +6,8 @@ import Button from '@mui/material/Button';
 import Icon from '@mdi/react';
 import { mdiStar, mdiStarOutline } from '@mdi/js';
 import { mdiWeatherCloudy } from '@mdi/js';
-import { mdiThermometer, mdiWeatherWindy } from '@mdi/js';
+import { mdiThermometer, mdiWeatherWindy, mdiDelete } from '@mdi/js';
+import Modal from "../components/Modal";
 
 type WeatherType = {
   temperature: number;
@@ -38,6 +39,10 @@ type ReviewType = {
 }
 
 type StateType = {
+  screenSize: number;
+  user: User | null;
+  adminView: boolean;
+
   resorts: SkiResort[];
   resortDetailPage: boolean;
   selectedResort: SkiResort | null;
@@ -52,21 +57,32 @@ type StateType = {
 
   myReviews: ReviewType[];
   resortReviews: ReviewType[];
-  userId: string | null;
+
+  confirmDeleteModal: boolean;
+  successModal: boolean;
+  selectedReview: ReviewType | null;
+  confirmDeleteReviewModal: boolean;
 };
 
-interface DashboardProps {
-  user: {
-    id: string;
-    email?: string;
-    first_name?: string;
-  } | null;
+interface User {
+  id: string;
+  email?: string;
+  first_name?: string;
+  [key: string]: any;
+  is_admin: boolean;
 }
 
-class Dashboard extends Component<DashboardProps, StateType> {
-  constructor(props: DashboardProps) {
+interface PropsType {
+}
+
+class Dashboard extends Component<PropsType, StateType> {
+  constructor(props: PropsType) {
     super(props);
     this.state = {
+      screenSize: typeof window !== "undefined" ? window.innerWidth : 0,
+      user: null,
+      adminView: false,
+
       resorts: [],
       resortDetailPage: false,
       selectedResort: null,
@@ -81,7 +97,12 @@ class Dashboard extends Component<DashboardProps, StateType> {
 
       myReviews: [],
       resortReviews: [],
-      userId: null,
+
+      confirmDeleteModal: false,
+      successModal: false,
+
+      selectedReview: null,
+      confirmDeleteReviewModal: false,
     };
   }
 
@@ -108,7 +129,9 @@ class Dashboard extends Component<DashboardProps, StateType> {
       const res = await fetch("/api/ski_resorts");
       if (res.ok) {
         const data = await res.json();
-        this.setState({ resorts: data });
+        this.setState({ resorts: data } , () => {
+          console.log("Resorts fetched:", this.state.resorts);
+        });
       } else {
         console.error("Failed to fetch ski resorts");
       }
@@ -164,6 +187,14 @@ class Dashboard extends Component<DashboardProps, StateType> {
           errorOccurred: false,
         }, () => {
           this.fetchEverything();
+          if (this.state.selectedResort) {
+            this.fetchResortReviews(this.state.selectedResort.id);
+          }
+          // success message disappears after 3 seconds
+          setTimeout(() => {
+            this.setState({ successOccurred: false, successMessage: "" });
+          }
+          , 3000);
         });
       } else {
         const error = await res.json();
@@ -181,6 +212,48 @@ class Dashboard extends Component<DashboardProps, StateType> {
         successOccurred: false,
       });
     }
+  }
+
+  deleteReview() {
+    
+    if (!this.state.selectedReview) {
+      console.error("No review selected for deletion.");
+      return;
+    }
+
+    fetch("/api/reviews/delete", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({ id: this.state.selectedReview.id }),
+    })
+      .then((res) => {
+        if (res.ok) {
+          this.setState({
+            confirmDeleteReviewModal: false,
+            successModal: true,
+            successOccurred: true,
+            successMessage: "Review deleted successfully.",
+          }, () => {
+            this.fetchEverything();
+            if (this.state.selectedResort) {
+              this.fetchResortReviews(this.state.selectedResort.id);
+            }
+          });
+        } else {
+          console.log("Failed to delete review");
+        }
+      })
+      .catch((error) => {
+        console.error("Error deleting review:", error);
+        this.setState({
+          confirmDeleteReviewModal: false,
+          errorOccurred: true,
+          errorMessage: "Error deleting review.",
+        });
+      });
   }
 
   async fetchResortReviews(resortId: string) {
@@ -249,18 +322,74 @@ class Dashboard extends Component<DashboardProps, StateType> {
     }
   }
 
+  deleteResort() {
+    if (!this.state.selectedResort) {
+      console.error("No resort selected for deletion.");
+      return;
+    }
+
+    fetch("/api/ski_resorts", {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({ id: this.state.selectedResort.id }),
+    })
+      .then((res) => {
+        if (res.ok) {
+          this.setState({
+            confirmDeleteModal: false,
+            successOccurred: true,
+            successMessage: "Resort deleted successfully.",
+          }, () => {
+            this.fetchEverything();
+          });
+        } else {
+          throw new Error("Failed to delete resort");
+        }
+      })
+      .catch((error) => {
+        console.error("Error deleting resort:", error);
+        this.setState({
+          confirmDeleteModal: false,
+          errorOccurred: true,
+          errorMessage: "Error deleting resort.",
+        });
+      });
+  }
+
   async fetchEverything() {
+    await this.getCurrentUser();
     await this.fetchResorts();
     await this.fetchUserReviews();
     await this.fetchWeatherForAllResorts();
-    await console.log("Resorts after fetching everything:", this.state.resorts);
   }
 
   componentDidMount() {
-    console.log("User from componentDidMount:", this.props.user);
+    console.log(this.state.user, "user here")
 
     this.createSnowflakes();
     this.fetchEverything();
+  }
+
+  async getCurrentUser() {
+    try {
+      const res = await fetch("/api/auth/user", {
+        credentials: "include",
+      });
+      if (res.ok) {
+        const data = await res.json();
+        this.setState({ user: data.user }, () => {
+          console.log("User data on dashboard:", this.state.user);
+          if (this.state.user && this.state.user.is_admin === true) {
+            this.setState({ adminView: true });
+          }
+        });
+      }
+    } catch (error) {
+      console.error("Failed to fetch user:", error);
+    }
   }
 
   createSnowflakes() {
@@ -279,8 +408,7 @@ class Dashboard extends Component<DashboardProps, StateType> {
   }
 
   render() {
-    const { resorts } = this.state;
-    const { user } = this.props;
+    const { resorts, screenSize } = this.state;
 
     return (
       <div
@@ -315,12 +443,14 @@ class Dashboard extends Component<DashboardProps, StateType> {
                 backgroundColor: "white",
                 borderRadius: "0.5rem",
                 boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+                // width: screenSize < 850 ? "100%" : "52%",
                 width: "52%",
                 height: "80vh",
                 // maxHeight: "500px",
                 overflowY: "auto"
               }}
             >
+              {/* <p style={{position: "sticky"}}>hi</p> */}
               {resorts.length > 0 ? (
                 <ul style={{ listStyleType: "none", padding: 0 }}>
                   {resorts.map((resort) => (
@@ -356,19 +486,41 @@ class Dashboard extends Component<DashboardProps, StateType> {
                       onMouseEnter={e => e.currentTarget.style.transform = "scale(1.01)"}
                       onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
                     >
-                      <div style={{ display: "flex", alignItems: "center", marginBottom: "0.5rem" }}>
-                        <img
-                          src={resort.photoURL}
-                          alt="resort photo"
-                          style={{
-                            width: "45px",
-                            height: "45px",
-                            borderRadius: "8px",
-                          }}
-                        />
-                        <div style={{ fontWeight: "bold", fontSize: "1.1rem", color: "#16435d", justifyContent: "center", marginLeft: "0.5rem" }}>
-                          {resort.name}
+                      <div style={{ display: "flex", alignItems: "center", marginBottom: "0.5rem", justifyContent: "space-between" }}>
+                        <div style={{display: "flex", justifyContent: "center", alignItems: "center"}}>
+                          <img
+                            src={resort.photoURL}
+                            alt="resort photo"
+                            style={{
+                              width: "45px",
+                              height: "45px",
+                              borderRadius: "8px",
+                            }}
+                          />
+                          <div style={{ fontWeight: "bold", fontSize: "1.1rem", color: "#16435d", justifyContent: "center", marginLeft: "0.5rem" }}>
+                            {resort.name}
+                          </div>
                         </div>
+                        <div
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = "scale(1.2)";
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = "scale(1)";
+                          }}
+                          style={{
+                            transition: "transform 0.2s ease-in-out",
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center"
+                          }}
+                        >
+                          <div style={{display: this.state.adminView ? '' : 'none'}} onClick={(e) => {
+                            e.stopPropagation();
+                            this.setState({ confirmDeleteModal: true, selectedResort: resort });
+                          }}><Icon path={mdiDelete} size={1} color="#dc3545"/></div>
+                        </div>
+
                       </div>
                       <div style={{ display: "flex", alignItems: "center", margin: "0.5rem 0" }}>
                         <Icon path={mdiWeatherCloudy} size={1} color="#6c757d" />
@@ -424,15 +576,27 @@ class Dashboard extends Component<DashboardProps, StateType> {
                             height: "100px",
                             borderRadius: "8px",
                             display: "block",
-                            margin: "0 auto",
+                            margin: "0.5rem auto",
                           }}
                         />
               <h2 style={{ color: "#16435d", marginBottom: "0.25rem", fontWeight: "bold", fontSize: "32px" }}>
                 {this.state.selectedResort?.name}
               </h2>
-              <h2 style={{ color: "#4a6b82", marginBottom: "1rem", fontSize: "16px" }}>
+              <a
+                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(this.state.selectedResort?.address || "")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: "#4a6b82", marginBottom: "1rem", fontSize: "16px", display: "block" }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.fontWeight = "bold";
+                    e.currentTarget.style.textDecoration = "underline";
+                  }} onMouseLeave={e => {
+                    e.currentTarget.style.fontWeight = "normal";
+                    e.currentTarget.style.textDecoration = "none";
+                  }}
+              >
                 {this.state.selectedResort?.address}
-              </h2>
+              </a>
               {this.state.selectedResort?.weather && (
                 <div style={{ display: "flex", flexDirection: "column", marginBottom: "1rem" }}>
                   <div style={{ display: "flex", alignItems: "center", color: "#6c757d", marginBottom: "0.5rem" }}>
@@ -466,7 +630,22 @@ class Dashboard extends Component<DashboardProps, StateType> {
                     boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
                     transition: "transform 0.2s ease-in-out",
                      }}>
-                      <div>{review.users.first_name}</div>
+                      <div style={{ display: "flex", alignItems: "center", marginBottom: "0.5rem", justifyContent: "space-between" }}>
+                        <span>{review.users.first_name}</span>
+                        <span style={{ color: "#6c757d", fontSize: "0.9rem", transition: "transform 0.2s ease-in-out", cursor: "pointer", display: this.state.adminView ? '' : 'none' }}  onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = "scale(1.2)";
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = "scale(1)";
+                          }}
+                          onClick={() => {
+                            this.setState({ confirmDeleteReviewModal: true, selectedReview: review });
+                          }}
+                          >
+                          <Icon path={mdiDelete} size={1} color="#dc3545"/>
+                        </span>
+                          
+                        </div>
                       <div style={{ display: "flex", gap: "0.25rem" }}>
                         {[1, 2, 3, 4, 5].map((star) => (
                           <Icon
@@ -505,7 +684,7 @@ class Dashboard extends Component<DashboardProps, StateType> {
               <p style={{ alignSelf: "flex-start", fontWeight: "bold", marginBottom: "0.25rem", color: "#2a5f9e" }}>
                 Rating:
               </p>
-              <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1.5rem", justifyContent: 'center' }}>
+              <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem", justifyContent: 'center' }}>
                 {[1, 2, 3, 4, 5].map((star) => (
                   <div
                     key={star}
@@ -521,13 +700,13 @@ class Dashboard extends Component<DashboardProps, StateType> {
                 ))}
               </div>
               {
-                this.state.errorOccurred ?  <span style={{ color: "red", marginBottom: '16px' }}>{this.state.errorMessage}</span> : null
+                this.state.errorOccurred ?  <span style={{ color: "red"}}>{this.state.errorMessage}</span> : null
               }
                {
-                this.state.successOccurred ?  <span style={{ color: "darkgreen", marginBottom: '16px' }}>{this.state.successMessage}</span> : null
+                this.state.successOccurred ?  <span style={{ color: "darkgreen" }}>{this.state.successMessage}</span> : null
               }
 
-              <div style={{ display: "flex", justifyContent: "space-around", width: "100%" }}>
+              <div style={{ display: "flex", justifyContent: "space-around", width: "100%", marginTop: '1rem' }}>
                 <Button
                   style={{
                     backgroundColor: "#0d6efd",
@@ -565,15 +744,154 @@ class Dashboard extends Component<DashboardProps, StateType> {
           )}
 
           {/* Right Column - Map */}
-          <div style={{ width: "47%", overflow: "hidden", boxSizing: "border-box" }}>
+          <div style={{ 
+            // width: screenSize < 850 ? "100%" : "47%",
+            width: "47%",
+             overflow: "hidden", boxSizing: "border-box", 
+            //  marginTop: screenSize < 850 ? "1rem" : "0"
+              }}>
             <SkiResortsMap
               selectedResort={
                 this.state.selectedResort
                   ? `${this.state.selectedResort.latitude},${this.state.selectedResort.longitude}`
                   : ""
               }
-            />
+            />  
           </div>
+
+<Modal show={this.state.confirmDeleteModal}>
+  <div
+    style={{
+      textAlign: "center",
+      backgroundColor: "#fff",
+      padding: "2rem",
+      borderRadius: "0.5rem",
+      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+      maxWidth: "400px",
+      margin: "0 auto"
+    }}
+  >
+    <h3 style={{ color: "#16435d", marginBottom: "1rem" }}>Confirm Delete</h3>
+    <p style={{ color: "#4a6b82", marginBottom: "2rem" }}>
+      Are you sure you want to delete this resort?
+    </p>
+    <div style={{ display: "flex", justifyContent: "space-between" }}>
+      <button
+        onClick={() => this.setState({ confirmDeleteModal: false })}
+        style={{
+          backgroundColor: "#6c757d",
+          color: "#fff",
+          padding: "0.5rem 1rem",
+          border: "none",
+          borderRadius: "4px",
+          cursor: "pointer"
+        }}
+      >
+        Cancel
+      </button>
+      <button
+        onClick={() => {
+          this.deleteResort();
+        }}
+        style={{
+          backgroundColor: "#dc3545",
+          color: "#fff",
+          padding: "0.5rem 1rem",
+          border: "none",
+          borderRadius: "4px",
+          cursor: "pointer"
+        }}
+      >
+        Confirm Delete
+      </button>
+    </div>
+  </div>
+</Modal>
+
+<Modal show={this.state.confirmDeleteReviewModal}>
+  <div
+    style={{
+      textAlign: "center",
+      backgroundColor: "#fff",
+      padding: "2rem",
+      borderRadius: "0.5rem",
+      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+      maxWidth: "400px",
+      margin: "0 auto"
+    }}
+  >
+    <h3 style={{ color: "#16435d", marginBottom: "1rem" }}>Confirm Deletion</h3>
+    <p style={{ color: "#4a6b82", marginBottom: "2rem" }}>
+      Are you sure you want to delete this review?
+    </p>
+    <div style={{ display: "flex", justifyContent: "space-between" }}>
+      <button
+        onClick={() => this.setState({ confirmDeleteReviewModal: false })}
+        style={{
+          backgroundColor: "#6c757d",
+          color: "#fff",
+          padding: "0.5rem 1rem",
+          border: "none",
+          borderRadius: "4px",
+          cursor: "pointer"
+        }}
+      >
+        Cancel
+      </button>
+      <button
+        onClick={() => {
+          this.deleteReview();
+        }}
+        style={{
+          backgroundColor: "#dc3545",
+          color: "#fff",
+          padding: "0.5rem 1rem",
+          border: "none",
+          borderRadius: "4px",
+          cursor: "pointer"
+        }}
+      >
+        Delete
+      </button>
+    </div>
+  </div>
+</Modal>
+
+<Modal show={this.state.successModal}>
+  <div
+    style={{
+      position: "relative",
+      textAlign: "center",
+      backgroundColor: "#eafaf1",
+      padding: "2rem",
+      borderRadius: "0.5rem",
+      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+      maxWidth: "400px",
+      margin: "0 auto",
+      color: "#155724",
+      fontSize: "1.2rem",
+      fontWeight: "bold",
+    }}
+  >
+    <button
+      onClick={() => this.setState({ successModal: false, successOccurred: false, successMessage: "" })}
+      style={{
+        position: "absolute",
+        top: "0.5rem",
+        right: "0.75rem",
+        background: "transparent",
+        border: "none",
+        fontSize: "1.25rem",
+        cursor: "pointer",
+        color: "#155724"
+      }}
+    >
+      &times;
+    </button>
+    {this.state.successMessage}
+  </div>
+</Modal>
+
         </div>
 
 
@@ -583,7 +901,8 @@ class Dashboard extends Component<DashboardProps, StateType> {
           {`
             body {
               margin: 0;
-              overflow: hidden;
+              overflow-x: hidden;
+              overflow-y: auto;
               background-color: #eaf4fb;
               color: #16435d;
             }
@@ -636,16 +955,9 @@ class Dashboard extends Component<DashboardProps, StateType> {
 export default Dashboard;
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const supabase = createPagesServerClient(context);
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  console.log("User from getServerSideProps:", user);
 
   return {
     props: {
-      user,
     },
   };
 };

@@ -6,6 +6,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ message: "Method not allowed" });
   }
 
+// grabs all reviews for a specific resort
+
   const supabase = createPagesServerClient({ req, res });
   const resort_id = req.query.resort_id as string;
 

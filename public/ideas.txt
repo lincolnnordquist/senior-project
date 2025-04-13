@@ -1,0 +1,3 @@
+- Finish Admin page (add resorts, user settings, maybe reviews)
+- Add a "state" section for each user. When a user logs in, center the map on their state with all the resorts
+- Add filters to resorts page (search, state, rating)

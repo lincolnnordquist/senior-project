@@ -44,8 +44,8 @@ class Login extends Component<{}, LoginState> {
     return (
       <div style={styles.container}>
         <div style={styles.card}>
-          <h1 style={styles.title}>Welcome to Ski Scape!</h1>
-          <p style={styles.subtitle}>Log in to access your resorts</p>
+          <h1 style={styles.title}>Welcome</h1>
+          <p style={styles.subtitle}>Log in or create an account.</p>
 
           <form onSubmit={this.handleSubmit} style={styles.form}>
             <input
@@ -67,9 +67,9 @@ class Login extends Component<{}, LoginState> {
             <button type="submit" style={styles.button}>Login</button>
           </form>
 
-          {this.state.message && <p style={styles.message}>{this.state.message}</p>}
+          {this.state.message && <p style={{color: "green", fontSize: "14px", marginTop: "10px",}}>{this.state.message}</p>}
 
-          <p style={styles.footerText}>
+          <p style={{marginTop: "20px", fontSize: "14px", color: "#666",}}>
             Don't have an account? <a href="/signup" style={styles.link}>Sign up here</a>
           </p>
         </div>
@@ -129,16 +129,6 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   buttonHover: {
     backgroundColor: "#154073",
-  },
-  message: {
-    color: "red",
-    fontSize: "14px",
-    marginTop: "10px",
-  },
-  footerText: {
-    marginTop: "20px",
-    fontSize: "14px",
-    color: "#666",
   },
   link: {
     color: "#1b4b8e",

@@ -15,7 +15,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const { data: fullUser, error: userError } = await supabase
     .from("users")
-    .select("id, email, first_name, last_name")
+    .select("id, email, first_name, last_name, is_admin")
     .eq("id", user.id)
     .single();
 

@@ -18,7 +18,17 @@ const checkAuth = async (
       return res.status(401).json({ message: "Unauthorized: No user found" });
     }
 
-    (req as any).user = user;
+    const { data: userRecord, error: userError } = await supabase
+      .from("users")
+      .select("*")
+      .eq("id", user.id)
+      .single();
+
+    if (!userRecord || userError) {
+      return res.status(403).json({ message: "Unauthorized: No user record found" });
+    }
+
+    (req as any).user = userRecord;
     next();
   } catch (err) {
     console.error("Auth Middleware Error:", err);

@@ -7,8 +7,6 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-// route to get all of a user's reviews
-
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "GET") {
     return res.status(405).json({ message: "Method Not Allowed" });
@@ -17,10 +15,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   await checkAuth(req, res, async () => {
     const user = (req as any).user;
 
+    if (!user?.is_admin) {
+      return res.status(403).json({ message: "Forbidden: Admins only" });
+    }
+
     const { data, error } = await supabase
       .from("resort_reviews")
-      .select("id, resort_id, rating, review, created_at, updated_at")
-      .eq("user_id", user.id);
+      .select("id, rating, review, created_at, resort_id, user_id, users(first_name), ski_resorts(name)")
+      .order("resort_id", { ascending: true });
 
     if (error) {
       console.error("Error fetching user reviews:", error.message);
