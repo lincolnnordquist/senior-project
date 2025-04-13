@@ -8,6 +8,7 @@ import { mdiStar, mdiStarOutline } from '@mdi/js';
 import { mdiWeatherCloudy } from '@mdi/js';
 import { mdiThermometer, mdiWeatherWindy, mdiDelete } from '@mdi/js';
 import Modal from "../components/Modal";
+import SkeletonLoader from "../components/SkeletonLoader";
 
 type WeatherType = {
   temperature: number;
@@ -549,7 +550,7 @@ class Dashboard extends Component<PropsType, StateType> {
                   ))}
                 </ul>
               ) : (
-                <p style={{ color: "#6c757d" }}>No resorts available.</p>
+                <SkeletonLoader />
               )}
             </div>
           ) : (
