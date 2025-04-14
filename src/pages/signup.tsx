@@ -9,6 +9,7 @@ interface SignupState {
   last_name: string;
   phone_number: string;
   message: string;
+  zip_code: string;
 }
 
 class Signup extends Component<{}, SignupState> {
@@ -20,6 +21,7 @@ class Signup extends Component<{}, SignupState> {
       first_name: "",
       last_name: "",
       phone_number: "",
+      zip_code: "",
       message: "",
     };
   }
@@ -39,6 +41,7 @@ class Signup extends Component<{}, SignupState> {
         first_name: this.state.first_name,
         last_name: this.state.last_name,
         phone_number: this.state.phone_number,
+        zip_code: this.state.zip_code,
       }),
     });
 
@@ -92,6 +95,13 @@ class Signup extends Component<{}, SignupState> {
               type="text"
               name="phone_number"
               placeholder="Phone Number"
+              onChange={this.handleChange}
+              style={styles.input}
+            />
+            <input
+              type="text"
+              name="zip_code"
+              placeholder="Zip Code"
               onChange={this.handleChange}
               style={styles.input}
             />

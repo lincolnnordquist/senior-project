@@ -6,7 +6,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ message: "Method Not Allowed" });
   }
 
-  const { email, password, first_name, last_name, phone_number } = req.body;
+  const { email, password, first_name, last_name, phone_number, zip_code } = req.body;
 
   const { data, error } = await supabase.auth.signUp({
     email,
@@ -26,6 +26,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         last_name,
         email,
         phone_number,
+        zip_code,
         is_admin: false,
       },
     ]);
