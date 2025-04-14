@@ -70,8 +70,11 @@ type StateType = {
 
 interface User {
   id: string;
-  email?: string;
-  first_name?: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  phone_number: string;
+  zip_code: string;
   [key: string]: any;
   is_admin: boolean;
 }
@@ -387,8 +390,6 @@ class Dashboard extends Component<PropsType, StateType> {
     setTimeout(() => {
       this.setState({ screenSize: window.innerWidth });
     }, 1000);
-
-    console.log(this.state.user, "user on dash")
 
   }
 
@@ -816,6 +817,7 @@ class Dashboard extends Component<PropsType, StateType> {
             //  marginTop: screenSize < 850 ? "1rem" : "0"
               }}>
             <SkiResortsMap
+            zip={this.state.user?.zip_code}
               selectedResort={
                 this.state.selectedResort
                   ? `${this.state.selectedResort.latitude},${this.state.selectedResort.longitude}`

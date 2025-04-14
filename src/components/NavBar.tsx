@@ -226,6 +226,7 @@ class NavBar extends Component<NavBarProps, NavBarState> {
           null
 }
 
+{this.state.user ? 
 <li style={navItemStyle} onClick={() => this.state.accountModal ? this.setState({ accountModal: false }) : this.setState({ accountModal: true })}>
             <span style={navLinkStyle} onMouseEnter={e => {
               e.currentTarget.style.fontWeight = "bold";
@@ -237,6 +238,7 @@ class NavBar extends Component<NavBarProps, NavBarState> {
               Account
             </span>
           </li>
+          : null}
           
             
              {

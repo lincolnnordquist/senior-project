@@ -11,6 +11,9 @@ interface SkiResort {
 interface MapProps {
   style?: React.CSSProperties;
   selectedResort?: string;
+
+  // undefined when logged out
+  zip?: string;
 }
 
 interface MapState {
@@ -24,23 +27,47 @@ class SkiResortsMap extends Component<MapProps, MapState> {
     super(props);
     this.state = {
       resorts: [],
-      zoom: 7, 
-      center: { lat: 39.5, lng: -111.5 },
+      zoom: 6, 
+      center: { lat: 39.5, lng: -108.5 },
     };
   }
 
-  async componentDidMount() {
-    try {
-      const res = await fetch("/api/ski_resorts");
-      if (res.ok) {
-        const data = await res.json();
-        this.setState({ resorts: data });
-      } else {
-        console.error("Failed to fetch ski resorts");
-      }
-    } catch (error) {
-      console.error("Error fetching ski resorts:", error);
+  private initializeMapBasedOnZip(zip: string) {
+    // -108: Utah + Colorado
+    // -105: Colorado
+    // -111: Utah
+
+    let zoom = 6;
+    let center = { lat: 39.5, lng: -108.5 };
+
+    if (!zip) {
+      zoom = 6;
+      center = { lat: 39.5, lng: -111.5 };
+      console.log("no zip provided")
+    } else if (zip.startsWith("84")) {
+      center = { lat: 39.5, lng: -111.5 };
+      zoom = 7;
+      console.log("utah zip")
+    } else if (zip.startsWith("80") || zip.startsWith("81")) {
+      zoom = 7;
+      center = { lat: 39.5, lng: -105.5 };
+      console.log("colorado zip")
     }
+
+    this.setState({ center, zoom });
+  }
+
+  componentDidMount() {
+    const { zip } = this.props;
+
+    if (zip) {
+      this.initializeMapBasedOnZip(zip);
+    }
+
+    fetch("/api/ski_resorts")
+      .then((res) => res.ok ? res.json() : Promise.reject("Failed to fetch"))
+      .then((data) => this.setState({ resorts: data }))
+      .catch((error) => console.error("Error fetching ski resorts:", error));
   }
 
   componentDidUpdate(prevProps: MapProps) {
@@ -51,6 +78,10 @@ class SkiResortsMap extends Component<MapProps, MapState> {
       } else {
         this.setState({ center: { lat: 39.5, lng: -111.5 }, zoom: 7 });
       }
+    }
+
+    if (this.props.zip !== prevProps.zip && this.props.zip) {
+      this.initializeMapBasedOnZip(this.props.zip);
     }
   }
 
