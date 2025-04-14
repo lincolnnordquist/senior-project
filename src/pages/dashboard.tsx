@@ -383,7 +383,9 @@ class Dashboard extends Component<PropsType, StateType> {
     this.fetchEverything();
 
     window.addEventListener("resize", this.handleResize);
-  this.setState({ screenSize: window.innerWidth });
+    setTimeout(() => {
+      this.setState({ screenSize: window.innerWidth });
+    }, 1000);
 
   }
 

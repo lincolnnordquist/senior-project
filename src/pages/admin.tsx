@@ -130,6 +130,9 @@ class Dashboard extends Component<PropsType, StateType> {
 
   componentWillUnmount() {
     window.removeEventListener("resize", this.handleResize);
+    setTimeout(() => {
+      this.setState({ screenSize: window.innerWidth });
+    }, 1000);
   }
 
   handleResize = () => {
