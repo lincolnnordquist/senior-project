@@ -61,6 +61,7 @@ type StateType = {
 
   myReviews: ReviewType[];
   resortReviews: ReviewType[];
+  resortReviewsLoading: boolean;
 
   confirmDeleteModal: boolean;
   successModal: boolean;
@@ -106,6 +107,7 @@ class Dashboard extends Component<PropsType, StateType> {
 
       myReviews: [],
       resortReviews: [],
+      resortReviewsLoading: true,
 
       confirmDeleteModal: false,
       successModal: false,
@@ -273,7 +275,7 @@ class Dashboard extends Component<PropsType, StateType> {
       const res = await fetch(`/api/reviews/resort?resort_id=${resortId}`);
       if (res.ok) {
         const data = await res.json();
-        this.setState({ resortReviews: data.reviews }, () => {
+        this.setState({ resortReviews: data.reviews, resortReviewsLoading: false }, () => {
           console.log("Resort reviews fetched:", this.state.resortReviews);
         });
       } else {
@@ -495,18 +497,24 @@ class Dashboard extends Component<PropsType, StateType> {
                       })
                     }}
                   />
+                 
                   <div 
                     style={{
                       position: "absolute",
                       right: "0.5rem",
                       top: "50%",
                       transform: "translateY(-50%)",
-                      cursor: "pointer"
+                      cursor: "pointer",
+                      transition: "transform 0.1s ease-in-out"
                     }}
+                    onMouseDown={e => e.currentTarget.style.transform = "translateY(-50%) scale(0.9)"}
+                    onMouseUp={e => e.currentTarget.style.transform = "translateY(-50%)"}
+                    onMouseLeave={e => e.currentTarget.style.transform = "translateY(-50%)"}
                     onClick={() => this.setState({ searchField: "" })}
                   >
                     <Icon path={mdiCloseCircle} size={1} color="#6c757d" />
                   </div>
+                 
                 </div>
 
               {/* <p style={{position: "sticky"}}>hi</p> */}
@@ -605,7 +613,7 @@ class Dashboard extends Component<PropsType, StateType> {
                             color="#FFD700"
                           />
                         ))}
-                      </div> : <SkeletonLoader />
+                      </div> :  "No reviews yet"
                       }
                         </div>
                       
@@ -683,9 +691,13 @@ class Dashboard extends Component<PropsType, StateType> {
                     textAlign: "left",
                 }}>
                   <h3 style={{ fontWeight: "bold", color: "#2a5f9e", marginTop: "2rem", marginBottom: "1rem" }}>Reviews</h3>
-                {this.state.resortReviews.length === 0 ? (
+                {this.state.resortReviewsLoading ? (
                   <SkeletonLoader />
-                ) : (
+                ) : 
+                this.state.resortReviews.length === 0 ? (
+                  <span style={{color: "#6c757d"}}>No reviews yet</span>
+                ) :
+                (
                   this.state.resortReviews.map((review) => (
                     <div key={review.id} style={{ marginBottom: "1rem", borderRadius: "8px",
                       backgroundColor: "#f8f9fa",

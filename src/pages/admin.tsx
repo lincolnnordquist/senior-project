@@ -558,6 +558,7 @@ class Dashboard extends Component<PropsType, StateType> {
                        <div>
                          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                            <p style={{ margin: 0, fontWeight: "bold" }}>{user.first_name} {user.last_name}</p>
+                           {/* {this.state.user?.email === user.email ? <span>(me)</span> : null} */}
                            {user.is_admin && (
                              <Icon path={mdiCrown} size={0.8} color="#ffc107" title="Admin" />
                            )}

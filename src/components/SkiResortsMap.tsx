@@ -32,7 +32,8 @@ class SkiResortsMap extends Component<MapProps, MapState> {
     };
   }
 
-  private initializeMapBasedOnZip(zip: string) {
+  private initializeMapBasedOnZip() {
+    const zip = this.props.zip;
     // -108: Utah + Colorado
     // -105: Colorado
     // -111: Utah
@@ -40,7 +41,7 @@ class SkiResortsMap extends Component<MapProps, MapState> {
     let zoom = 6;
     let center = { lat: 39.5, lng: -108.5 };
 
-    if (!zip) {
+    if (zip === undefined) {
       zoom = 6;
       center = { lat: 39.5, lng: -111.5 };
       console.log("no zip provided")
@@ -58,11 +59,8 @@ class SkiResortsMap extends Component<MapProps, MapState> {
   }
 
   componentDidMount() {
-    const { zip } = this.props;
 
-    if (zip) {
-      this.initializeMapBasedOnZip(zip);
-    }
+      this.initializeMapBasedOnZip();
 
     fetch("/api/ski_resorts")
       .then((res) => res.ok ? res.json() : Promise.reject("Failed to fetch"))
@@ -76,12 +74,12 @@ class SkiResortsMap extends Component<MapProps, MapState> {
         const [lat, lng] = this.props.selectedResort.split(",").map(Number);
         this.setState({ center: { lat, lng }, zoom: 16 });
       } else {
-        this.setState({ center: { lat: 39.5, lng: -111.5 }, zoom: 7 });
+        this.initializeMapBasedOnZip();
       }
     }
 
     if (this.props.zip !== prevProps.zip && this.props.zip) {
-      this.initializeMapBasedOnZip(this.props.zip);
+      this.initializeMapBasedOnZip();
     }
   }
 
