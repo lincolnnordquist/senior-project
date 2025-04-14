@@ -25,7 +25,7 @@ class NavBar extends Component<NavBarProps, NavBarState> {
     super(props);
     this.state = {
       user: null,
-      screenSize: typeof window !== "undefined" ? window.innerWidth : 0,
+      screenSize: typeof window !== "undefined" ? window.innerWidth : 851,
     };
   }
 

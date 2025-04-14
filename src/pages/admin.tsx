@@ -85,7 +85,7 @@ class Dashboard extends Component<PropsType, StateType> {
         user: null,
         resorts: [],
 
-        screenSize: typeof window !== "undefined" ? window.innerWidth : 0,
+        screenSize: typeof window !== "undefined" ? window.innerWidth : 851,
 
         errorOccurred: false,
         errorMessage: "",

@@ -83,7 +83,7 @@ class Dashboard extends Component<PropsType, StateType> {
   constructor(props: PropsType) {
     super(props);
     this.state = {
-      screenSize: typeof window !== "undefined" ? window.innerWidth : 0,
+      screenSize: typeof window !== "undefined" ? window.innerWidth : 851,
       user: null,
       adminView: false,
 
