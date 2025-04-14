@@ -7,6 +7,7 @@ import Icon from '@mdi/react';
 import { mdiStar, mdiStarOutline } from '@mdi/js';
 import { mdiWeatherCloudy } from '@mdi/js';
 import { mdiThermometer, mdiWeatherWindy, mdiDelete } from '@mdi/js';
+import { mdiCloseCircle } from '@mdi/js';
 import Modal from "../components/Modal";
 import SkeletonLoader from "../components/SkeletonLoader";
 
@@ -43,6 +44,8 @@ type StateType = {
   screenSize: number;
   user: User | null;
   adminView: boolean;
+
+  searchField: string;
 
   resorts: SkiResort[];
   resortDetailPage: boolean;
@@ -83,6 +86,8 @@ class Dashboard extends Component<PropsType, StateType> {
       screenSize: typeof window !== "undefined" ? window.innerWidth : 0,
       user: null,
       adminView: false,
+
+      searchField: "",
 
       resorts: [],
       resortDetailPage: false,
@@ -466,10 +471,45 @@ class Dashboard extends Component<PropsType, StateType> {
                 overflowY: "auto"
               }}
             >
+                {/* ADD SEARCH HERE */}
+                <div style={{ position: "relative", marginBottom: "1rem" }}>
+                  <input 
+                    placeholder="Search resorts..."
+                    style={{
+                      width: "100%",
+                      padding: "0.5rem 2.5rem 0.5rem 0.5rem", // right padding for icon space
+                      border: "1px solid #ccc",
+                      borderRadius: "0.5rem",
+                    }}
+                    value={this.state.searchField}
+                    onChange={(e) => {
+                      this.setState({
+                        searchField: e.target.value,
+                      })
+                    }}
+                  />
+                  <div 
+                    style={{
+                      position: "absolute",
+                      right: "0.5rem",
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      cursor: "pointer"
+                    }}
+                    onClick={() => this.setState({ searchField: "" })}
+                  >
+                    <Icon path={mdiCloseCircle} size={1} color="#6c757d" />
+                  </div>
+                </div>
+
               {/* <p style={{position: "sticky"}}>hi</p> */}
               {resorts.length > 0 ? (
                 <ul style={{ listStyleType: "none", padding: 0 }}>
-                  {resorts.map((resort) => (
+              {resorts
+                    .filter((resort) =>
+                      resort.name.toLowerCase().includes(this.state.searchField.toLowerCase())
+                    )
+                    .map((resort) => (
                     <div
                       key={resort.id}
                       onClick={() => {
