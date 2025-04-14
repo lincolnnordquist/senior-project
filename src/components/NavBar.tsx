@@ -17,6 +17,7 @@ interface NavBarProps {
 
 interface NavBarState {
   user: User | null;
+  screenSize: number;
 }
 
 class NavBar extends Component<NavBarProps, NavBarState> {
@@ -24,6 +25,7 @@ class NavBar extends Component<NavBarProps, NavBarState> {
     super(props);
     this.state = {
       user: null,
+      screenSize: typeof window !== "undefined" ? window.innerWidth : 0,
     };
   }
 
@@ -41,12 +43,25 @@ class NavBar extends Component<NavBarProps, NavBarState> {
     } catch (error) {
       console.error("Failed to fetch user:", error);
     }
+
+    window.addEventListener("resize", this.handleResize);
+  this.setState({ screenSize: window.innerWidth });
   }
+
+  isMobileView = () => this.state.screenSize < 850;
+
+  componentWillUnmount() {
+    window.removeEventListener("resize", this.handleResize);
+  }
+
+  handleResize = () => {
+    this.setState({ screenSize: window.innerWidth });
+  };
 
   render() {
     const { user } = this.state;
 
-    const navStyle = {
+    const navStyle: React.CSSProperties = {
       background: "linear-gradient(to right, #0d6efd, #4ab4f4)",
       padding: "0.5rem 1rem",
       display: "flex",
@@ -55,25 +70,27 @@ class NavBar extends Component<NavBarProps, NavBarState> {
       height: "75px",
     };
 
-    const titleStyle = {
+    const titleStyle: React.CSSProperties = {
+      display: this.isMobileView() ? "none" : "block",
       fontWeight: "bold",
       fontSize: "1.5rem",
       color: "white",
       textDecoration: "none",
     };
 
-    const navListStyle = {
+    const navListStyle: React.CSSProperties = {
       listStyleType: "none",
       display: "flex",
+      justifyContent: "space-between",
       margin: 0,
       padding: 0,
     };
 
-    const navItemStyle = {
-      marginLeft: "1rem",
+    const navItemStyle: React.CSSProperties = {
+      marginLeft: this.isMobileView() ? "0.5rem" : "1rem",
     };
 
-    const navLinkStyle = {
+    const navLinkStyle: React.CSSProperties = {
       color: "#eaf4fb",
       textDecoration: "none",
       textShadow: "0 1px 2px rgba(0, 0, 0, 0.15)",
@@ -86,11 +103,11 @@ class NavBar extends Component<NavBarProps, NavBarState> {
           <Image src={Logo} alt="Ski Scape Logo" width={90} height={90} />
           <span style={titleStyle}>Ski Scape</span>
         </Link>
-        {user?.first_name && (
+        {/* {user?.first_name && (
             <li style={{ ...navItemStyle, color: "white", display: "flex", alignItems: "center" }}>
               <span>Welcome, {user.first_name}</span>
             </li>
-          )}
+          )} */}
         <ul style={navListStyle}>
 
           <li style={navItemStyle}>

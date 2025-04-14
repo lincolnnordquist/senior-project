@@ -380,7 +380,6 @@ class Dashboard extends Component<PropsType, StateType> {
     window.addEventListener("resize", this.handleResize);
   this.setState({ screenSize: window.innerWidth });
 
-  console.log(this.isMobileView(), "is mobile view")
   }
 
   componentWillUnmount() {
@@ -447,8 +446,7 @@ class Dashboard extends Component<PropsType, StateType> {
             justifyContent: "space-between",
             alignItems: "center",
             textAlign: "center",
-            padding: "2rem",
-            paddingBottom: '0',
+            padding: this.isMobileView() ? "1rem" : "2rem",
             width: "100%",
             boxSizing: "border-box"
           }}

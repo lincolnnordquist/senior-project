@@ -51,6 +51,8 @@ type StateType = {
     user: User | null;
     resorts: SkiResort[];
 
+    screenSize: number;
+
     errorOccurred: boolean;
     errorMessage: string;
     successOccurred: boolean;
@@ -82,6 +84,8 @@ class Dashboard extends Component<PropsType, StateType> {
     this.state = {
         user: null,
         resorts: [],
+
+        screenSize: typeof window !== "undefined" ? window.innerWidth : 0,
 
         errorOccurred: false,
         errorMessage: "",
@@ -117,7 +121,20 @@ class Dashboard extends Component<PropsType, StateType> {
     this.fetchResorts();
     this.fetchAllUsers();
     this.fetchAllReviews();
+
+    window.addEventListener("resize", this.handleResize);
+  this.setState({ screenSize: window.innerWidth });
   }
+
+  isMobileView = () => this.state.screenSize < 850;
+
+  componentWillUnmount() {
+    window.removeEventListener("resize", this.handleResize);
+  }
+
+  handleResize = () => {
+    this.setState({ screenSize: window.innerWidth });
+  };
 
   async getCurrentUser() {
     try {
