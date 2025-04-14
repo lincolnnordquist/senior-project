@@ -276,7 +276,7 @@ class Dashboard extends Component<PropsType, StateType> {
           this.fetchResorts();
           setTimeout(() => {
             this.setState({ successOccurred: false, successMessage: "", resortNameInput: "", stateInput: "", websiteInput: "", latitudeInput: "", longitudeInput: "", addressInput: "", photoURLInput: "" }); 
-          }, 3000);
+          }, 1000);
         } else {
           console.log("Failed to add resort");
         }

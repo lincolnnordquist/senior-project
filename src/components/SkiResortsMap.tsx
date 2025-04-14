@@ -11,6 +11,7 @@ interface SkiResort {
 interface MapProps {
   style?: React.CSSProperties;
   selectedResort?: string;
+  stateFilter?: string;
 
   // undefined when logged out
   zip?: string;
@@ -32,35 +33,66 @@ class SkiResortsMap extends Component<MapProps, MapState> {
     };
   }
 
-  private initializeMapBasedOnZip() {
+  private initializeMap() {
     const zip = this.props.zip;
-    // -108: Utah + Colorado
-    // -105: Colorado
-    // -111: Utah
+    const stateFilter = this.props.stateFilter;
+    // -108.5: Utah + Colorado
+    // -105.5: Colorado
+    // -111.5: Utah
+    // -119.5: California
+    // -72.5: Vermont
+    // -75.5: New York
+    // -95.5: Default
 
-    let zoom = 6;
-    let center = { lat: 39.5, lng: -108.5 };
+      let zoom = 4;
+      let center = { lat: 37.5, lng: -95.5 };
 
-    if (zip === undefined) {
-      zoom = 6;
-      center = { lat: 39.5, lng: -111.5 };
-      console.log("no zip provided")
-    } else if (zip.startsWith("84")) {
-      center = { lat: 39.5, lng: -111.5 };
-      zoom = 7;
-      console.log("utah zip")
-    } else if (zip.startsWith("80") || zip.startsWith("81")) {
-      zoom = 7;
-      center = { lat: 39.5, lng: -105.5 };
-      console.log("colorado zip")
-    }
+    // having a state filter overrides having a zip code
+    if (stateFilter) {
+      if (stateFilter === "UT") {
+        center = { lat: 39.5, lng: -111.5 };
+        zoom = 7;
+      } else if (stateFilter === "CO") {
+        center = { lat: 39.5, lng: -105.5 };
+        zoom = 7;
+      } else if (stateFilter === "CA") {
+        center = { lat: 37.5, lng: -119.5 };
+        zoom = 6;
+      } else if (stateFilter === "VT") {
+        center = { lat: 44.5, lng: -72.5 };
+        zoom = 7;
+      }
+      else if (stateFilter === "NY") {
+        center = { lat: 43.5, lng: -75.5 };
+        zoom = 7;
+      }
+       
+      this.setState({ center, zoom });
+      return;
+    } 
+  //   else {
+
+  //   if (zip === undefined) {
+  //     zoom = 4;
+  //     center = { lat: 37.5, lng: -95.5 };
+  //     console.log("no zip provided")
+  //   } else if (zip.startsWith("84")) {
+  //     center = { lat: 39.5, lng: -111.5 };
+  //     zoom = 7;
+  //     console.log("utah zip")
+  //   } else if (zip.startsWith("80") || zip.startsWith("81")) {
+  //     zoom = 7;
+  //     center = { lat: 39.5, lng: -105.5 };
+  //     console.log("colorado zip")
+  //   }
+  // }
 
     this.setState({ center, zoom });
   }
 
   componentDidMount() {
 
-      this.initializeMapBasedOnZip();
+      this.initializeMap();
 
     fetch("/api/ski_resorts")
       .then((res) => res.ok ? res.json() : Promise.reject("Failed to fetch"))
@@ -72,14 +104,18 @@ class SkiResortsMap extends Component<MapProps, MapState> {
     if (prevProps.selectedResort !== this.props.selectedResort) {
       if (this.props.selectedResort) {
         const [lat, lng] = this.props.selectedResort.split(",").map(Number);
-        this.setState({ center: { lat, lng }, zoom: 16 });
+        this.setState({ center: { lat, lng }, zoom: 13 });
       } else {
-        this.initializeMapBasedOnZip();
+        this.initializeMap();
       }
     }
-
+  
     if (this.props.zip !== prevProps.zip && this.props.zip) {
-      this.initializeMapBasedOnZip();
+      this.initializeMap();
+    }
+  
+    if (this.props.stateFilter !== prevProps.stateFilter) {
+      this.initializeMap();
     }
   }
 

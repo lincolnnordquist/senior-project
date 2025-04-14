@@ -2,7 +2,7 @@ import { GetServerSideProps } from "next";
 import { createPagesServerClient } from "@supabase/auth-helpers-nextjs";
 import React, { Component } from "react";
 import Head from 'next/head';
-import SkiResortsMap from "../components/SkiResortsMap";
+import Map from "../components/SkiResortsMap";
 import Button from '@mui/material/Button';
 import Icon from '@mdi/react';
 import { mdiStar, mdiStarOutline } from '@mdi/js';
@@ -471,7 +471,7 @@ class Dashboard extends Component<PropsType, StateType> {
         }}
       >
         <Head>
-          <title>SkiScape Dashboard</title>
+          <title>SkiScape | Dashboard</title>
         </Head>
         <div
           style={{
@@ -543,6 +543,10 @@ class Dashboard extends Component<PropsType, StateType> {
                     <option value="">Filter by State</option>
                     <option value="UT">Utah</option>
                     <option value="CO">Colorado</option>
+                    <option value="CA">California</option>
+                    <option value="NY">New York</option>
+                    <option value="VT">Vermont</option>
+
                   </select>
 
                   <select value={this.state.sortFilter} onChange={(e) => this.setState({ sortFilter: e.target.value })} style={inputStyle}>
@@ -689,6 +693,7 @@ class Dashboard extends Component<PropsType, StateType> {
             // resort detail section
             <div
               style={{
+                position: "relative",
                 padding: "1rem",
                 background: "#ffffff",
                 border: "1px solid #d4e3f0",
@@ -701,6 +706,27 @@ class Dashboard extends Component<PropsType, StateType> {
                 alignItems: "center",
               }}
             >
+               <div
+                 style={{
+                   position: "absolute",
+                   top: "1rem",
+                   right: "1rem",
+                   cursor: "pointer",
+                   zIndex: 1
+                 }}
+                 onClick={() =>
+                   this.setState({
+                     resortDetailPage: false,
+                     selectedResort: null,
+                     errorOccurred: false,
+                     successOccurred: false,
+                     errorMessage: "",
+                     successMessage: ""
+                   })
+                 }
+               >
+                 <Icon path={mdiCloseCircle} size={1.5} color="#6c757d" />
+               </div>
               <img
                           src={this.state.selectedResort?.photoURL}
                           alt="resort photo"
@@ -921,8 +947,9 @@ class Dashboard extends Component<PropsType, StateType> {
              overflow: "hidden", boxSizing: "border-box", 
             //  marginTop: screenSize < 850 ? "1rem" : "0"
               }}>
-            <SkiResortsMap
+            <Map
             zip={this.state.user?.zip_code}
+            stateFilter={this.state.stateFilter}
               selectedResort={
                 this.state.selectedResort
                   ? `${this.state.selectedResort.latitude},${this.state.selectedResort.longitude}`
