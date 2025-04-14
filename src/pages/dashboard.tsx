@@ -6,7 +6,7 @@ import Button from '@mui/material/Button';
 import Icon from '@mdi/react';
 import { mdiStar, mdiStarOutline } from '@mdi/js';
 import { mdiWeatherCloudy } from '@mdi/js';
-import { mdiThermometer, mdiWeatherWindy, mdiDelete } from '@mdi/js';
+import { mdiThermometer, mdiWeatherWindy, mdiDelete, mdiOpenInNew } from '@mdi/js';
 import { mdiCloseCircle } from '@mdi/js';
 import Modal from "../components/Modal";
 import SkeletonLoader from "../components/SkeletonLoader";
@@ -669,6 +669,38 @@ class Dashboard extends Component<PropsType, StateType> {
               >
                 {this.state.selectedResort?.address}
               </a>
+              {/* add website here */}
+                <p style={{ display: 'flex', color: "#6c757d", marginBottom: "0.5rem", alignItems: "center", fontSize: "16px", justifyContent: "center" }} onMouseEnter={e => {
+                  e.currentTarget.style.fontWeight = "bold";
+                  e.currentTarget.style.cursor = "pointer";
+                  e.currentTarget.style.textDecoration = "underline";
+                  }} onMouseLeave={e => {
+                  e.currentTarget.style.fontWeight = "normal";
+                  e.currentTarget.style.textDecoration = "none";
+                  e.currentTarget.style.cursor = "default";
+                  }}>
+                <a
+                  href={this.state.selectedResort?.website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: "#4a6b82", textDecoration: "none" }}
+                  onMouseEnter={e => {
+                  e.currentTarget.style.fontWeight = "bold";
+                  e.currentTarget.style.textDecoration = "underline";
+                  }} onMouseLeave={e => {
+                  e.currentTarget.style.fontWeight = "normal";
+                  e.currentTarget.style.textDecoration = "none";
+                  }}
+                >
+                  Website 
+                </a>
+                <Icon
+                  path={mdiOpenInNew}
+                  size={0.9}
+                  color="#6c757d"
+                  style={{ marginLeft: "0.5rem", verticalAlign: "middle" }}
+                />
+                </p>
               {this.state.selectedResort?.weather && (
                 <div style={{ display: "flex", flexDirection: "column", marginBottom: "1rem" }}>
                   <div style={{ display: "flex", alignItems: "center", color: "#6c757d", marginBottom: "0.5rem" }}>
@@ -690,7 +722,7 @@ class Dashboard extends Component<PropsType, StateType> {
                 <div style={{ 
                     textAlign: "left",
                 }}>
-                  <h3 style={{ fontWeight: "bold", color: "#2a5f9e", marginTop: "2rem", marginBottom: "1rem" }}>Reviews</h3>
+                  <h3 style={{ fontWeight: "bold", color: "#2a5f9e", marginTop: "1rem", marginBottom: "1rem" }}>Reviews</h3>
                 {this.state.resortReviewsLoading ? (
                   <SkeletonLoader />
                 ) : 
