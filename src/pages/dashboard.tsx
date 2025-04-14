@@ -135,8 +135,11 @@ class Dashboard extends Component<PropsType, StateType> {
       const res = await fetch("/api/ski_resorts");
       if (res.ok) {
         const data = await res.json();
-        this.setState({ resorts: data } , () => {
-          console.log("Resorts fetched:", this.state.resorts);
+        const sortedResorts = data.sort((a: SkiResort, b: SkiResort) =>
+          a.name.localeCompare(b.name)
+        );
+        this.setState({ resorts: sortedResorts }, () => {
+          console.log("Resorts fetched and sorted:", this.state.resorts);
         });
       } else {
         console.error("Failed to fetch ski resorts");
@@ -431,6 +434,7 @@ class Dashboard extends Component<PropsType, StateType> {
 
   render() {
     const { resorts, screenSize } = this.state;
+    const loggedIn = this.state.user !== null;
 
     return (
       <div
@@ -600,7 +604,8 @@ class Dashboard extends Component<PropsType, StateType> {
                             color="#FFD700"
                           />
                         ))}
-                      </div> : "No reviews yet"}
+                      </div> : <SkeletonLoader />
+                      }
                         </div>
                       
                     </div>
@@ -678,7 +683,7 @@ class Dashboard extends Component<PropsType, StateType> {
                 }}>
                   <h3 style={{ fontWeight: "bold", color: "#2a5f9e", marginTop: "2rem", marginBottom: "1rem" }}>Reviews</h3>
                 {this.state.resortReviews.length === 0 ? (
-                  <p>No reviews for this resort yet.</p>
+                  <SkeletonLoader />
                 ) : (
                   this.state.resortReviews.map((review) => (
                     <div key={review.id} style={{ marginBottom: "1rem", borderRadius: "8px",
@@ -720,7 +725,7 @@ class Dashboard extends Component<PropsType, StateType> {
                 )}
               </div>
               
-              <p style={{ alignSelf: "flex-start", fontWeight: "bold", marginBottom: "0.25rem", color: "#2a5f9e" }}>
+              <p style={{ alignSelf: "flex-start", fontWeight: "bold", marginBottom: "0.25rem", color: "#2a5f9e", display: loggedIn ? '' : 'none' }}>
                 Write a Review:
               </p>
               <textarea
@@ -734,15 +739,16 @@ class Dashboard extends Component<PropsType, StateType> {
                   borderRadius: "0.5rem",
                   marginBottom: "1rem",
                   resize: "vertical",
+                  display: loggedIn ? '' : 'none'
                 }}
                 value={this.state.reviewInput}
                 onChange={(e) => this.setState({ reviewInput: e.target.value })}
               />
 
-              <p style={{ alignSelf: "flex-start", fontWeight: "bold", marginBottom: "0.25rem", color: "#2a5f9e" }}>
+              <p style={{ alignSelf: "flex-start", fontWeight: "bold", marginBottom: "0.25rem", color: "#2a5f9e", display: loggedIn ? '' : 'none' }}>
                 Rating:
               </p>
-              <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem", justifyContent: 'center' }}>
+              <div style={{ display: loggedIn ? 'flex' : 'none', gap: "0.5rem", marginBottom: "1rem", justifyContent: 'center' }}>
                 {[1, 2, 3, 4, 5].map((star) => (
                   <div
                     key={star}
@@ -767,6 +773,7 @@ class Dashboard extends Component<PropsType, StateType> {
               <div style={{ display: "flex", justifyContent: "space-around", width: "100%", marginTop: '1rem' }}>
                 <Button
                   style={{
+                    display: loggedIn ? '' : 'none',
                     backgroundColor: "#0d6efd",
                     color: "white",
                     padding: "0.5rem 1rem",

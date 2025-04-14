@@ -110,6 +110,18 @@ class NavBar extends Component<NavBarProps, NavBarState> {
           )} */}
         <ul style={navListStyle}>
 
+        <li style={navItemStyle}>
+            <Link href="/" style={navLinkStyle} onMouseEnter={e => {
+              e.currentTarget.style.fontWeight = "bold";
+              e.currentTarget.style.textDecoration = "underline";
+            }} onMouseLeave={e => {
+              e.currentTarget.style.fontWeight = "normal";
+              e.currentTarget.style.textDecoration = "none";
+            }}>
+              Home
+            </Link>
+          </li>
+
           <li style={navItemStyle}>
             <Link href="/dashboard" style={navLinkStyle} onMouseEnter={e => {
               e.currentTarget.style.fontWeight = "bold";

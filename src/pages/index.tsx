@@ -95,6 +95,23 @@ componentDidUpdate(prevProps: Readonly<PropsType>, prevState: Readonly<StatesTyp
               Sign Up
             </a>
           </div>
+          <div>
+            <p style={{marginBottom: '16px'}}>or</p>
+            <a
+              href="/dashboard"
+              style={{
+                backgroundColor: "#ffffff",
+                color: "#16435d",
+                padding: "12px",
+                borderRadius: "0.5rem",
+                textDecoration: "none",
+                fontWeight: "bold",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+              }}
+            >
+              Continue as guest
+            </a>
+          </div>
         </div>
       </div>
     );
