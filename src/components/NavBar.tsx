@@ -45,7 +45,7 @@ class NavBar extends Component<NavBarProps, NavBarState> {
     }
 
     window.addEventListener("resize", this.handleResize);
-  this.setState({ screenSize: window.innerWidth });
+    this.setState({ screenSize: window.innerWidth });
   }
 
   isMobileView = () => this.state.screenSize < 850;
@@ -87,7 +87,7 @@ class NavBar extends Component<NavBarProps, NavBarState> {
     };
 
     const navItemStyle: React.CSSProperties = {
-      marginLeft: this.isMobileView() ? "0.5rem" : "1rem",
+      marginLeft: this.isMobileView() ? "8px" : "16px",
     };
 
     const navLinkStyle: React.CSSProperties = {
