@@ -3,6 +3,7 @@
 - Add "favorites" to user. Ability to favorite resort, pin it to the top.
 - User settings
 
-TOMORRW:
+after class:
 
-I am going to add a profile settings and allow users to edit settings (like zipe code), then i will add a proximity filter and state filter, then add colorado resorts.
+make it so when a state is selected in the filter, it zooms to that state on the map component
+

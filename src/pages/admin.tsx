@@ -9,6 +9,7 @@ import { mdiWeatherCloudy } from '@mdi/js';
 import { mdiThermometer, mdiWeatherWindy, mdiCrown } from '@mdi/js';
 import { Span } from "next/dist/trace";
 import Modal from "../components/Modal";
+import Head from 'next/head';
 
 type WeatherType = {
   temperature: number;
@@ -349,6 +350,9 @@ class Dashboard extends Component<PropsType, StateType> {
       <div
         style={containerStyle}
       >
+         <Head>
+          <title>SkiScape | Admin Portal</title>
+        </Head>
         <div
           style={{
             display: "flex",

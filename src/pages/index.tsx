@@ -4,6 +4,7 @@ import { Props } from "next/script";
 import Home from "./test";
 import Background from "../../public/images/home-page.png";
 import Logo from "../../public/images/logo.png";
+import Head from 'next/head';
 
 type PropsType = {
 }
@@ -41,13 +42,15 @@ componentDidUpdate(prevProps: Readonly<PropsType>, prevState: Readonly<StatesTyp
           textAlign: "center",
           padding: "0 2rem 2rem 2rem",
           boxSizing: "border-box",
-        }}
-      >
-        <img
+        }}>
+          <Head>
+          <title>SkiScape | Home</title>
+        </Head>
+        {/* <img
           src={Logo.src}
           alt="Ski Scape Logo"
           style={{ width: "200px" }}
-        />
+        /> */}
         <div
           style={{
             backgroundColor: "rgba(0, 0, 0, 0.5)",

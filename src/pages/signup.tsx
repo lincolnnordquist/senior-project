@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import Logo from "../../public/images/logo.png";
+import Head from 'next/head';
 
 
 interface SignupState {
@@ -56,6 +57,9 @@ class Signup extends Component<{}, SignupState> {
   render() {
     return (
       <div style={styles.container}>
+        <Head>
+          <title>SkiScape | Register</title>
+        </Head>
         <img
         onClick={() => window.location.href = "/"}
           src={Logo.src}

@@ -1,6 +1,7 @@
 import { GetServerSideProps } from "next";
 import { createPagesServerClient } from "@supabase/auth-helpers-nextjs";
 import React, { Component } from "react";
+import Head from 'next/head';
 import SkiResortsMap from "../components/SkiResortsMap";
 import Button from '@mui/material/Button';
 import Icon from '@mdi/react';
@@ -469,6 +470,9 @@ class Dashboard extends Component<PropsType, StateType> {
           overflow: this.isMobileView() ? "visible" : "hidden",
         }}
       >
+        <Head>
+          <title>SkiScape Dashboard</title>
+        </Head>
         <div
           style={{
             display: "flex",
@@ -755,7 +759,7 @@ class Dashboard extends Component<PropsType, StateType> {
                   path={mdiOpenInNew}
                   size={0.9}
                   color="#6c757d"
-                  style={{ marginLeft: "0.5rem", verticalAlign: "middle" }}
+                  style={{ marginLeft: "0.25rem", verticalAlign: "middle" }}
                 />
                 </p>
               {this.state.selectedResort?.weather && (

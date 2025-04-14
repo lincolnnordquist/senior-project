@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { GetServerSideProps } from "next";
 import Logo from "../../public/images/logo.png";
 import { createPagesServerClient } from "@supabase/auth-helpers-nextjs";
+import Head from 'next/head';
 
 
 interface LoginState {
@@ -47,6 +48,9 @@ class Login extends Component<{}, LoginState> {
   render() {
     return (
       <div style={styles.container}>
+        <Head>
+          <title>SkiScape | Login</title>
+        </Head>
         <img
         onClick={() => window.location.href = "/"}
           src={Logo.src}
