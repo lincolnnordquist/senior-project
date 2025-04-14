@@ -432,6 +432,7 @@ class Dashboard extends Component<PropsType, StateType> {
             alignItems: "center",
             textAlign: "center",
             padding: "2rem",
+            paddingBottom: '0',
             width: "100%",
             boxSizing: "border-box"
           }}
@@ -914,13 +915,14 @@ class Dashboard extends Component<PropsType, StateType> {
             }
             
             .snowfall-container {
-              position: absolute;
+              position: fixed;
               top: 0;
               left: 0;
               width: 100%;
               height: 100vh;
               z-index: 0;
               pointer-events: none;
+              overflow: hidden;
             }
             
             .snowflake {
