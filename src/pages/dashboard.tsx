@@ -273,6 +273,10 @@ class Dashboard extends Component<PropsType, StateType> {
     }
   }
 
+  handleResize = () => {
+    this.setState({ screenSize: window.innerWidth });
+  };
+
   async fetchWeatherForAllResorts() {
     const updatedResorts = await Promise.all(
       this.state.resorts.map(async (resort) => {
@@ -372,7 +376,18 @@ class Dashboard extends Component<PropsType, StateType> {
 
     this.createSnowflakes();
     this.fetchEverything();
+
+    window.addEventListener("resize", this.handleResize);
+  this.setState({ screenSize: window.innerWidth });
+
+  console.log(this.isMobileView(), "is mobile view")
   }
+
+  componentWillUnmount() {
+    window.removeEventListener("resize", this.handleResize);
+  }
+
+  isMobileView = () => this.state.screenSize < 850;
 
   async getCurrentUser() {
     try {
@@ -417,17 +432,18 @@ class Dashboard extends Component<PropsType, StateType> {
           display: "flex",
           flexDirection: "column",
           background: "#eaf4fb",
-          height: "100vh",
+          height: this.isMobileView() ? "auto" : "100vh",
           width: "100%",
           margin: 0,
           padding: 0,
           boxSizing: "border-box",
-          overflow: "hidden",
+          overflow: this.isMobileView() ? "visible" : "hidden",
         }}
       >
         <div
           style={{
             display: "flex",
+            flexDirection: this.isMobileView() ? "column" : "row",
             justifyContent: "space-between",
             alignItems: "center",
             textAlign: "center",
@@ -446,7 +462,7 @@ class Dashboard extends Component<PropsType, StateType> {
                 borderRadius: "0.5rem",
                 boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
                 // width: screenSize < 850 ? "100%" : "52%",
-                width: "52%",
+                width: this.isMobileView() ? "100%" : "52%",
                 height: "80vh",
                 // maxHeight: "500px",
                 overflowY: "auto"
@@ -563,7 +579,7 @@ class Dashboard extends Component<PropsType, StateType> {
                 border: "1px solid #d4e3f0",
                 borderRadius: "0.5rem",
                 boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
-                width: "52%",
+                width: this.isMobileView() ? "100%" : "52%",
                 // maxHeight: "500px",
                 height: "80vh",
                 overflowY: "auto",
@@ -748,7 +764,7 @@ class Dashboard extends Component<PropsType, StateType> {
           {/* Right Column - Map */}
           <div style={{ 
             // width: screenSize < 850 ? "100%" : "47%",
-            width: "47%",
+            width: this.isMobileView() ? "100%" : "47%",
              overflow: "hidden", boxSizing: "border-box", 
             //  marginTop: screenSize < 850 ? "1rem" : "0"
               }}>

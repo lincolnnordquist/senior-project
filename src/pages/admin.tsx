@@ -419,7 +419,7 @@ class Dashboard extends Component<PropsType, StateType> {
 >
             {
               this.state.selectedSection === "manage_resorts" ?
-              <div style={tabStyle}>
+              <div style={{ ...tabStyle, overflowY: "auto", maxHeight: "80vh" }}>
                 <div style={{display: 'flex', flexDirection: 'column', gap: '1rem'}}>
                   <h2 style={{ color: "#6c757d", marginBottom: "0.5rem", textAlign: "center" }}>
                   Add Resort
@@ -521,7 +521,7 @@ class Dashboard extends Component<PropsType, StateType> {
                 </div>
                 :
                 this.state.selectedSection === "manage_users" ?
-               <div style={tabStyle}>
+               <div style={{ ...tabStyle, overflowY: "auto", maxHeight: "80vh" }}>
                  <h2 style={{ textAlign: "center", color: "#6c757d", marginBottom: "1rem" }}>All Users</h2>
                  <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
                    {this.state.users.map((user) => (
