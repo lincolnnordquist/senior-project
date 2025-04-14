@@ -380,8 +380,6 @@ class Dashboard extends Component<PropsType, StateType> {
   }
 
   componentDidMount() {
-    console.log(this.state.user, "user here")
-
     this.createSnowflakes();
     this.fetchEverything();
 
@@ -389,6 +387,8 @@ class Dashboard extends Component<PropsType, StateType> {
     setTimeout(() => {
       this.setState({ screenSize: window.innerWidth });
     }, 1000);
+
+    console.log(this.state.user, "user on dash")
 
   }
 
