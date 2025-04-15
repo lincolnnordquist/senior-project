@@ -79,7 +79,11 @@ componentDidUpdate(prevProps: Readonly<PropsType>, prevState: Readonly<StatesTyp
                 textDecoration: "none",
                 fontWeight: "bold",
                 boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+                transition: "transform 0.1s ease-in-out",
               }}
+              onMouseDown={(e) => (e.currentTarget.style.transform = "scale(0.96)")}
+              onMouseUp={(e) => (e.currentTarget.style.transform = "scale(1)")}
+              onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
             >
               Login
             </a>
@@ -94,6 +98,9 @@ componentDidUpdate(prevProps: Readonly<PropsType>, prevState: Readonly<StatesTyp
                 fontWeight: "bold",
                 boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
               }}
+              onMouseDown={(e) => (e.currentTarget.style.transform = "scale(0.96)")}
+              onMouseUp={(e) => (e.currentTarget.style.transform = "scale(1)")}
+              onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
             >
               Sign Up
             </a>
@@ -111,6 +118,9 @@ componentDidUpdate(prevProps: Readonly<PropsType>, prevState: Readonly<StatesTyp
                 fontWeight: "bold",
                 boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
               }}
+              onMouseDown={(e) => (e.currentTarget.style.transform = "scale(0.90)")}
+              onMouseUp={(e) => (e.currentTarget.style.transform = "scale(1)")}
+              onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
             >
               Continue as guest
             </a>

@@ -15,7 +15,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   });
 
   if (error) {
-    return res.status(400).json({ message: "Invalid login credentials" });
+    return res.status(400).json({ message: "email or password is incorrect" });
   }
 
   return res.status(200).json({ message: "Successfully logged in", user: data.user });

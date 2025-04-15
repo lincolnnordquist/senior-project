@@ -531,7 +531,7 @@ class Dashboard extends Component<PropsType, StateType> {
                     onMouseUp={e => e.currentTarget.style.transform = "translateY(-50%)"}
                     onMouseLeave={e => e.currentTarget.style.transform = "translateY(-50%)"}
                     // clear all filters
-                    onClick={() => this.setState({ searchField: "", sortFilter: "", stateFilter: "" })}
+                    onClick={() => this.setState({ searchField: "", sortFilter: "", stateFilter: "", myReviews: [] })}
                   >
                     <Icon path={mdiCloseCircle} size={1} color="#6c757d" />
                   </div>
@@ -930,7 +930,7 @@ class Dashboard extends Component<PropsType, StateType> {
                     height: '40px'
                   }}
                   onClick={() =>
-                    this.setState({ resortDetailPage: false, selectedResort: null, errorOccurred: false, successOccurred: false, errorMessage: "", successMessage: "" })
+                    this.setState({ resortDetailPage: false, selectedResort: null, errorOccurred: false, successOccurred: false, errorMessage: "", successMessage: "", myReviews: [] })
                   }
                 >
                   Back
