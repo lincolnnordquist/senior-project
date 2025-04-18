@@ -6,8 +6,7 @@ import Map from "../components/SkiResortsMap";
 import Button from '@mui/material/Button';
 import Icon from '@mdi/react';
 import { mdiStar, mdiStarOutline } from '@mdi/js';
-import { mdiWeatherCloudy } from '@mdi/js';
-import { mdiThermometer, mdiWeatherWindy, mdiDelete, mdiOpenInNew } from '@mdi/js';
+import { mdiWeatherCloudy, mdiWeatherSnowy, mdiWeatherSunny, mdiWeatherFog, mdiWeatherPartlyCloudy, mdiWeatherRainy, mdiThermometer, mdiWeatherWindy, mdiDelete, mdiOpenInNew } from '@mdi/js';
 import { mdiCloseCircle } from '@mdi/js';
 import Modal from "../components/Modal";
 import SkeletonLoader from "../components/SkeletonLoader";
@@ -308,6 +307,7 @@ class Dashboard extends Component<PropsType, StateType> {
           }
 
           const weatherData = await res.json();
+          console.log("Weather data:", weatherData);
           return {
             ...resort,
             weather: weatherData,
@@ -445,6 +445,17 @@ class Dashboard extends Component<PropsType, StateType> {
   render() {
     const { resorts, screenSize } = this.state;
     const loggedIn = this.state.user !== null;
+    const weatherIconMap: { [key: string]: string } = {
+      "scattered clouds": mdiWeatherCloudy,
+      "broken clouds": mdiWeatherCloudy,
+      "light snow": mdiWeatherSnowy,
+      "clear sky": mdiWeatherSunny,
+      "snow": mdiWeatherSnowy,
+      "overcast clouds": mdiWeatherPartlyCloudy,
+      "few clouds": mdiWeatherPartlyCloudy,
+      "light rain": mdiWeatherRainy,
+      "mist": mdiWeatherFog
+    };
 
     const inputStyle: React.CSSProperties = {
           padding: "0.75rem",
@@ -657,14 +668,24 @@ class Dashboard extends Component<PropsType, StateType> {
                             }}><Icon path={mdiDelete} size={1} color="#dc3545"/></div>
                           </div>
                         </div>
-                        <div style={{ display: "flex", alignItems: "center", margin: "0.5rem 0" }}>
-                          <Icon path={mdiWeatherCloudy} size={1} color="#6c757d" />
-                          <span style={{ marginLeft: "0.5rem", color: "#6c757d" }}>
+                        <div style={{ display: "flex", alignItems: "center", margin: "0.5rem 0", color: "#6c757d" }}>
+                          <Icon path={mdiThermometer} size={1} color="#6c757d" />
+                          <span style={{ marginLeft: "0.5rem" }}>
                             {resort.weather?.temperature !== undefined ? `${resort.weather.temperature}°F` : "N/A"}
                           </span>
-                        </div>
-                        <div style={{ color: "#6c757d", marginBottom: "0.5rem" }}>
-                          {resort.address}
+                          {resort.weather?.description && (
+                            <>
+                              <span style={{ margin: "0 0.5rem" }}>|</span>
+                              <Icon
+                                path={weatherIconMap[(resort.weather.description || "").toLowerCase()] || mdiWeatherCloudy}
+                                size={1}
+                                color="#6c757d"
+                              />
+                              <span style={{ marginLeft: "0.5rem" }}>
+                                {resort.weather.description.charAt(0).toUpperCase() + resort.weather.description.slice(1)}
+                              </span>
+                            </>
+                          )}
                         </div>
                         <div style={{ color: "#6c757d" }}></div>
                       <hr style={{margin: '10px 0'}}/>
@@ -800,6 +821,12 @@ class Dashboard extends Component<PropsType, StateType> {
                     <Icon path={mdiWeatherWindy} size={1} color="#6c757d" />
                     <span style={{ marginLeft: "0.5rem" }}>
                       Wind Speed: {this.state.selectedResort.weather.windSpeed} mph
+                    </span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", color: "#6c757d", marginTop: "0.5rem" }}>
+                    <Icon path={mdiWeatherCloudy} size={1} color="#6c757d" />
+                    <span style={{ marginLeft: "0.5rem" }}>
+                      {this.state.selectedResort.weather.description.charAt(0).toUpperCase() + this.state.selectedResort.weather.description.slice(1)}
                     </span>
                   </div>
                 </div>
