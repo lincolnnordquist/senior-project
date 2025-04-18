@@ -1,8 +1,9 @@
-import React, { Component } from "react";
-import Link from "next/link";
-import Logo from "../../public/images/logo.png";
-import Image from "next/image";
-import Modal from "../components/Modal";
+import React, { Component } from 'react';
+import Link from 'next/link';
+import { withRouter } from 'next/router';
+import Icon from '@mdi/react';
+import { mdiSnowflake } from '@mdi/js';
+import Modal from './Modal';
 
 interface User {
   id: string;
@@ -17,6 +18,7 @@ interface User {
 
 interface NavBarProps {
   user?: User | null;
+  router: any;
 }
 
 interface NavBarState {
@@ -30,49 +32,24 @@ interface NavBarState {
   successMessage: string;
 }
 
-class NavBar extends Component<NavBarProps, NavBarState> {
+class Navbar extends Component<NavBarProps, NavBarState> {
   constructor(props: NavBarProps) {
     super(props);
     this.state = {
-      user: null,
-      screenSize: typeof window !== "undefined" ? window.innerWidth : 851,
+      user: props.user || null,
+      screenSize: 0,
       accountModal: false,
-
       errorOccurred: false,
-      errorMessage: "",
+      errorMessage: '',
       successOccurred: false,
-      successMessage: "",
+      successMessage: '',
     };
   }
 
-  async componentDidMount() {
-    try {
-      const res = await fetch("/api/auth/user", {
-        credentials: "include",
-      });
-      if (res.ok) {
-        const data = await res.json();
-        this.setState({ user: data.user }, () => {
-          console.log("User data on navvv:", this.state.user);
-        });
-      }
-    } catch (error) {
-      console.error("Failed to fetch user:", error);
-    }
-
-    window.addEventListener("resize", this.handleResize);
-    this.setState({ screenSize: window.innerWidth });
+  private isActive = (path: string) => {
+    // check to see if the path is the current path
+    return this.props.router.pathname === path;
   }
-
-  isMobileView = () => this.state.screenSize < 850;
-
-  componentWillUnmount() {
-    window.removeEventListener("resize", this.handleResize);
-  }
-
-  handleResize = () => {
-    this.setState({ screenSize: window.innerWidth });
-  };
 
   updateAccount() {
     if (!this.state.user) {
@@ -127,45 +104,26 @@ class NavBar extends Component<NavBarProps, NavBarState> {
     }
   }
 
+  async componentDidMount() {
+    try {
+      const res = await fetch("/api/auth/user", {
+        credentials: "include",
+      });
+      if (res.ok) {
+        const data = await res.json();
+        this.setState({ user: data.user }, () => {
+          console.log("User data on navvv:", this.state.user);
+        });
+      }
+    } catch (error) {
+      console.error("Failed to fetch user:", error);
+    }
+
+    this.setState({ screenSize: window.innerWidth });
+  }
+
   render() {
-    const { user } = this.state;
-
-    const navStyle: React.CSSProperties = {
-      background: "linear-gradient(to right, #0d6efd, #4ab4f4)",
-      padding: "0.5rem 1rem",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between",
-      height: "75px",
-    };
-
-    const titleStyle: React.CSSProperties = {
-      display: this.isMobileView() ? "none" : "block",
-      fontWeight: "bold",
-      fontSize: "1.5rem",
-      color: "white",
-      textDecoration: "none",
-    };
-
-    const navListStyle: React.CSSProperties = {
-      listStyleType: "none",
-      display: "flex",
-      justifyContent: "space-between",
-      margin: 0,
-      padding: 0,
-    };
-
-    const navItemStyle: React.CSSProperties = {
-      marginLeft: this.isMobileView() ? "8px" : "16px",
-    };
-
-    const navLinkStyle: React.CSSProperties = {
-      color: "#eaf4fb",
-      textDecoration: "none",
-      textShadow: "0 1px 2px rgba(0, 0, 0, 0.15)",
-      transition: "all 0.2s ease",
-      cursor: "pointer",
-    };
+    const { user } = this.props;
 
     const inputStyle: React.CSSProperties = {
       padding: "0.75rem",
@@ -179,96 +137,155 @@ class NavBar extends Component<NavBarProps, NavBarState> {
     }
 
     return (
-      <nav style={navStyle}>
-        <Link href="/" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
-          <Image src={Logo} alt="Ski Scape Logo" width={90} height={90} />
-          <span style={titleStyle}>Ski Scape</span>
+      <nav style={{
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        backdropFilter: 'blur(8px)',
+        padding: '1rem 2rem',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+        position: 'sticky',
+        top: 0,
+        zIndex: 1000,
+      }}>
+        <Link href="/" style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.75rem',
+          textDecoration: 'none',
+          color: '#16435d',
+          fontWeight: 600,
+          fontSize: '1.5rem',
+          transition: 'transform 0.2s ease'
+        }}
+        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+        >
+          <Icon path={mdiSnowflake} size={1.5} color="#2196f3" />
+          <span>SkiScape</span>
         </Link>
-        <ul style={navListStyle}>
 
-          <li style={navItemStyle}>
-            <Link href="/" style={navLinkStyle} onMouseEnter={e => {
-              e.currentTarget.style.fontWeight = "bold";
-              e.currentTarget.style.textDecoration = "underline";
-            }} onMouseLeave={e => {
-              e.currentTarget.style.fontWeight = "normal";
-              e.currentTarget.style.textDecoration = "none";
-            }}>
-              Home
-            </Link>
-          </li>
-
-          <li style={navItemStyle}>
-            <Link href="/dashboard" style={navLinkStyle} onMouseEnter={e => {
-              e.currentTarget.style.fontWeight = "bold";
-              e.currentTarget.style.textDecoration = "underline";
-            }} onMouseLeave={e => {
-              e.currentTarget.style.fontWeight = "normal";
-              e.currentTarget.style.textDecoration = "none";
-            }}>
-              Dashboard
-            </Link>
-          </li>
-
-          {this.state.user?.is_admin ? 
-            <li style={navItemStyle}>
-            <Link href="/admin" style={navLinkStyle} onMouseEnter={e => {
-              e.currentTarget.style.fontWeight = "bold";
-              e.currentTarget.style.textDecoration = "underline";
-            }} onMouseLeave={e => {
-              e.currentTarget.style.fontWeight = "normal";
-              e.currentTarget.style.textDecoration = "none";
-            }}>
-              Admin Portal
-            </Link>
-          </li>
-          : 
-          null
-}
-
-{this.state.user ? 
-<li style={navItemStyle} onClick={() => this.state.accountModal ? this.setState({ accountModal: false }) : this.setState({ accountModal: true })}>
-            <span style={navLinkStyle} onMouseEnter={e => {
-              e.currentTarget.style.fontWeight = "bold";
-              e.currentTarget.style.textDecoration = "underline";
-            }} onMouseLeave={e => {
-              e.currentTarget.style.fontWeight = "normal";
-              e.currentTarget.style.textDecoration = "none";
-            }}>
-              Account
-            </span>
-          </li>
-          : null}
+        {/* Navigation Links */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '2rem'
+        }}>
+          <NavLink href="/" active={this.isActive('/')}>Home</NavLink>
+          <NavLink href="/dashboard" active={this.isActive('/dashboard')}>Dashboard</NavLink>
+          {user?.is_admin && (
+            <NavLink href="/admin" active={this.isActive('/admin')}>Admin Portal</NavLink>
+          )}
           
-            
-             {
-              this.state.user ? 
-              <li style={navItemStyle}>
-            <Link href="/logout" style={navLinkStyle} onMouseEnter={e => {
-              e.currentTarget.style.fontWeight = "bold";
-              e.currentTarget.style.textDecoration = "underline";
-            }} onMouseLeave={e => {
-              e.currentTarget.style.fontWeight = "normal";
-              e.currentTarget.style.textDecoration = "none";
-            }}>
-              Logout
-            </Link>
-          </li>
-              :
-              <li style={navItemStyle}>
-              <Link href="/login" style={navLinkStyle} onMouseEnter={e => {
-                e.currentTarget.style.fontWeight = "bold";
-                e.currentTarget.style.textDecoration = "underline";
-              }} onMouseLeave={e => {
-                e.currentTarget.style.fontWeight = "normal";
-                e.currentTarget.style.textDecoration = "none";
-              }}>
+          {user ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+              <button
+                onClick={() => this.setState({ accountModal: true })}
+                style={{
+                  backgroundColor: '#f6f9fc',
+                  color: '#2a5f9e',
+                  border: '1px solid #d4e3f0',
+                  padding: '0.5rem 1rem',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontSize: '0.9rem',
+                  fontWeight: '500',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#ffffff';
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#f6f9fc';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}
+              >
+                Account
+              </button>
+              <button
+                onClick={() => {
+                  fetch('/api/auth/signout', {
+                    method: 'POST',
+                    credentials: 'include',
+                  })
+                  .then(() => {
+                    this.props.router.push('/');
+                  });
+                }}
+                style={{
+                  backgroundColor: '#f6f9fc',
+                  color: '#2a5f9e',
+                  border: '1px solid #d4e3f0',
+                  padding: '0.5rem 1rem',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontSize: '0.9rem',
+                  fontWeight: '500',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#ffffff';
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#f6f9fc';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}
+              >
+                Logout
+              </button>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <Link href="/login" style={{
+                backgroundColor: '#f6f9fc',
+                color: '#2a5f9e',
+                padding: '0.5rem 1rem',
+                borderRadius: '8px',
+                textDecoration: 'none',
+                fontSize: '0.9rem',
+                fontWeight: '500',
+                transition: 'all 0.2s ease',
+                border: '1px solid #d4e3f0'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#ffffff';
+                e.currentTarget.style.transform = 'translateY(-1px)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#f6f9fc';
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
+              >
                 Login
               </Link>
-            </li>
-             }
-         
-        </ul>
+              <Link href="/signup" style={{
+                backgroundColor: '#2196f3',
+                color: 'white',
+                padding: '0.5rem 1rem',
+                borderRadius: '8px',
+                textDecoration: 'none',
+                fontSize: '0.9rem',
+                fontWeight: '500',
+                transition: 'all 0.2s ease',
+                boxShadow: '0 2px 4px rgba(33, 150, 243, 0.2)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-1px)';
+                e.currentTarget.style.boxShadow = '0 4px 8px rgba(33, 150, 243, 0.3)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 2px 4px rgba(33, 150, 243, 0.2)';
+              }}
+              >
+                Sign Up
+              </Link>
+            </div>
+          )}
+        </div>
         <Modal show={this.state.accountModal}>
   <div
     style={{
@@ -328,4 +345,36 @@ class NavBar extends Component<NavBarProps, NavBarState> {
   }
 }
 
-export default NavBar;
+class NavLink extends Component<{ href: string, active: boolean, children: React.ReactNode }> {
+  render() {
+    const { href, active, children } = this.props;
+    return (
+      <Link href={href} style={{
+        color: active ? '#2196f3' : '#4a6b82',
+        textDecoration: 'none',
+        fontSize: '0.9rem',
+        fontWeight: '500',
+        padding: '0.5rem 0',
+        borderBottom: active ? '2px solid #2196f3' : '2px solid transparent',
+        transition: 'all 0.2s ease'
+      }}
+      onMouseEnter={(e) => {
+        if (!active) {
+          e.currentTarget.style.color = '#2196f3';
+          e.currentTarget.style.borderBottom = '2px solid #e3f2fd';
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (!active) {
+          e.currentTarget.style.color = '#4a6b82';
+          e.currentTarget.style.borderBottom = '2px solid transparent';
+        }
+      }}
+      >
+        {children}
+      </Link>
+    );
+  }
+}
+
+export default withRouter(Navbar);

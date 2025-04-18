@@ -6,7 +6,7 @@ import Button from '@mui/material/Button';
 import Icon from '@mdi/react';
 import { mdiStar, mdiStarOutline } from '@mdi/js';
 import { mdiWeatherCloudy } from '@mdi/js';
-import { mdiThermometer, mdiWeatherWindy, mdiCrown } from '@mdi/js';
+import { mdiThermometer, mdiWeatherWindy, mdiCrown, mdiSnowflake } from '@mdi/js';
 import { Span } from "next/dist/trace";
 import Modal from "../components/Modal";
 import Head from 'next/head';
@@ -116,7 +116,6 @@ class Dashboard extends Component<PropsType, StateType> {
 
    componentDidMount() {
     console.log("comeponentDidMount working on admin page")
-    this.createSnowflakes();
 
     this.getCurrentUser();
     this.fetchResorts();
@@ -210,22 +209,6 @@ class Dashboard extends Component<PropsType, StateType> {
     }
   }
 
-
-  async createSnowflakes() {
-    const snowflakeContainer = document.querySelector('.snowfall-container');
-
-    if (snowflakeContainer) {
-      for (let i = 0; i < 100; i++) {
-        const snowflake = document.createElement('div');
-        snowflake.classList.add('snowflake');
-        snowflake.style.left = `${Math.random() * 100}%`;
-        snowflake.style.animationDuration = `${Math.random() * 25 + 25}s`;
-        snowflake.style.animationDelay = `-${Math.random() * 25}s`;
-        snowflakeContainer.appendChild(snowflake);
-      }
-    }
-  }
-
   attemptToPostResort () {
     if (this.state.resortNameInput === "" ){
       this.setState({ errorOccurred: true, errorMessage: "Please enter a resort name"});
@@ -311,7 +294,6 @@ class Dashboard extends Component<PropsType, StateType> {
   }
 
   render() {
-
     const inputStyle: React.CSSProperties = {
       padding: "0.75rem",
       borderRadius: "0.5rem",
@@ -331,6 +313,7 @@ class Dashboard extends Component<PropsType, StateType> {
       padding: 0,
       boxSizing: "border-box",
       overflowX: "hidden",
+      position: "relative"
     }
 
     const tabStyle: React.CSSProperties = {
@@ -347,425 +330,415 @@ class Dashboard extends Component<PropsType, StateType> {
     };
 
     return (
-      <div
-        style={containerStyle}
-      >
-         <Head>
+      <div style={containerStyle}>
+        <Head>
           <title>SkiScape | Admin Portal</title>
         </Head>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "stretch",
-            textAlign: "center",
-            padding: "2rem",
-            width: "100%",
-            boxSizing: "border-box",
-            minHeight: "80vh",
-          }}
-        >
-          {/* left column - options */}
+
+        {/* Snowfall Effect */}
+        <div style={{ 
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          pointerEvents: "none",
+          zIndex: 1000
+        }}>
+          {[...Array(20)].map((_, i) => (
             <div
+              key={i}
               style={{
-                padding: "1.5rem",
-                backgroundColor: "white",
-                borderRadius: "0.5rem",
-                boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-                width: "32%",
-                height: "fit-content",
-                maxHeight: "600px",
-                overflowY: "auto",
-                margin: "0 1rem",
+                position: "absolute",
+                left: `${Math.random() * 100}%`,
+                top: "-10px",
+                animation: `fall ${Math.random() * 5 + 5}s linear infinite`,
+                animationDelay: `${Math.random() * 5}s`,
+                opacity: Math.random() * 0.5 + 0.3
               }}
             >
-                <ul style={{ listStyleType: "none", padding: 0 }}>
-                    <div
-                      style={tabStyle}
-                      onMouseEnter={e => e.currentTarget.style.transform = "scale(1.01)"}
-                      onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
-                      onClick={() => 
-                        this.state.selectedSection === "manage_resorts" ?
-                        this.setState({ selectedSection: "", successOccurred: false, successMessage: "" }) :
-                        this.setState({ selectedSection: "manage_resorts", successOccurred: false, successMessage: "" })}
-                    >
-                      <div style={{ color: "#6c757d", marginBottom: "0.5rem" }}>
-                        Add Resort
-                      </div>
-
-
-                    </div>
-
-
-                    <div
-                      style={tabStyle}
-                      onMouseEnter={e => e.currentTarget.style.transform = "scale(1.01)"}
-                      onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
-                      onClick={() => 
-                        this.state.selectedSection === "manage_users" ?
-                        this.setState({ selectedSection: "" }) :
-                        this.setState({ selectedSection: "manage_users" })
-                      }
-                    >
-                      <div style={{ color: "#6c757d", marginBottom: "0.5rem" }}>
-                        Manage Users
-                      </div>
-                    </div>
-                    <div
-                      style={tabStyle}
-                      onMouseEnter={e => e.currentTarget.style.transform = "scale(1.01)"}
-                      onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
-                      onClick={() => 
-                        this.state.selectedSection === "admin_analytics" ?
-                        this.setState({ selectedSection: "" }) :
-                        this.setState({ selectedSection: "admin_analytics" })}
-                    >
-                      <div style={{ color: "#6c757d", marginBottom: "0.5rem" }}>
-                        Admin Analytics
-                      </div>
-                    </div>
-
-
-                </ul>
-
-
+              <Icon path={mdiSnowflake} size={0.5} color="#2196f3" />
             </div>
-         
-
-          <div
-  style={{
-    width: "55%",
-    minHeight: "80vh",
-    overflowY: "auto",
-    boxSizing: "border-box",
-    transition: "all 0.3s ease-in-out",
-  }}
->
-            {
-              this.state.selectedSection === "manage_resorts" ?
-              <div style={{ ...tabStyle, overflowY: "auto", maxHeight: "80vh" }}>
-                <div style={{display: 'flex', flexDirection: 'column', gap: '1rem'}}>
-                  <h2 style={{ color: "#6c757d", marginBottom: "0.5rem", textAlign: "center" }}>
-                  Add Resort
-                  </h2>
-                  <div style={tabStyle}>
-  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-    <input required value={this.state.resortNameInput} type="text" name="Resort Name" placeholder="Resort Name" style={inputStyle} onChange={(e) => {this.setState({resortNameInput: e.target.value})}}/>
-    <select value={this.state.stateInput} onChange={(e) => this.setState({ stateInput: e.target.value })} style={inputStyle}>
-      <option value="">Select State</option>
-      <option value="AL">Alabama</option>
-      <option value="AK">Alaska</option>
-      <option value="AZ">Arizona</option>
-      <option value="AR">Arkansas</option>
-      <option value="CA">California</option>
-      <option value="CO">Colorado</option>
-      <option value="CT">Connecticut</option>
-      <option value="DE">Delaware</option>
-      <option value="FL">Florida</option>
-      <option value="GA">Georgia</option>
-      <option value="HI">Hawaii</option>
-      <option value="ID">Idaho</option>
-      <option value="IL">Illinois</option>
-      <option value="IN">Indiana</option>
-      <option value="IA">Iowa</option>
-      <option value="KS">Kansas</option>
-      <option value="KY">Kentucky</option>
-      <option value="LA">Louisiana</option>
-      <option value="ME">Maine</option>
-      <option value="MD">Maryland</option>
-      <option value="MA">Massachusetts</option>
-      <option value="MI">Michigan</option>
-      <option value="MN">Minnesota</option>
-      <option value="MS">Mississippi</option>
-      <option value="MO">Missouri</option>
-      <option value="MT">Montana</option>
-      <option value="NE">Nebraska</option>
-      <option value="NV">Nevada</option>
-      <option value="NH">New Hampshire</option>
-      <option value="NJ">New Jersey</option>
-      <option value="NM">New Mexico</option>
-      <option value="NY">New York</option>
-      <option value="NC">North Carolina</option>
-      <option value="ND">North Dakota</option>
-      <option value="OH">Ohio</option>
-      <option value="OK">Oklahoma</option>
-      <option value="OR">Oregon</option>
-      <option value="PA">Pennsylvania</option>
-      <option value="RI">Rhode Island</option>
-      <option value="SC">South Carolina</option>
-      <option value="SD">South Dakota</option>
-      <option value="TN">Tennessee</option>
-      <option value="TX">Texas</option>
-      <option value="UT">Utah</option>
-      <option value="VT">Vermont</option>
-      <option value="VA">Virginia</option>
-      <option value="WA">Washington</option>
-      <option value="WV">West Virginia</option>
-      <option value="WI">Wisconsin</option>
-      <option value="WY">Wyoming</option>
-    </select>
-    <input required value={this.state.websiteInput} type="text" name="Website URL" placeholder="Website URL" style={inputStyle} onChange={(e) => {this.setState({websiteInput: e.target.value})}}/>
-    <input required value={this.state.latitudeInput} type="text" name="Latitude" placeholder="Latitude" style={inputStyle} onChange={(e) => {this.setState({latitudeInput: e.target.value})}}/>
-    <input required value={this.state.longitudeInput} type="text" name="Longitude" placeholder="Longitude" style={inputStyle} onChange={(e) => {this.setState({longitudeInput: e.target.value})}}/>
-    <input required value={this.state.addressInput} type="text" name="Address" placeholder="Address" style={inputStyle} onChange={(e) => {this.setState({addressInput: e.target.value})}}/>
-    <input required value={this.state.photoURLInput} type="text" name="Photo URL" placeholder="Photo URL" style={inputStyle} onChange={(e) => {this.setState({photoURLInput: e.target.value})}} />
-
-    {this.state.errorOccurred ? 
-      <p style={{ color: "red", fontSize: "14px", marginTop: "10px", margin: 'auto' }}>{this.state.errorMessage}</p>
-   : this.state.successOccurred ?
-      <p style={{ color: "green", fontSize: "14px", marginTop: "10px", margin: 'auto' }}>{this.state.successMessage}</p>
-   : null
-    }
-   
-     <button
-       style={{
-         backgroundColor: "#16435d",
-         color: "#ffffff",
-         padding: "0.5rem",
-         border: "none",
-         borderRadius: "0.5rem",
-         fontSize: "1rem",
-         cursor: "pointer",
-         boxShadow: "0 2px 6px rgba(0, 0, 0, 0.1)",
-         transition: "background-color 0.3s ease",
-         width: "100px",  
-         margin: "auto",       
-       }}
-       onClick={() => {
-          this.attemptToPostResort();
-       }}
-     >
-       Submit
-     </button>
-   
-  </div>
-</div>
-                    </div>
-                   
-                </div>
-                :
-                this.state.selectedSection === "manage_users" ?
-               <div style={{ ...tabStyle, overflowY: "auto", maxHeight: "80vh" }}>
-                 <h2 style={{ textAlign: "center", color: "#6c757d", marginBottom: "1rem" }}>All Users</h2>
-                 <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
-                   {this.state.users.map((user) => (
-                     <li
-                       key={user.id}
-                       style={{
-                         display: "flex",
-                         justifyContent: "space-between",
-                         alignItems: "center",
-                         padding: "0.75rem 1rem",
-                         borderBottom: "1px solid #e0e6ed",
-                       }}
-                     >
-                       <div>
-                         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                           <p style={{ margin: 0, fontWeight: "bold" }}>{user.first_name} {user.last_name}</p>
-                           {/* {this.state.user?.email === user.email ? <span>(me)</span> : null} */}
-                           {user.is_admin && (
-                             <Icon path={mdiCrown} size={0.8} color="#ffc107" title="Admin" />
-                           )}
-                         </div>
-                         <p style={{ margin: 0, fontSize: "0.9rem", color: "#6c757d" }}>{user.email}</p>
-                       </div>
-                       <button
-                         style={{
-                          display: user.is_admin === true ? "none" : "",
-                           backgroundColor: "#16435d",
-                           color: "#ffffff",
-                           padding: "0.4rem 0.75rem",
-                           border: "none",
-                           borderRadius: "4px",
-                           cursor: "pointer",
-                           fontSize: "0.9rem"
-                         }}
-                         onClick={() => {this.setState({ confirmPromoteModal: true, selectedUser: user })}}
-                       >
-                         Promote
-                       </button>
-                     </li>
-                   ))}
-                 </ul>
-               </div>
-                :
-                this.state.selectedSection === "admin_analytics" ?
-                <div style={tabStyle}>
-                  <h2 style={{ textAlign: "center", color: "#16435d" }}>Admin Analytics</h2>
- 
-                  <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap" }}>
-                    <div style={{ flex: "1", minWidth: "200px", backgroundColor: "#f8f9fa", padding: "1rem", borderRadius: "8px", boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)" }}>
-                      <h3 style={{ color: "#16435d" }}>Total Users</h3>
-                      <p style={{ fontSize: "1.5rem", fontWeight: "bold" }}>{this.state.users.length}</p>
-                    </div>
- 
-                    <div style={{ flex: "1", minWidth: "200px", backgroundColor: "#f8f9fa", padding: "1rem", borderRadius: "8px", boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)" }}>
-                      <h3 style={{ color: "#16435d" }}>Total Resorts</h3>
-                      <p style={{ fontSize: "1.5rem", fontWeight: "bold" }}>{this.state.resorts.length}</p>
-                    </div>
- 
-                    <div style={{ flex: "1", minWidth: "200px", backgroundColor: "#f8f9fa", padding: "1rem", borderRadius: "8px", boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)" }}>
-                      <h3 style={{ color: "#16435d" }}>Total Reviews</h3>
-                      <p style={{ fontSize: "1.5rem", fontWeight: "bold" }}>{this.state.resortReviews.length}</p>
-                    </div>
-                   <div style={{ flex: "1", minWidth: "200px", backgroundColor: "#f8f9fa", padding: "1rem", borderRadius: "8px", boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)" }}>
-                     <h3 style={{ color: "#16435d" }}>Highest Rated Resort</h3>
-                     <p style={{ fontSize: "1rem", fontWeight: "bold" }}>
-                       {this.state.resorts.length > 0 ? this.state.resorts.reduce((prev, curr) => prev.average_rating > curr.average_rating ? prev : curr).name : "N/A"}
-                     </p>
-                   </div>
- 
-                   <div style={{ flex: "1", minWidth: "200px", backgroundColor: "#f8f9fa", padding: "1rem", borderRadius: "8px", boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)" }}>
-                     <h3 style={{ color: "#16435d" }}>Lowest Rated Resort</h3>
-                     <p style={{ fontSize: "1rem", fontWeight: "bold" }}>
-                       {this.state.resorts.length > 0 ? this.state.resorts.reduce((prev, curr) => prev.average_rating < curr.average_rating ? prev : curr).name : "N/A"}
-                     </p>
-                   </div>
-                  </div>
- 
-                </div>
-                :
-                null
-            }
-          </div>
+          ))}
         </div>
 
-        <Modal show={this.state.confirmPromoteModal}>
-  <div
-    style={{
-      textAlign: "center",
-      backgroundColor: "#fff",
-      padding: "2rem",
-      borderRadius: "0.5rem",
-      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
-      maxWidth: "400px",
-      margin: "0 auto"
-    }}
-  >
-    <h3 style={{ color: "#16435d", marginBottom: "1rem" }}>Confirm Promotion</h3>
-    <p style={{ color: "#4a6b82", marginBottom: "2rem" }}>
-      Are you sure you want to promote {this.state.selectedUser?.first_name} {this.state.selectedUser?.last_name} to admin?
-    </p>
-    <div style={{ display: "flex", justifyContent: "space-between" }}>
-      <button
-        onClick={() => this.setState({ confirmPromoteModal: false })}
-        style={{
-          backgroundColor: "#6c757d",
-          color: "#fff",
-          padding: "0.5rem 1rem",
-          border: "none",
-          borderRadius: "4px",
-          cursor: "pointer"
-        }}
-      >
-        Cancel
-      </button>
-      <button
-        onClick={() => {
-          this.promoteUser();
-        }}
-        style={{
-          backgroundColor: "#28a745",
-          color: "#fff",
-          padding: "0.5rem 1rem",
-          border: "none",
-          borderRadius: "4px",
-          cursor: "pointer"
-        }}
-      >
-        Confirm
-      </button>
-    </div>
-  </div>
-</Modal>
+        {/* Main Content */}
+        <div style={{ position: "relative", zIndex: 1 }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "stretch",
+              textAlign: "center",
+              padding: "2rem",
+              width: "100%",
+              boxSizing: "border-box",
+              minHeight: "80vh",
+            }}
+          >
+            {/* left column - options */}
+              <div
+                style={{
+                  padding: "1.5rem",
+                  backgroundColor: "white",
+                  borderRadius: "0.5rem",
+                  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+                  width: "32%",
+                  height: "fit-content",
+                  maxHeight: "600px",
+                  overflowY: "auto",
+                  margin: "0 1rem",
+                }}
+              >
+                  <ul style={{ listStyleType: "none", padding: 0 }}>
+                      <div
+                        style={tabStyle}
+                        onMouseEnter={e => e.currentTarget.style.transform = "scale(1.01)"}
+                        onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
+                        onClick={() => 
+                          this.state.selectedSection === "manage_resorts" ?
+                          this.setState({ selectedSection: "", successOccurred: false, successMessage: "" }) :
+                          this.setState({ selectedSection: "manage_resorts", successOccurred: false, successMessage: "" })}
+                      >
+                        <div style={{ color: "#6c757d", marginBottom: "0.5rem" }}>
+                          Add Resort
+                        </div>
 
-<Modal show={this.state.successModal}>
-  <div
-    style={{
-      position: "relative",
-      textAlign: "center",
-      backgroundColor: "#eafaf1",
-      padding: "2rem",
-      borderRadius: "0.5rem",
-      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-      maxWidth: "400px",
-      margin: "0 auto",
-      color: "#155724",
-      fontSize: "1.2rem",
-      fontWeight: "bold",
-    }}
-  >
-    <button
-      onClick={() => this.setState({ successModal: false })}
+
+                      </div>
+
+
+                      <div
+                        style={tabStyle}
+                        onMouseEnter={e => e.currentTarget.style.transform = "scale(1.01)"}
+                        onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
+                        onClick={() => 
+                          this.state.selectedSection === "manage_users" ?
+                          this.setState({ selectedSection: "" }) :
+                          this.setState({ selectedSection: "manage_users" })
+                        }
+                      >
+                        <div style={{ color: "#6c757d", marginBottom: "0.5rem" }}>
+                          Manage Users
+                        </div>
+                      </div>
+                      <div
+                        style={tabStyle}
+                        onMouseEnter={e => e.currentTarget.style.transform = "scale(1.01)"}
+                        onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
+                        onClick={() => 
+                          this.state.selectedSection === "admin_analytics" ?
+                          this.setState({ selectedSection: "" }) :
+                          this.setState({ selectedSection: "admin_analytics" })}
+                      >
+                        <div style={{ color: "#6c757d", marginBottom: "0.5rem" }}>
+                          Admin Analytics
+                        </div>
+                      </div>
+
+
+                  </ul>
+
+
+              </div>
+           
+
+            <div
       style={{
-        position: "absolute",
-        top: "0.5rem",
-        right: "0.75rem",
-        background: "transparent",
-        border: "none",
-        fontSize: "1.25rem",
-        cursor: "pointer",
-        color: "#155724"
+        width: "55%",
+        minHeight: "80vh",
+        overflowY: "auto",
+        boxSizing: "border-box",
+        transition: "all 0.3s ease-in-out",
       }}
     >
-      &times;
-    </button>
-    {this.state.successMessage}
-  </div>
-</Modal>
+              {
+                this.state.selectedSection === "manage_resorts" ?
+                <div style={{ ...tabStyle, overflowY: "auto", maxHeight: "80vh" }}>
+                  <div style={{display: 'flex', flexDirection: 'column', gap: '1rem'}}>
+                    <h2 style={{ color: "#6c757d", marginBottom: "0.5rem", textAlign: "center" }}>
+                    Add Resort
+                    </h2>
+                    <div style={tabStyle}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <input required value={this.state.resortNameInput} type="text" name="Resort Name" placeholder="Resort Name" style={inputStyle} onChange={(e) => {this.setState({resortNameInput: e.target.value})}}/>
+                <select value={this.state.stateInput} onChange={(e) => this.setState({ stateInput: e.target.value })} style={inputStyle}>
+                  <option value="">Select State</option>
+                  <option value="AL">Alabama</option>
+                  <option value="AK">Alaska</option>
+                  <option value="AZ">Arizona</option>
+                  <option value="AR">Arkansas</option>
+                  <option value="CA">California</option>
+                  <option value="CO">Colorado</option>
+                  <option value="CT">Connecticut</option>
+                  <option value="DE">Delaware</option>
+                  <option value="FL">Florida</option>
+                  <option value="GA">Georgia</option>
+                  <option value="HI">Hawaii</option>
+                  <option value="ID">Idaho</option>
+                  <option value="IL">Illinois</option>
+                  <option value="IN">Indiana</option>
+                  <option value="IA">Iowa</option>
+                  <option value="KS">Kansas</option>
+                  <option value="KY">Kentucky</option>
+                  <option value="LA">Louisiana</option>
+                  <option value="ME">Maine</option>
+                  <option value="MD">Maryland</option>
+                  <option value="MA">Massachusetts</option>
+                  <option value="MI">Michigan</option>
+                  <option value="MN">Minnesota</option>
+                  <option value="MS">Mississippi</option>
+                  <option value="MO">Missouri</option>
+                  <option value="MT">Montana</option>
+                  <option value="NE">Nebraska</option>
+                  <option value="NV">Nevada</option>
+                  <option value="NH">New Hampshire</option>
+                  <option value="NJ">New Jersey</option>
+                  <option value="NM">New Mexico</option>
+                  <option value="NY">New York</option>
+                  <option value="NC">North Carolina</option>
+                  <option value="ND">North Dakota</option>
+                  <option value="OH">Ohio</option>
+                  <option value="OK">Oklahoma</option>
+                  <option value="OR">Oregon</option>
+                  <option value="PA">Pennsylvania</option>
+                  <option value="RI">Rhode Island</option>
+                  <option value="SC">South Carolina</option>
+                  <option value="SD">South Dakota</option>
+                  <option value="TN">Tennessee</option>
+                  <option value="TX">Texas</option>
+                  <option value="UT">Utah</option>
+                  <option value="VT">Vermont</option>
+                  <option value="VA">Virginia</option>
+                  <option value="WA">Washington</option>
+                  <option value="WV">West Virginia</option>
+                  <option value="WI">Wisconsin</option>
+                  <option value="WY">Wyoming</option>
+                </select>
+                <input required value={this.state.websiteInput} type="text" name="Website URL" placeholder="Website URL" style={inputStyle} onChange={(e) => {this.setState({websiteInput: e.target.value})}}/>
+                <input required value={this.state.latitudeInput} type="text" name="Latitude" placeholder="Latitude" style={inputStyle} onChange={(e) => {this.setState({latitudeInput: e.target.value})}}/>
+                <input required value={this.state.longitudeInput} type="text" name="Longitude" placeholder="Longitude" style={inputStyle} onChange={(e) => {this.setState({longitudeInput: e.target.value})}}/>
+                <input required value={this.state.addressInput} type="text" name="Address" placeholder="Address" style={inputStyle} onChange={(e) => {this.setState({addressInput: e.target.value})}}/>
+                <input required value={this.state.photoURLInput} type="text" name="Photo URL" placeholder="Photo URL" style={inputStyle} onChange={(e) => {this.setState({photoURLInput: e.target.value})}} />
+
+                {this.state.errorOccurred ? 
+                  <p style={{ color: "red", fontSize: "14px", marginTop: "10px", margin: 'auto' }}>{this.state.errorMessage}</p>
+               : this.state.successOccurred ?
+                  <p style={{ color: "green", fontSize: "14px", marginTop: "10px", margin: 'auto' }}>{this.state.successMessage}</p>
+               : null
+                }
+               
+                 <button
+                   style={{
+                     backgroundColor: "#16435d",
+                     color: "#ffffff",
+                     padding: "0.5rem",
+                     border: "none",
+                     borderRadius: "0.5rem",
+                     fontSize: "1rem",
+                     cursor: "pointer",
+                     boxShadow: "0 2px 6px rgba(0, 0, 0, 0.1)",
+                     transition: "background-color 0.3s ease",
+                     width: "100px",  
+                     margin: "auto",       
+                   }}
+                   onClick={() => {
+                      this.attemptToPostResort();
+                   }}
+                 >
+                   Submit
+                 </button>
+               
+              </div>
+            </div>
+                      </div>
+                     
+                  </div>
+                  :
+                  this.state.selectedSection === "manage_users" ?
+                 <div style={{ ...tabStyle, overflowY: "auto", maxHeight: "80vh" }}>
+                   <h2 style={{ textAlign: "center", color: "#6c757d", marginBottom: "1rem" }}>All Users</h2>
+                   <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                     {this.state.users.map((user) => (
+                       <li
+                         key={user.id}
+                         style={{
+                           display: "flex",
+                           justifyContent: "space-between",
+                           alignItems: "center",
+                           padding: "0.75rem 1rem",
+                           borderBottom: "1px solid #e0e6ed",
+                         }}
+                       >
+                         <div>
+                           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                             <p style={{ margin: 0, fontWeight: "bold" }}>{user.first_name} {user.last_name}</p>
+                             {/* {this.state.user?.email === user.email ? <span>(me)</span> : null} */}
+                             {user.is_admin && (
+                               <Icon path={mdiCrown} size={0.8} color="#ffc107" title="Admin" />
+                             )}
+                           </div>
+                           <p style={{ margin: 0, fontSize: "0.9rem", color: "#6c757d" }}>{user.email}</p>
+                         </div>
+                         <button
+                           style={{
+                            display: user.is_admin === true ? "none" : "",
+                             backgroundColor: "#16435d",
+                             color: "#ffffff",
+                             padding: "0.4rem 0.75rem",
+                             border: "none",
+                             borderRadius: "4px",
+                             cursor: "pointer",
+                             fontSize: "0.9rem"
+                           }}
+                           onClick={() => {this.setState({ confirmPromoteModal: true, selectedUser: user })}}
+                         >
+                           Promote
+                         </button>
+                       </li>
+                     ))}
+                   </ul>
+                 </div>
+                  :
+                  this.state.selectedSection === "admin_analytics" ?
+                  <div style={tabStyle}>
+                    <h2 style={{ textAlign: "center", color: "#16435d" }}>Admin Analytics</h2>
+         
+                    <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap" }}>
+                      <div style={{ flex: "1", minWidth: "200px", backgroundColor: "#f8f9fa", padding: "1rem", borderRadius: "8px", boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)" }}>
+                        <h3 style={{ color: "#16435d" }}>Total Users</h3>
+                        <p style={{ fontSize: "1.5rem", fontWeight: "bold" }}>{this.state.users.length}</p>
+                      </div>
+           
+                      <div style={{ flex: "1", minWidth: "200px", backgroundColor: "#f8f9fa", padding: "1rem", borderRadius: "8px", boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)" }}>
+                        <h3 style={{ color: "#16435d" }}>Total Resorts</h3>
+                        <p style={{ fontSize: "1.5rem", fontWeight: "bold" }}>{this.state.resorts.length}</p>
+                      </div>
+           
+                      <div style={{ flex: "1", minWidth: "200px", backgroundColor: "#f8f9fa", padding: "1rem", borderRadius: "8px", boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)" }}>
+                        <h3 style={{ color: "#16435d" }}>Total Reviews</h3>
+                        <p style={{ fontSize: "1.5rem", fontWeight: "bold" }}>{this.state.resortReviews.length}</p>
+                      </div>
+                     <div style={{ flex: "1", minWidth: "200px", backgroundColor: "#f8f9fa", padding: "1rem", borderRadius: "8px", boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)" }}>
+                       <h3 style={{ color: "#16435d" }}>Highest Rated Resort</h3>
+                       <p style={{ fontSize: "1rem", fontWeight: "bold" }}>
+                         {this.state.resorts.length > 0 ? this.state.resorts.reduce((prev, curr) => prev.average_rating > curr.average_rating ? prev : curr).name : "N/A"}
+                       </p>
+                     </div>
+           
+                     <div style={{ flex: "1", minWidth: "200px", backgroundColor: "#f8f9fa", padding: "1rem", borderRadius: "8px", boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)" }}>
+                       <h3 style={{ color: "#16435d" }}>Lowest Rated Resort</h3>
+                       <p style={{ fontSize: "1rem", fontWeight: "bold" }}>
+                         {this.state.resorts.length > 0 ? this.state.resorts.reduce((prev, curr) => prev.average_rating < curr.average_rating ? prev : curr).name : "N/A"}
+                       </p>
+                     </div>
+                    </div>
+         
+                  </div>
+                  :
+                  null
+              }
+            </div>
+          </div>
+
+          <Modal show={this.state.confirmPromoteModal}>
+    <div
+      style={{
+        textAlign: "center",
+        backgroundColor: "#fff",
+        padding: "2rem",
+        borderRadius: "0.5rem",
+        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+        maxWidth: "400px",
+        margin: "0 auto"
+      }}
+    >
+      <h3 style={{ color: "#16435d", marginBottom: "1rem" }}>Confirm Promotion</h3>
+      <p style={{ color: "#4a6b82", marginBottom: "2rem" }}>
+        Are you sure you want to promote {this.state.selectedUser?.first_name} {this.state.selectedUser?.last_name} to admin?
+      </p>
+      <div style={{ display: "flex", justifyContent: "space-between" }}>
+        <button
+          onClick={() => this.setState({ confirmPromoteModal: false })}
+          style={{
+            backgroundColor: "#6c757d",
+            color: "#fff",
+            padding: "0.5rem 1rem",
+            border: "none",
+            borderRadius: "4px",
+            cursor: "pointer"
+          }}
+        >
+          Cancel
+        </button>
+        <button
+          onClick={() => {
+            this.promoteUser();
+          }}
+          style={{
+            backgroundColor: "#28a745",
+            color: "#fff",
+            padding: "0.5rem 1rem",
+            border: "none",
+            borderRadius: "4px",
+            cursor: "pointer"
+          }}
+        >
+          Confirm
+        </button>
+      </div>
+    </div>
+  </Modal>
+
+  <Modal show={this.state.successModal}>
+    <div
+      style={{
+        position: "relative",
+        textAlign: "center",
+        backgroundColor: "#eafaf1",
+        padding: "2rem",
+        borderRadius: "0.5rem",
+        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+        maxWidth: "400px",
+        margin: "0 auto",
+        color: "#155724",
+        fontSize: "1.2rem",
+        fontWeight: "bold",
+      }}
+    >
+      <button
+        onClick={() => this.setState({ successModal: false })}
+        style={{
+          position: "absolute",
+          top: "0.5rem",
+          right: "0.75rem",
+          background: "transparent",
+          border: "none",
+          fontSize: "1.25rem",
+          cursor: "pointer",
+          color: "#155724"
+        }}
+      >
+        &times;
+      </button>
+      {this.state.successMessage}
+    </div>
+  </Modal>
 
 
-        <div className="snowfall-container"></div>
+          <div className="snowfall-container"></div>
 
-        <style>
-          {`
-            body {
-              margin: 0;
-              overflow: hidden;
-              background-color: #eaf4fb;
-              color: #16435d;
-            }
-            
-            .main-container {
-              position: relative;
-              z-index: 1;
-              /* Add your other styles for the main content container here */
-            }
-            
-            .snowfall-container {
-              position: absolute;
-              top: 0;
-              left: 0;
-              width: 100%;
-              height: 100%;
-              z-index: 0;
-              pointer-events: none;
-            }
-            
-            .snowflake {
-              position: absolute;
-              width: 10px;
-              height: 10px;
-              background-color: #ffffff;
-              border-radius: 50%;
-              opacity: 1;
-              box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
-              animation: snowfall linear infinite;
-              pointer-events: none;
-            }
-            
-            @keyframes snowfall {
+          <style jsx global>{`
+            @keyframes fall {
               0% {
-                top: -10px;
-                transform: translateY(0);
+                transform: translateY(0) rotate(0deg);
               }
               100% {
-                top: 100vh;
-                transform: translateY(200vh);
+                transform: translateY(100vh) rotate(360deg);
               }
             }
-          `}
-        </style>
+          `}</style>
+        </div>
       </div>
     );
   }
