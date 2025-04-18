@@ -1,7 +1,7 @@
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import Navbar from "../components/Navbar";
+import NavBar from "../components/NavBar";
 import "../styles/globals.css";
 
 export default function App({ Component, pageProps }: AppProps) {
@@ -29,7 +29,7 @@ export default function App({ Component, pageProps }: AppProps) {
 
   return (
     <>
-      {!hideNavbar && <Navbar user={user} />}
+      {!hideNavbar && <NavBar user={user} />}
       <Component {...pageProps} user={user} />
     </>
   );
