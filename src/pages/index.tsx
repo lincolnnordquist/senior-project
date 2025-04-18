@@ -69,7 +69,7 @@ class HomePage extends Component<PropsType, StateType> {
               Welcome to SkiScape
             </h1>
             <p className="text-xl md:text-2xl mb-8 text-gray-200 max-w-2xl mx-auto">
-              Your ultimate companion for discovering and reviewing the world's finest ski resorts
+              Your all-in-one platform for discovering and reviewing ski resorts
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <motion.a
