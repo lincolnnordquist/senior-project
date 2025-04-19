@@ -11,11 +11,43 @@ import { mdiCloseCircle } from '@mdi/js';
 import Modal from "../components/Modal";
 import SkeletonLoader from "../components/SkeletonLoader";
 import Footer from "../components/Footer";
+import SlideGroup from '../components/SlideGroup';
 
 type WeatherType = {
   temperature: number;
   description: string;
   windSpeed: number;
+  feelsLike: number;
+  humidity: number;
+  visibility: number;
+  pressure: number;
+  uvIndex: number;
+  sunrise: number;
+  sunset: number;
+  dailyForecast: {
+    date: number;
+    temp: {
+      day: number;
+      min: number;
+      max: number;
+    };
+    weather: {
+      main: string;
+      description: string;
+    };
+    pop: number;
+    snow?: number;
+  }[];
+  hourlyForecast: {
+    time: number;
+    temp: number;
+    feelsLike: number;
+    weather: {
+      main: string;
+      description: string;
+    };
+    pop: number;
+  }[];
 }
 
 type SkiResort = {
@@ -63,6 +95,7 @@ type StateType = {
   myReviews: ReviewType[];
   resortReviews: ReviewType[];
   resortReviewsLoading: boolean;
+  resortsLoading: boolean;
 
   confirmDeleteModal: boolean;
   successModal: boolean;
@@ -100,6 +133,7 @@ class Dashboard extends Component<PropsType, StateType> {
       resorts: [],
       resortDetailPage: false,
       selectedResort: null,
+      resortsLoading: true,
 
       reviewInput: "",
       ratingInput: 0,
@@ -320,7 +354,7 @@ class Dashboard extends Component<PropsType, StateType> {
       })
     );
 
-    this.setState({ resorts: updatedResorts });
+    this.setState({ resorts: updatedResorts, resortsLoading: false });
   }
 
   async fetchWeatherForOneResort() {
@@ -497,7 +531,7 @@ class Dashboard extends Component<PropsType, StateType> {
                   backgroundColor: "white",
                   borderRadius: "0.5rem",
                   boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-                  width: this.isMobileView() ? "100%" : "52%",
+                  width: this.isMobileView() ? "100%" : "54%",
                   height: "80vh",
                   overflowY: "auto"
                 }}
@@ -567,7 +601,7 @@ class Dashboard extends Component<PropsType, StateType> {
 
 
                 {/* <p style={{position: "sticky"}}>hi</p> */}
-                {resorts.length > 0 ? (
+                {!this.state.resortsLoading ? (
                   <ul style={{ listStyleType: "none", padding: 0 }}>
                     {resorts
                       .filter((resort) => {
@@ -843,63 +877,198 @@ class Dashboard extends Component<PropsType, StateType> {
                   </a>
                   </p>
                 {this.state.selectedResort?.weather && (
-                  <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(3, 1fr)',
-                    gap: '1rem',
-                    padding: '1.5rem',
-                    background: 'linear-gradient(145deg, #f6f9fc, #ffffff)',
-                    borderRadius: '12px',
-                    boxShadow: '0 4px 15px rgba(0,0,0,0.05)',
-                    marginBottom: '2rem'
-                  }}>
-                    <div style={{ 
-                      textAlign: 'center',
-                      padding: '1rem',
-                      borderRadius: '8px',
-                      backgroundColor: 'white',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+                  <>
+                    {/* Current Weather Section */}
+                    <div style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(3, 1fr)',
+                      gap: '1rem',
+                      padding: '1.5rem',
+                      background: 'linear-gradient(145deg, #f6f9fc, #ffffff)',
+                      borderRadius: '12px',
+                      boxShadow: '0 4px 15px rgba(0,0,0,0.05)',
+                      marginBottom: '2rem'
                     }}>
-                      <Icon path={mdiThermometer} size={1.2} color="#2a5f9e" />
-                      <h4 style={{ margin: '0.5rem 0', color: '#16435d', fontSize: '0.9rem' }}>Temperature</h4>
-                      <p style={{ fontSize: '1.25rem', color: '#2a5f9e', fontWeight: 'bold', margin: 0 }}>
-                        {this.state.selectedResort.weather.temperature}°F
-                      </p>
+                      <div style={{ 
+                        textAlign: 'center',
+                        padding: '1rem',
+                        borderRadius: '8px',
+                        backgroundColor: 'white',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+                      }}>
+                        <Icon path={mdiThermometer} size={1.2} color="#2a5f9e" />
+                        <h4 style={{ margin: '0.5rem 0', color: '#16435d', fontSize: '0.9rem' }}>Temperature</h4>
+                        <p style={{ fontSize: '1.25rem', color: '#2a5f9e', fontWeight: 'bold', margin: 0 }}>
+                          {this.state.selectedResort.weather.temperature}°F
+                        </p>
+                        <p style={{ fontSize: '0.9rem', color: '#6c757d', margin: '0.25rem 0 0 0' }}>
+                          Feels like {this.state.selectedResort.weather.feelsLike}°F
+                        </p>
+                      </div>
+
+                      <div style={{ 
+                        textAlign: 'center',
+                        padding: '1rem',
+                        borderRadius: '8px',
+                        backgroundColor: 'white',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+                      }}>
+                        <Icon path={mdiWeatherWindy} size={1.2} color="#2a5f9e" />
+                        <h4 style={{ margin: '0.5rem 0', color: '#16435d', fontSize: '0.9rem' }}>Wind & Humidity</h4>
+                        <p style={{ fontSize: '1.25rem', color: '#2a5f9e', fontWeight: 'bold', margin: 0 }}>
+                          {this.state.selectedResort.weather.windSpeed} mph
+                        </p>
+                        <p style={{ fontSize: '0.9rem', color: '#6c757d', margin: '0.25rem 0 0 0' }}>
+                          Humidity: {this.state.selectedResort.weather.humidity}%
+                        </p>
+                      </div>
+
+                      <div style={{ 
+                        textAlign: 'center',
+                        padding: '1rem',
+                        borderRadius: '8px',
+                        backgroundColor: 'white',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+                      }}>
+                        <Icon 
+                          path={weatherIconMap[this.state.selectedResort.weather.description.toLowerCase()] || mdiWeatherCloudy}
+                          size={1.2}
+                          color="#2a5f9e"
+                        />
+                        <h4 style={{ margin: '0.5rem 0', color: '#16435d', fontSize: '0.9rem' }}>Conditions</h4>
+                        <p style={{ fontSize: '1.25rem', color: '#2a5f9e', fontWeight: 'bold', margin: 0 }}>
+                          {this.state.selectedResort.weather.description.charAt(0).toUpperCase() + 
+                           this.state.selectedResort.weather.description.slice(1)}
+                        </p>
+                        <p style={{ fontSize: '0.9rem', color: '#6c757d', margin: '0.25rem 0 0 0' }}>
+                          Visibility: {Math.round(this.state.selectedResort.weather.visibility / 1609)} mi
+                        </p>
+                      </div>
+
+                      <div style={{ 
+                        textAlign: 'center',
+                        padding: '1rem',
+                        borderRadius: '8px',
+                        backgroundColor: 'white',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+                      }}>
+                        <Icon path={mdiSnowflake} size={1.2} color="#2a5f9e" />
+                        <h4 style={{ margin: '0.5rem 0', color: '#16435d', fontSize: '0.9rem' }}>UV Index</h4>
+                        <p style={{ fontSize: '1.25rem', color: '#2a5f9e', fontWeight: 'bold', margin: 0 }}>
+                          {this.state.selectedResort.weather.uvIndex}
+                        </p>
+                        <p style={{ fontSize: '0.9rem', color: '#6c757d', margin: '0.25rem 0 0 0' }}>
+                          Pressure: {this.state.selectedResort.weather.pressure} hPa
+                        </p>
+                      </div>
+
+                      <div style={{ 
+                        textAlign: 'center',
+                        padding: '1rem',
+                        borderRadius: '8px',
+                        backgroundColor: 'white',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+                      }}>
+                        <Icon path={mdiWeatherSunny} size={1.2} color="#2a5f9e" />
+                        <h4 style={{ margin: '0.5rem 0', color: '#16435d', fontSize: '0.9rem' }}>Sunrise</h4>
+                        <p style={{ fontSize: '1.25rem', color: '#2a5f9e', fontWeight: 'bold', margin: 0 }}>
+                          {new Date(this.state.selectedResort.weather.sunrise * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                      </div>
+
+                      <div style={{ 
+                        textAlign: 'center',
+                        padding: '1rem',
+                        borderRadius: '8px',
+                        backgroundColor: 'white',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+                      }}>
+                        <Icon path={mdiWeatherSunny} size={1.2} color="#2a5f9e" />
+                        <h4 style={{ margin: '0.5rem 0', color: '#16435d', fontSize: '0.9rem' }}>Sunset</h4>
+                        <p style={{ fontSize: '1.25rem', color: '#2a5f9e', fontWeight: 'bold', margin: 0 }}>
+                          {new Date(this.state.selectedResort.weather.sunset * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                      </div>
                     </div>
 
-                    <div style={{ 
-                      textAlign: 'center',
-                      padding: '1rem',
-                      borderRadius: '8px',
-                      backgroundColor: 'white',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+                    {/* Daily Forecast Section */}
+                    <div style={{
+                      padding: '1.5rem',
+                      background: 'linear-gradient(145deg, #f6f9fc, #ffffff)',
+                      borderRadius: '12px',
+                      boxShadow: '0 4px 15px rgba(0,0,0,0.05)',
+                      marginBottom: '2rem'
                     }}>
-                      <Icon path={mdiWeatherWindy} size={1.2} color="#2a5f9e" />
-                      <h4 style={{ margin: '0.5rem 0', color: '#16435d', fontSize: '0.9rem' }}>Wind Speed</h4>
-                      <p style={{ fontSize: '1.25rem', color: '#2a5f9e', fontWeight: 'bold', margin: 0 }}>
-                        {this.state.selectedResort.weather.windSpeed} mph
-                      </p>
+                      <h3 style={{ color: '#16435d', marginBottom: '1rem' }}>8-Day Forecast</h3>
+                      <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
+                        gap: '1rem',
+                        overflowX: 'auto'
+                      }}>
+                        {this.state.selectedResort.weather.dailyForecast.map((day, index) => (
+                          <div key={index} style={{
+                            textAlign: 'center',
+                            padding: '1rem',
+                            borderRadius: '8px',
+                            backgroundColor: 'white',
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+                          }}>
+                            <p style={{ 
+                              fontSize: '0.9rem', 
+                              color: '#6c757d', 
+                              marginBottom: '0.5rem' 
+                            }}>
+                              {new Date(day.date * 1000).toLocaleDateString([], { weekday: 'short' })}
+                            </p>
+                            <Icon 
+                              path={weatherIconMap[day.weather.description.toLowerCase()] || mdiWeatherCloudy}
+                              size={1.2}
+                              color="#2a5f9e"
+                            />
+                            <div style={{ marginTop: '0.5rem' }}>
+                              <p style={{ 
+                                fontSize: '1.1rem', 
+                                color: '#2a5f9e', 
+                                fontWeight: 'bold', 
+                                margin: 0 
+                              }}>
+                                {Math.round(day.temp.max)}°F
+                              </p>
+                              <p style={{ 
+                                fontSize: '0.9rem', 
+                                color: '#6c757d', 
+                                margin: '0.25rem 0 0 0' 
+                              }}>
+                                {Math.round(day.temp.min)}°F
+                              </p>
+                            </div>
+                            {day.snow && (
+                              <p style={{ 
+                                fontSize: '0.8rem', 
+                                color: '#2196f3', 
+                                margin: '0.25rem 0 0 0' 
+                              }}>
+                                {day.snow} in
+                              </p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
                     </div>
 
-                    <div style={{ 
-                      textAlign: 'center',
-                      padding: '1rem',
-                      borderRadius: '8px',
-                      backgroundColor: 'white',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+                    {/* forecast section */}
+                    <div style={{
+                      padding: '1.5rem',
+                      background: 'linear-gradient(145deg, #f6f9fc, #ffffff)',
+                      borderRadius: '12px',
+                      boxShadow: '0 4px 15px rgba(0,0,0,0.05)',
+                      marginBottom: '2rem'
                     }}>
-                      <Icon 
-                        path={weatherIconMap[this.state.selectedResort.weather.description.toLowerCase()] || mdiWeatherCloudy}
-                        size={1.2}
-                        color="#2a5f9e"
-                      />
-                      <h4 style={{ margin: '0.5rem 0', color: '#16435d', fontSize: '0.9rem' }}>Conditions</h4>
-                      <p style={{ fontSize: '1.25rem', color: '#2a5f9e', fontWeight: 'bold', margin: 0 }}>
-                        {this.state.selectedResort.weather.description.charAt(0).toUpperCase() + 
-                         this.state.selectedResort.weather.description.slice(1)}
-                      </p>
+                      <h3 style={{ color: '#16435d', marginBottom: '1rem' }}>24-Hour Forecast</h3>
+                      <SlideGroup hourlyForecast={this.state.selectedResort.weather.hourlyForecast} />
                     </div>
-                  </div>
+                  </>
                 )}
 
 
@@ -1250,7 +1419,7 @@ class Dashboard extends Component<PropsType, StateType> {
 
             {/* Right Column - Map */}
             <div style={{ 
-              width: this.isMobileView() ? "100%" : "47%",
+              width: this.isMobileView() ? "100%" : "45%",
               overflow: "hidden", 
               boxSizing: "border-box"
             }}>

@@ -15,6 +15,37 @@ type WeatherType = {
   temperature: number;
   description: string;
   windSpeed: number;
+  feelsLike: number;
+  humidity: number;
+  visibility: number;
+  pressure: number;
+  uvIndex: number;
+  sunrise: number;
+  sunset: number;
+  dailyForecast: {
+    date: number;
+    temp: {
+      day: number;
+      min: number;
+      max: number;
+    };
+    weather: {
+      main: string;
+      description: string;
+    };
+    pop: number;
+    snow?: number;
+  }[];
+  hourlyForecast: {
+    time: number;
+    temp: number;
+    feelsLike: number;
+    weather: {
+      main: string;
+      description: string;
+    };
+    pop: number;
+  }[];
 }
 
 interface User {
@@ -602,38 +633,124 @@ class Dashboard extends Component<PropsType, StateType> {
                   :
                   this.state.selectedSection === "admin_analytics" ?
                   <div style={tabStyle}>
-                    <h2 style={{ textAlign: "center", color: "#16435d" }}>Admin Analytics</h2>
+                    <h2 style={{ textAlign: "center", color: "#16435d", marginBottom: "1.5rem" }}>Admin Analytics</h2>
          
-                    <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap", marginBottom: "1.5rem" }}>
                       <div style={{ flex: "1", minWidth: "200px", backgroundColor: "#f8f9fa", padding: "1rem", borderRadius: "8px", boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)" }}>
-                        <h3 style={{ color: "#16435d" }}>Total Users</h3>
+                        <h3 style={{ color: "#16435d", fontSize: "1.1rem" }}>Total Users</h3>
                         <p style={{ fontSize: "1.5rem", fontWeight: "bold" }}>{this.state.users.length}</p>
                       </div>
            
                       <div style={{ flex: "1", minWidth: "200px", backgroundColor: "#f8f9fa", padding: "1rem", borderRadius: "8px", boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)" }}>
-                        <h3 style={{ color: "#16435d" }}>Total Resorts</h3>
+                        <h3 style={{ color: "#16435d", fontSize: "1.1rem" }}>Total Resorts</h3>
                         <p style={{ fontSize: "1.5rem", fontWeight: "bold" }}>{this.state.resorts.length}</p>
                       </div>
            
                       <div style={{ flex: "1", minWidth: "200px", backgroundColor: "#f8f9fa", padding: "1rem", borderRadius: "8px", boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)" }}>
-                        <h3 style={{ color: "#16435d" }}>Total Reviews</h3>
+                        <h3 style={{ color: "#16435d", fontSize: "1.1rem" }}>Total Reviews</h3>
                         <p style={{ fontSize: "1.5rem", fontWeight: "bold" }}>{this.state.resortReviews.length}</p>
                       </div>
-                     <div style={{ flex: "1", minWidth: "200px", backgroundColor: "#f8f9fa", padding: "1rem", borderRadius: "8px", boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)" }}>
-                       <h3 style={{ color: "#16435d" }}>Highest Rated Resort</h3>
-                       <p style={{ fontSize: "1rem", fontWeight: "bold" }}>
-                         {this.state.resorts.length > 0 ? this.state.resorts.reduce((prev, curr) => prev.average_rating > curr.average_rating ? prev : curr).name : "N/A"}
-                       </p>
-                     </div>
-           
-                     <div style={{ flex: "1", minWidth: "200px", backgroundColor: "#f8f9fa", padding: "1rem", borderRadius: "8px", boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)" }}>
-                       <h3 style={{ color: "#16435d" }}>Lowest Rated Resort</h3>
-                       <p style={{ fontSize: "1rem", fontWeight: "bold" }}>
-                         {this.state.resorts.length > 0 ? this.state.resorts.reduce((prev, curr) => prev.average_rating < curr.average_rating ? prev : curr).name : "N/A"}
-                       </p>
-                     </div>
+
+                      <div style={{ flex: "1", minWidth: "200px", backgroundColor: "#f8f9fa", padding: "1rem", borderRadius: "8px", boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)" }}>
+                        <h3 style={{ color: "#16435d", fontSize: "1.1rem" }}>Average Rating</h3>
+                        <p style={{ fontSize: "1.5rem", fontWeight: "bold" }}>
+                          {this.state.resorts.length > 0 
+                            ? (this.state.resorts.reduce((sum, resort) => sum + resort.average_rating, 0) / this.state.resorts.length).toFixed(1)
+                            : "N/A"}
+                        </p>
+                      </div>
                     </div>
-         
+
+                    <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap", marginBottom: "1.5rem" }}>
+                      <div style={{ flex: "1", minWidth: "200px", backgroundColor: "#f8f9fa", padding: "1rem", borderRadius: "8px", boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)" }}>
+                        <h3 style={{ color: "#16435d", fontSize: "1.1rem" }}>Most Reviewed Resort</h3>
+                        <p style={{ fontSize: "1rem", fontWeight: "bold" }}>
+                          {(() => {
+                            const resortReviewCounts = this.state.resortReviews.reduce((acc, review) => {
+                              acc[review.resort_id] = (acc[review.resort_id] || 0) + 1;
+                              return acc;
+                            }, {} as { [key: string]: number });
+                            
+                            const mostReviewedId = Object.entries(resortReviewCounts).reduce((a, b) => a[1] > b[1] ? a : b)[0];
+                            const resort = this.state.resorts.find(r => r.id === mostReviewedId);
+                            return resort ? `${resort.name} (${resortReviewCounts[mostReviewedId]} reviews)` : "N/A";
+                          })()}
+                        </p>
+                      </div>
+
+                      <div style={{ flex: "1", minWidth: "200px", backgroundColor: "#f8f9fa", padding: "1rem", borderRadius: "8px", boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)" }}>
+                        <h3 style={{ color: "#16435d", fontSize: "1.1rem" }}>Highest Rated Resort</h3>
+                        <p style={{ fontSize: "1rem", fontWeight: "bold" }}>
+                          {this.state.resorts.length > 0 
+                            ? `${this.state.resorts.reduce((prev, curr) => prev.average_rating > curr.average_rating ? prev : curr).name} (${this.state.resorts.reduce((prev, curr) => prev.average_rating > curr.average_rating ? prev : curr).average_rating.toFixed(1)})`
+                            : "N/A"}
+                        </p>
+                      </div>
+
+                      <div style={{ flex: "1", minWidth: "200px", backgroundColor: "#f8f9fa", padding: "1rem", borderRadius: "8px", boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)" }}>
+                        <h3 style={{ color: "#16435d", fontSize: "1.1rem" }}>Lowest Rated Resort</h3>
+                        <p style={{ fontSize: "1rem", fontWeight: "bold" }}>
+                          {this.state.resorts.length > 0 
+                            ? `${this.state.resorts.reduce((prev, curr) => prev.average_rating < curr.average_rating ? prev : curr).name} (${this.state.resorts.reduce((prev, curr) => prev.average_rating < curr.average_rating ? prev : curr).average_rating.toFixed(1)})`
+                            : "N/A"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap", marginBottom: "1.5rem" }}>
+                      <div style={{ flex: "1", minWidth: "300px", backgroundColor: "#f8f9fa", padding: "1rem", borderRadius: "8px", boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)" }}>
+                        <h3 style={{ color: "#16435d", fontSize: "1.1rem", marginBottom: "1rem" }}>Review Distribution</h3>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                          {[5, 4, 3, 2, 1].map((rating) => {
+                            const count = this.state.resortReviews.filter(r => r.rating === rating).length;
+                            const percentage = (count / this.state.resortReviews.length * 100).toFixed(1);
+                            return (
+                              <div key={rating} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                                <div style={{ width: "60px" }}>{rating} Stars</div>
+                                <div style={{ flex: 1, height: "20px", backgroundColor: "#e9ecef", borderRadius: "10px", overflow: "hidden" }}>
+                                  <div style={{ 
+                                    width: `${percentage}%`, 
+                                    height: "100%", 
+                                    backgroundColor: rating >= 4 ? "#28a745" : rating >= 3 ? "#ffc107" : "#dc3545",
+                                    transition: "width 0.5s ease"
+                                  }} />
+                                </div>
+                                <div style={{ width: "50px", textAlign: "right" }}>{percentage}%</div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      <div style={{ flex: "1", minWidth: "300px", backgroundColor: "#f8f9fa", padding: "1rem", borderRadius: "8px", boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)" }}>
+                        <h3 style={{ color: "#16435d", fontSize: "1.1rem", marginBottom: "1rem" }}>Resorts by State</h3>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                          {(() => {
+                            const stateCounts = this.state.resorts.reduce((acc, resort) => {
+                              acc[resort.state] = (acc[resort.state] || 0) + 1;
+                              return acc;
+                            }, {} as { [key: string]: number });
+                            
+                            return Object.entries(stateCounts)
+                              .sort((a, b) => b[1] - a[1])
+                              .map(([state, count]) => (
+                                <div key={state} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                                  <div style={{ width: "60px" }}>{state}</div>
+                                  <div style={{ flex: 1, height: "20px", backgroundColor: "#e9ecef", borderRadius: "10px", overflow: "hidden" }}>
+                                    <div style={{ 
+                                      width: `${(count / this.state.resorts.length * 100).toFixed(1)}%`, 
+                                      height: "100%", 
+                                      backgroundColor: "#2196f3",
+                                      transition: "width 0.5s ease"
+                                    }} />
+                                  </div>
+                                  <div style={{ width: "50px", textAlign: "right" }}>{count}</div>
+                                </div>
+                              ));
+                          })()}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                   :
                   null

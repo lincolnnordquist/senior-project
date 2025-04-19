@@ -14,7 +14,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=imperial&appid=${apiKey}`;
+    const url = `https://api.openweathermap.org/data/3.0/onecall?lat=${lat}&lon=${lon}&units=imperial&appid=${apiKey}`;
 
     const response = await fetch(url);
     const data = await response.json();
@@ -24,9 +24,40 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     const weather = {
-      temperature: data.main?.temp,
-      description: data.weather?.[0]?.description,
-      windSpeed: data.wind?.speed,
+      temperature: data.current?.temp,
+      description: data.current?.weather?.[0]?.description,
+      windSpeed: data.current?.wind_speed,
+      feelsLike: data.current?.feels_like,
+      humidity: data.current?.humidity,
+      visibility: data.current?.visibility,
+      pressure: data.current?.pressure,
+      uvIndex: data.current?.uvi,
+      sunrise: data.current?.sunrise,
+      sunset: data.current?.sunset,
+      dailyForecast: data.daily?.slice(0, 8).map((day: any) => ({
+        date: day.dt,
+        temp: {
+          day: day.temp.day,
+          min: day.temp.min,
+          max: day.temp.max
+        },
+        weather: {
+          main: day.weather[0].main,
+          description: day.weather[0].description
+        },
+        pop: day.pop,
+        snow: day.snow
+      })),
+      hourlyForecast: data.hourly?.slice(0, 24).map((hour: any) => ({
+        time: hour.dt,
+        temp: hour.temp,
+        feelsLike: hour.feels_like,
+        weather: {
+          main: hour.weather[0].main,
+          description: hour.weather[0].description
+        },
+        pop: hour.pop
+      }))
     };
 
     return res.status(200).json(weather);
