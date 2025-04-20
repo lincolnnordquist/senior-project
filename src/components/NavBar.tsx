@@ -206,13 +206,7 @@ class Navbar extends Component<NavBarProps, NavBarState> {
               </button>
               <button
                 onClick={() => {
-                  fetch('/api/auth/signout', {
-                    method: 'POST',
-                    credentials: 'include',
-                  })
-                  .then(() => {
-                    this.props.router.push('/');
-                  });
+                  window.location.href = "/logout";
                 }}
                 style={{
                   backgroundColor: '#f6f9fc',
