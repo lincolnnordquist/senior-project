@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import Link from 'next/link';
 import { withRouter } from 'next/router';
 import Icon from '@mdi/react';
-import { mdiSnowflake } from '@mdi/js';
+import { mdiSnowflake, mdiMenu, mdiClose } from '@mdi/js';
 import Modal from './Modal';
 
 interface User {
@@ -25,6 +25,7 @@ interface NavBarState {
   user: User | null;
   screenSize: number;
   accountModal: boolean;
+  isMobileMenuOpen: boolean;
 
   errorOccurred: boolean;
   errorMessage: string;
@@ -37,8 +38,9 @@ class Navbar extends Component<NavBarProps, NavBarState> {
     super(props);
     this.state = {
       user: props.user || null,
-      screenSize: 0,
+      screenSize: typeof window !== 'undefined' ? window.innerWidth : 0,
       accountModal: false,
+      isMobileMenuOpen: false,
       errorOccurred: false,
       errorMessage: '',
       successOccurred: false,
@@ -104,6 +106,16 @@ class Navbar extends Component<NavBarProps, NavBarState> {
     }
   }
 
+  handleResize = () => {
+    this.setState({ screenSize: window.innerWidth });
+  };
+
+  isMobileView = () => this.state.screenSize < 768;
+
+  toggleMobileMenu = () => {
+    this.setState(prevState => ({ isMobileMenuOpen: !prevState.isMobileMenuOpen }));
+  };
+
   async componentDidMount() {
     try {
       const res = await fetch("/api/auth/user", {
@@ -119,11 +131,19 @@ class Navbar extends Component<NavBarProps, NavBarState> {
       console.error("Failed to fetch user:", error);
     }
 
+
+    // window resize
     this.setState({ screenSize: window.innerWidth });
+    window.addEventListener('resize', this.handleResize);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.handleResize);
   }
 
   render() {
-    const { user } = this.props;
+    const { user, isMobileMenuOpen } = this.state;
+    const isMobile = this.isMobileView();
 
     const inputStyle: React.CSSProperties = {
       padding: "0.75rem",
@@ -136,70 +156,46 @@ class Navbar extends Component<NavBarProps, NavBarState> {
       margin: "0.5rem 0",
     }
 
-    return (
-      <nav style={{
-        backgroundColor: 'rgba(255, 255, 255, 0.95)',
-        backdropFilter: 'blur(8px)',
-        padding: '1rem 2rem',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-        position: 'sticky',
-        top: 0,
-        zIndex: 1000,
-      }}>
-        <Link href="/" style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.75rem',
-          textDecoration: 'none',
-          color: '#16435d',
-          fontWeight: 600,
-          fontSize: '1.5rem',
-          transition: 'transform 0.2s ease'
-        }}
-        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-        >
-          <Icon path={mdiSnowflake} size={1.5} color="#2196f3" />
-          <span>SkiScape</span>
-        </Link>
-
-        {/* Navigation Links */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '2rem'
-        }}>
+    const navLinks = (
+        <>
           <NavLink href="/" active={this.isActive('/')}>Home</NavLink>
           <NavLink href="/dashboard" active={this.isActive('/dashboard')}>Dashboard</NavLink>
           {user?.is_admin && (
             <NavLink href="/admin" active={this.isActive('/admin')}>Admin Portal</NavLink>
           )}
-          
           {user ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+            <>
               <button
                 onClick={() => this.setState({ accountModal: true })}
                 style={{
-                  backgroundColor: '#f6f9fc',
-                  color: '#2a5f9e',
-                  border: '1px solid #d4e3f0',
-                  padding: '0.5rem 1rem',
-                  borderRadius: '8px',
+                  backgroundColor: isMobile ? 'transparent' : '#f6f9fc',
+                  color: isMobile ? '#16435d' : '#2a5f9e',
+                  border: isMobile ? 'none' : '1px solid #d4e3f0',
+                  padding: isMobile ? '1rem' : '0.5rem',
+                  borderRadius: isMobile ? '0' : '8px',
                   cursor: 'pointer',
-                  fontSize: '0.9rem',
+                  fontSize: isMobile ? '1rem' : '0.9rem',
                   fontWeight: '500',
-                  transition: 'all 0.2s ease'
+                  transition: 'all 0.2s ease',
+                  whiteSpace: 'nowrap',
+                  width: isMobile ? '100%' : 'auto',
+                  textAlign: isMobile ? 'left' : 'center',
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#ffffff';
-                  e.currentTarget.style.transform = 'translateY(-1px)';
+                  if (!isMobile) {
+                    e.currentTarget.style.backgroundColor = '#ffffff';
+                    e.currentTarget.style.transform = 'translateY(-1px)';
+                  } else {
+                     e.currentTarget.style.backgroundColor = '#f0f0f0';
+                  }
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#f6f9fc';
-                  e.currentTarget.style.transform = 'translateY(0)';
+                   if (!isMobile) {
+                    e.currentTarget.style.backgroundColor = '#f6f9fc';
+                    e.currentTarget.style.transform = 'translateY(0)';
+                   } else {
+                     e.currentTarget.style.backgroundColor = 'transparent';
+                   }
                 }}
               >
                 Account
@@ -209,159 +205,296 @@ class Navbar extends Component<NavBarProps, NavBarState> {
                   window.location.href = "/logout";
                 }}
                 style={{
-                  backgroundColor: '#f6f9fc',
-                  color: '#2a5f9e',
-                  border: '1px solid #d4e3f0',
-                  padding: '0.5rem 1rem',
-                  borderRadius: '8px',
+                  backgroundColor: isMobile ? 'transparent' : '#f6f9fc',
+                  color: isMobile ? '#16435d' : '#2a5f9e',
+                  border: isMobile ? 'none' : '1px solid #d4e3f0',
+                  padding: isMobile ? '1rem' : '0.5rem',
+                  borderRadius: isMobile ? '0' : '8px',
                   cursor: 'pointer',
-                  fontSize: '0.9rem',
+                  fontSize: isMobile ? '1rem' : '0.9rem',
                   fontWeight: '500',
-                  transition: 'all 0.2s ease'
+                  transition: 'all 0.2s ease',
+                  whiteSpace: 'nowrap',
+                  width: isMobile ? '100%' : 'auto',
+                  textAlign: isMobile ? 'left' : 'center',
                 }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#ffffff';
-                  e.currentTarget.style.transform = 'translateY(-1px)';
+                 onMouseEnter={(e) => {
+                  if (!isMobile) {
+                    e.currentTarget.style.backgroundColor = '#ffffff';
+                    e.currentTarget.style.transform = 'translateY(-1px)';
+                  } else {
+                     e.currentTarget.style.backgroundColor = '#f0f0f0';
+                  }
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#f6f9fc';
-                  e.currentTarget.style.transform = 'translateY(0)';
+                   if (!isMobile) {
+                    e.currentTarget.style.backgroundColor = '#f6f9fc';
+                    e.currentTarget.style.transform = 'translateY(0)';
+                   } else {
+                     e.currentTarget.style.backgroundColor = 'transparent';
+                   }
                 }}
               >
                 Logout
               </button>
-            </div>
+            </>
           ) : (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <>
               <Link href="/login" style={{
-                backgroundColor: '#f6f9fc',
-                color: '#2a5f9e',
-                padding: '0.5rem 1rem',
-                borderRadius: '8px',
+                 backgroundColor: isMobile ? 'transparent' : '#f6f9fc',
+                  color: isMobile ? '#16435d' : '#2a5f9e',
+                  border: isMobile ? 'none' : '1px solid #d4e3f0',
+                  padding: isMobile ? '1rem' : '0.5rem',
+                  borderRadius: isMobile ? '0' : '8px',
                 textDecoration: 'none',
-                fontSize: '0.9rem',
+                fontSize: isMobile ? '1rem' : '0.9rem',
                 fontWeight: '500',
                 transition: 'all 0.2s ease',
-                border: '1px solid #d4e3f0'
+                whiteSpace: 'nowrap',
+                 width: isMobile ? '100%' : 'auto',
+                 textAlign: isMobile ? 'left' : 'center',
+                 display: 'block'
               }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#ffffff';
-                e.currentTarget.style.transform = 'translateY(-1px)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#f6f9fc';
-                e.currentTarget.style.transform = 'translateY(0)';
-              }}
+               onMouseEnter={(e) => {
+                  if (!isMobile) {
+                    e.currentTarget.style.backgroundColor = '#ffffff';
+                    e.currentTarget.style.transform = 'translateY(-1px)';
+                  } else {
+                     e.currentTarget.style.backgroundColor = '#f0f0f0';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                   if (!isMobile) {
+                    e.currentTarget.style.backgroundColor = '#f6f9fc';
+                    e.currentTarget.style.transform = 'translateY(0)';
+                   } else {
+                     e.currentTarget.style.backgroundColor = 'transparent';
+                   }
+                }}
               >
                 Login
               </Link>
               <Link href="/signup" style={{
-                backgroundColor: '#2196f3',
-                color: 'white',
-                padding: '0.5rem 1rem',
-                borderRadius: '8px',
+                backgroundColor: isMobile ? 'transparent' : '#2196f3',
+                color: isMobile ? '#16435d' : 'white',
+                border: isMobile ? 'none' : '',
+                padding: isMobile ? '1rem' : '0.5rem',
+                borderRadius: isMobile ? '0' : '8px',
                 textDecoration: 'none',
-                fontSize: '0.9rem',
+                fontSize: isMobile ? '1rem' : '0.9rem',
                 fontWeight: '500',
                 transition: 'all 0.2s ease',
-                boxShadow: '0 2px 4px rgba(33, 150, 243, 0.2)'
+                boxShadow: isMobile ? 'none' : '0 2px 4px rgba(33, 150, 243, 0.2)',
+                whiteSpace: 'nowrap',
+                 width: isMobile ? '100%' : 'auto',
+                 textAlign: isMobile ? 'left' : 'center',
+                 display: 'block'
               }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-1px)';
-                e.currentTarget.style.boxShadow = '0 4px 8px rgba(33, 150, 243, 0.3)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 2px 4px rgba(33, 150, 243, 0.2)';
-              }}
+               onMouseEnter={(e) => {
+                  if (!isMobile) {
+                    e.currentTarget.style.transform = 'translateY(-1px)';
+                    e.currentTarget.style.boxShadow = '0 4px 8px rgba(33, 150, 243, 0.3)';
+                  } else {
+                     e.currentTarget.style.backgroundColor = '#f0f0f0';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                   if (!isMobile) {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 2px 4px rgba(33, 150, 243, 0.2)';
+                   } else {
+                     e.currentTarget.style.backgroundColor = 'transparent';
+                   }
+                }}
               >
                 Sign Up
               </Link>
-            </div>
+            </>
           )}
-        </div>
+        </>
+    );
+
+    return (
+      <nav style={{
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        backdropFilter: 'blur(8px)',
+        padding: '1rem',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+        position: 'sticky',
+        top: 0,
+        zIndex: 1000,
+        width: '100%',
+        boxSizing: 'border-box'
+      }}>
+        <Link href="/" style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5rem',
+          textDecoration: 'none',
+          color: '#16435d',
+          fontWeight: 600,
+          fontSize: '1.25rem',
+          transition: 'transform 0.2s ease',
+          flexShrink: 0,
+          minWidth: 'fit-content'
+        }}
+        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+        >
+          <Icon path={mdiSnowflake} size={1.25} color="#2196f3" />
+          <span>SkiScape</span>
+        </Link>
+
+        {/* mobile hamburger menu icon */}
+        {isMobile && (
+          <button
+            onClick={this.toggleMobileMenu}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.5rem' }}
+            aria-label="Toggle menu"
+          >
+            <Icon path={isMobileMenuOpen ? mdiClose : mdiMenu} size={1.5} color="#16435d" />
+          </button>
+        )}
+
+        {/* desktop nav links here */}
+        {!isMobile && (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1rem',
+            flexShrink: 0,
+             overflowX: 'auto',
+            WebkitOverflowScrolling: 'touch',
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+            margin: '0 0.5rem'
+          }}>
+            {navLinks}
+          </div>
+        )}
+
+        {/* mobile menu */}
+        {isMobile && isMobileMenuOpen && (
+          <div style={{
+            position: 'absolute',
+            top: '100%',
+            left: 0,
+            right: 0,
+            backgroundColor: 'rgba(255, 255, 255, 0.98)',
+            backdropFilter: 'blur(5px)',
+            boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'flex-start',
+            zIndex: 999,
+            padding: '1rem 0',
+            borderTop: '1px solid #eee'
+          }}>
+            {navLinks}
+          </div>
+        )}
+
         <Modal show={this.state.accountModal}>
-  <div
-    style={{
-      textAlign: "center",
-      backgroundColor: "#fff",
-      padding: "2rem",
-      borderRadius: "0.5rem",
-      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
-      maxWidth: "400px",
-      margin: "0 auto"
-    }}
-  >
-    <h3 style={{ color: "#16435d", marginBottom: "1rem" }}>Account Settings</h3>
-    <p style={{ color: "#4a6b82", marginBottom: "1rem" }}>
-      Edit your account information below.
-    </p>
-    <input required value={this.state.user?.first_name || ''} type="text" name="First Name" placeholder="First Name" style={inputStyle} onChange={(e) => this.setState(prev => ({ user: { ...prev.user!, first_name: e.target.value } }))} />
-    <input required value={this.state.user?.last_name || ''} type="text" name="Last Name" placeholder="Last Name" style={inputStyle} onChange={(e) => this.setState(prev => ({ user: { ...prev.user!, last_name: e.target.value } }))} />
-    <input required value={this.state.user?.email || ''} type="email" name="Email" placeholder="Email" style={inputStyle} onChange={(e) => this.setState(prev => ({ user: { ...prev.user!, email: e.target.value } }))} />
-    <input required value={this.state.user?.zip_code || ''} type="text" name="Zip Code" placeholder="Zip Code" style={inputStyle} onChange={(e) => this.setState(prev => ({ user: { ...prev.user!, zip_code: e.target.value } }))} />
-    <input required value={this.state.user?.phone_number || ''} type="text" name="Phone Number" placeholder="Phone Number" style={inputStyle} onChange={(e) => this.setState(prev => ({ user: { ...prev.user!, phone_number: e.target.value } }))} />
-    {this.state.errorOccurred ? <p style={{ color: "red", marginTop: '0.5rem' }}>{this.state.errorMessage}</p> : this.state.successOccurred ? <p style={{ color: "green", marginTop: '0.5rem' }}>{this.state.successMessage}</p> : null}
-    <div style={{ display: "flex", justifyContent: "space-between", marginTop: '1rem' }}>
-      <button
-        onClick={() => this.setState({ accountModal: false, errorOccurred: false, errorMessage: "", successOccurred: false, successMessage: "" })}
-        style={{
-          backgroundColor: "#6c757d",
-          color: "#fff",
-          padding: "0.5rem 1rem",
-          border: "none",
-          borderRadius: "4px",
-          cursor: "pointer"
-        }}
-      >
-        Cancel
-      </button>
-      <button
-        onClick={() => {
-          this.updateAccount();
-        }}
-        style={{
-          backgroundColor: "green",
-          color: "#fff",
-          padding: "0.5rem 1rem",
-          border: "none",
-          borderRadius: "4px",
-          cursor: "pointer"
-        }}
-      >
-        Save
-      </button>
-    </div>
-  </div>
-</Modal>
+         <div
+           style={{
+             textAlign: "center",
+             backgroundColor: "#fff",
+             padding: "2rem",
+             borderRadius: "0.5rem",
+             boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+             maxWidth: "400px",
+             margin: "0 auto"
+           }}
+         >
+           <h3 style={{ color: "#16435d", marginBottom: "1rem" }}>Account Settings</h3>
+           <p style={{ color: "#4a6b82", marginBottom: "1rem" }}>
+             Edit your account information below.
+           </p>
+           <input required value={this.state.user?.first_name || ''} type="text" name="First Name" placeholder="First Name" style={inputStyle} onChange={(e) => this.setState(prev => ({ user: { ...prev.user!, first_name: e.target.value } }))} />
+           <input required value={this.state.user?.last_name || ''} type="text" name="Last Name" placeholder="Last Name" style={inputStyle} onChange={(e) => this.setState(prev => ({ user: { ...prev.user!, last_name: e.target.value } }))} />
+           <input required value={this.state.user?.email || ''} type="email" name="Email" placeholder="Email" style={inputStyle} onChange={(e) => this.setState(prev => ({ user: { ...prev.user!, email: e.target.value } }))} />
+           <input required value={this.state.user?.zip_code || ''} type="text" name="Zip Code" placeholder="Zip Code" style={inputStyle} onChange={(e) => this.setState(prev => ({ user: { ...prev.user!, zip_code: e.target.value } }))} />
+           <input required value={this.state.user?.phone_number || ''} type="text" name="Phone Number" placeholder="Phone Number" style={inputStyle} onChange={(e) => this.setState(prev => ({ user: { ...prev.user!, phone_number: e.target.value } }))} />
+           {this.state.errorOccurred ? <p style={{ color: "red", marginTop: '0.5rem' }}>{this.state.errorMessage}</p> : this.state.successOccurred ? <p style={{ color: "green", marginTop: '0.5rem' }}>{this.state.successMessage}</p> : null}
+           <div style={{ display: "flex", justifyContent: "space-between", marginTop: '1rem' }}>
+             <button
+               onClick={() => this.setState({ accountModal: false, errorOccurred: false, errorMessage: "", successOccurred: false, successMessage: "" })}
+               style={{
+                 backgroundColor: "#6c757d",
+                 color: "#fff",
+                 padding: "0.5rem 1rem",
+                 border: "none",
+                 borderRadius: "4px",
+                 cursor: "pointer"
+               }}
+             >
+               Cancel
+             </button>
+             <button
+               onClick={() => {
+                 this.updateAccount();
+               }}
+               style={{
+                 backgroundColor: "green",
+                 color: "#fff",
+                 padding: "0.5rem 1rem",
+                 border: "none",
+                 borderRadius: "4px",
+                 cursor: "pointer"
+               }}
+             >
+               Save
+             </button>
+           </div>
+         </div>
+       </Modal>
       </nav>
     );
   }
 }
 
+
+// navlinks component here
 class NavLink extends Component<{ href: string, active: boolean, children: React.ReactNode }> {
   render() {
     const { href, active, children } = this.props;
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+
     return (
       <Link href={href} style={{
         color: active ? '#2196f3' : '#4a6b82',
         textDecoration: 'none',
-        fontSize: '0.9rem',
+        fontSize: isMobile ? '1rem' : '0.9rem',
         fontWeight: '500',
-        padding: '0.5rem 0',
-        borderBottom: active ? '2px solid #2196f3' : '2px solid transparent',
-        transition: 'all 0.2s ease'
+        padding: isMobile ? '1rem 1.5rem' : '0.5rem 0',
+        borderBottom: !isMobile && active ? '2px solid #2196f3' : 'none',
+        transition: 'all 0.2s ease',
+        display: 'block',
+        width: '100%',
+        boxSizing: 'border-box',
+        whiteSpace: 'nowrap'
       }}
       onMouseEnter={(e) => {
-        if (!active) {
-          e.currentTarget.style.color = '#2196f3';
-          e.currentTarget.style.borderBottom = '2px solid #e3f2fd';
+        if (!isMobile) {
+          if (!active) {
+            e.currentTarget.style.color = '#2196f3';
+            e.currentTarget.style.borderBottom = '2px solid #e3f2fd';
+          }
+        } else {
+           e.currentTarget.style.backgroundColor = '#f0f0f0';
         }
       }}
       onMouseLeave={(e) => {
-        if (!active) {
-          e.currentTarget.style.color = '#4a6b82';
-          e.currentTarget.style.borderBottom = '2px solid transparent';
+        if (!isMobile) {
+          if (!active) {
+            e.currentTarget.style.color = '#4a6b82';
+            e.currentTarget.style.borderBottom = '2px solid transparent';
+          }
+        } else {
+           e.currentTarget.style.backgroundColor = 'transparent';
         }
       }}
       >

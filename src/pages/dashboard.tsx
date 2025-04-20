@@ -464,6 +464,7 @@ class Dashboard extends Component<PropsType, StateType> {
   render() {
     const { resorts, screenSize } = this.state;
     const loggedIn = this.state.user !== null;
+    const isMobile = this.isMobileView();
     const weatherIconMap: { [key: string]: string } = {
       "scattered clouds": mdiWeatherCloudy,
       "broken clouds": mdiWeatherCloudy,
@@ -514,13 +515,14 @@ class Dashboard extends Component<PropsType, StateType> {
           <div
             style={{
               display: "flex",
-              flexDirection: this.isMobileView() ? "column" : "row",
+              flexDirection: isMobile ? "column" : "row",
               justifyContent: "space-between",
               alignItems: "center",
               textAlign: "center",
-              padding: this.isMobileView() ? "1rem" : "2rem",
+              padding: isMobile ? "1rem" : "2rem",
               width: "100%",
-              boxSizing: "border-box"
+              boxSizing: "border-box",
+              gap: isMobile ? "1rem" : "0"
             }}
           >
             {/* Left Column - Resort List or Detail Page */}
@@ -531,8 +533,8 @@ class Dashboard extends Component<PropsType, StateType> {
                   backgroundColor: "white",
                   borderRadius: "0.5rem",
                   boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-                  width: this.isMobileView() ? "100%" : "54%",
-                  height: "80vh",
+                  width: isMobile ? "100%" : "54%",
+                  height: isMobile ? "auto" : "80vh",
                   overflowY: "auto"
                 }}
               >
@@ -742,13 +744,13 @@ class Dashboard extends Component<PropsType, StateType> {
                   border: "1px solid #d4e3f0",
                   borderRadius: "0.5rem",
                   boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
-                  width: this.isMobileView() ? "100%" : "52%",
-                  height: "80vh",
+                  width: isMobile ? "100%" : "52%",
+                  height: isMobile ? "auto" : "80vh",
                   overflowY: "auto",
                   alignItems: "center",
                 }}
               >
-                {/* Close button - only in detail view */}
+               {/* close button */}
                 <div
                   style={{
                     position: "absolute",
@@ -1419,7 +1421,8 @@ class Dashboard extends Component<PropsType, StateType> {
 
             {/* Right Column - Map */}
             <div style={{ 
-              width: this.isMobileView() ? "100%" : "45%",
+              width: isMobile ? "100%" : "45%",
+              height: isMobile ? "50vh" : "80vh",
               overflow: "hidden", 
               boxSizing: "border-box"
             }}>
