@@ -116,20 +116,15 @@ class Dashboard extends Component<PropsType, StateType> {
     this.state = {
         user: null,
         resorts: [],
-
-        screenSize: typeof window !== "undefined" ? window.innerWidth : 851,
-
+        screenSize: typeof window !== "undefined" ? window.innerWidth : 0,
         errorOccurred: false,
         errorMessage: "",
         successOccurred: false,
         successMessage: "",
         successModal: false,
-
         resortReviews: [],
-
         selectedSection: "",
         users: [],
-
         resortNameInput: "",
         stateInput: "",
         websiteInput: "",
@@ -137,42 +132,35 @@ class Dashboard extends Component<PropsType, StateType> {
         longitudeInput: "",
         addressInput: "",
         photoURLInput: "",
-
         confirmPromoteModal: false,
         selectedUser: null
-
     };
   }
 
-
    componentDidMount() {
     console.log("comeponentDidMount working on admin page")
-
     this.getCurrentUser();
     this.fetchResorts();
     this.fetchAllUsers();
     this.fetchAllReviews();
 
+    this.setState({ screenSize: window.innerWidth });
     window.addEventListener("resize", this.handleResize);
-  this.setState({ screenSize: window.innerWidth });
   }
-
-  isMobileView = () => this.state.screenSize < 850;
 
   componentWillUnmount() {
     window.removeEventListener("resize", this.handleResize);
-    setTimeout(() => {
-      this.setState({ screenSize: window.innerWidth });
-    }, 1000);
   }
 
   handleResize = () => {
     this.setState({ screenSize: window.innerWidth });
   };
 
+  isMobileView = () => this.state.screenSize < 768;
+
   async getCurrentUser() {
     try {
-      const res = await fetch("/api/au  th/user", {
+      const res = await fetch("/api/auth/user", {
         credentials: "include",
       });
       if (res.ok) {
@@ -360,32 +348,39 @@ class Dashboard extends Component<PropsType, StateType> {
       fontSize: "1.2rem"
     };
 
-    return (
-      <div style={containerStyle}>
-        <Head>
-          <title>SkiScape | Admin Portal</title>
-        </Head>
+    const isMobile = this.isMobileView();
 
-        {/* Snowfall Effect */}
-        <div style={{ 
-          position: "fixed",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          pointerEvents: "none",
-          zIndex: 1000
-        }}>
+    const cardStyle: React.CSSProperties = {
+      backgroundColor: "white",
+      borderRadius: "12px",
+      padding: isMobile ? "1rem" : "2rem",
+      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
+      flex: 1,
+      minWidth: isMobile ? "100%" : "300px",
+      marginBottom: isMobile ? "1rem" : "0",
+    };
+
+    return (
+      <div style={{
+        minHeight: "100vh",
+        backgroundColor: "#f4f7fc",
+        padding: isMobile ? "1rem" : "2rem",
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+        <Head>
+          <title>SkiScape | Admin</title>
+        </Head>
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, pointerEvents: 'none', zIndex: 0 }}>
           {[...Array(20)].map((_, i) => (
             <div
               key={i}
               style={{
-                position: "absolute",
+                position: 'absolute',
                 left: `${Math.random() * 100}%`,
-                top: "-10px",
                 animation: `fall ${Math.random() * 5 + 5}s linear infinite`,
                 animationDelay: `${Math.random() * 5}s`,
-                opacity: Math.random() * 0.5 + 0.3
+                opacity: Math.random() * 0.5 + 0.3,
               }}
             >
               <Icon path={mdiSnowflake} size={0.5} color="#2196f3" />
@@ -393,469 +388,475 @@ class Dashboard extends Component<PropsType, StateType> {
           ))}
         </div>
 
-        {/* Main Content */}
-        <div style={{ position: "relative", zIndex: 1 }}>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "stretch",
-              textAlign: "center",
-              padding: "2rem",
-              width: "100%",
-              boxSizing: "border-box",
-              minHeight: "80vh",
-            }}
-          >
-            {/* left column - options */}
-              <div
-                style={{
-                  padding: "1.5rem",
-                  backgroundColor: "white",
-                  borderRadius: "0.5rem",
-                  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-                  width: "32%",
-                  height: "fit-content",
-                  maxHeight: "600px",
-                  overflowY: "auto",
-                  margin: "0 1rem",
-                }}
-              >
-                  <ul style={{ listStyleType: "none", padding: 0 }}>
-                      <div
-                        style={tabStyle}
-                        onMouseEnter={e => e.currentTarget.style.transform = "scale(1.01)"}
-                        onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
-                        onClick={() => 
-                          this.state.selectedSection === "manage_resorts" ?
-                          this.setState({ selectedSection: "", successOccurred: false, successMessage: "" }) :
-                          this.setState({ selectedSection: "manage_resorts", successOccurred: false, successMessage: "" })}
-                      >
-                        <div style={{ color: "#6c757d", marginBottom: "0.5rem" }}>
-                          Add Resort
-                        </div>
+        <div style={{ maxWidth: "1400px", margin: "0 auto", position: 'relative', zIndex: 1 }}>
+          <h1 style={{
+            fontSize: isMobile ? "1.8rem" : "2.5rem",
+            color: "#16435d",
+            marginBottom: "2rem",
+            textAlign: "center",
+            fontWeight: "bold",
+          }}>
+            Admin Portal
+          </h1>
 
-
-                      </div>
-
-
-                      <div
-                        style={tabStyle}
-                        onMouseEnter={e => e.currentTarget.style.transform = "scale(1.01)"}
-                        onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
-                        onClick={() => 
-                          this.state.selectedSection === "manage_users" ?
-                          this.setState({ selectedSection: "" }) :
-                          this.setState({ selectedSection: "manage_users" })
-                        }
-                      >
-                        <div style={{ color: "#6c757d", marginBottom: "0.5rem" }}>
-                          Manage Users
-                        </div>
-                      </div>
-                      <div
-                        style={tabStyle}
-                        onMouseEnter={e => e.currentTarget.style.transform = "scale(1.01)"}
-                        onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
-                        onClick={() => 
-                          this.state.selectedSection === "admin_analytics" ?
-                          this.setState({ selectedSection: "" }) :
-                          this.setState({ selectedSection: "admin_analytics" })}
-                      >
-                        <div style={{ color: "#6c757d", marginBottom: "0.5rem" }}>
-                          Admin Analytics
-                        </div>
-                      </div>
-
-
-                  </ul>
-
-
-              </div>
-           
-
-            <div
-      style={{
-        width: "55%",
-        minHeight: "80vh",
-        overflowY: "auto",
-        boxSizing: "border-box",
-        transition: "all 0.3s ease-in-out",
-      }}
-    >
-              {
-                this.state.selectedSection === "manage_resorts" ?
-                <div style={{ ...tabStyle, overflowY: "auto", maxHeight: "80vh" }}>
-                  <div style={{display: 'flex', flexDirection: 'column', gap: '1rem'}}>
-                    <h2 style={{ color: "#6c757d", marginBottom: "0.5rem", textAlign: "center" }}>
-                    Add Resort
-                    </h2>
-                    <div style={tabStyle}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <input required value={this.state.resortNameInput} type="text" name="Resort Name" placeholder="Resort Name" style={inputStyle} onChange={(e) => {this.setState({resortNameInput: e.target.value})}}/>
-                <select value={this.state.stateInput} onChange={(e) => this.setState({ stateInput: e.target.value })} style={inputStyle}>
-                  <option value="">Select State</option>
-                  <option value="AL">Alabama</option>
-                  <option value="AK">Alaska</option>
-                  <option value="AZ">Arizona</option>
-                  <option value="AR">Arkansas</option>
-                  <option value="CA">California</option>
-                  <option value="CO">Colorado</option>
-                  <option value="CT">Connecticut</option>
-                  <option value="DE">Delaware</option>
-                  <option value="FL">Florida</option>
-                  <option value="GA">Georgia</option>
-                  <option value="HI">Hawaii</option>
-                  <option value="ID">Idaho</option>
-                  <option value="IL">Illinois</option>
-                  <option value="IN">Indiana</option>
-                  <option value="IA">Iowa</option>
-                  <option value="KS">Kansas</option>
-                  <option value="KY">Kentucky</option>
-                  <option value="LA">Louisiana</option>
-                  <option value="ME">Maine</option>
-                  <option value="MD">Maryland</option>
-                  <option value="MA">Massachusetts</option>
-                  <option value="MI">Michigan</option>
-                  <option value="MN">Minnesota</option>
-                  <option value="MS">Mississippi</option>
-                  <option value="MO">Missouri</option>
-                  <option value="MT">Montana</option>
-                  <option value="NE">Nebraska</option>
-                  <option value="NV">Nevada</option>
-                  <option value="NH">New Hampshire</option>
-                  <option value="NJ">New Jersey</option>
-                  <option value="NM">New Mexico</option>
-                  <option value="NY">New York</option>
-                  <option value="NC">North Carolina</option>
-                  <option value="ND">North Dakota</option>
-                  <option value="OH">Ohio</option>
-                  <option value="OK">Oklahoma</option>
-                  <option value="OR">Oregon</option>
-                  <option value="PA">Pennsylvania</option>
-                  <option value="RI">Rhode Island</option>
-                  <option value="SC">South Carolina</option>
-                  <option value="SD">South Dakota</option>
-                  <option value="TN">Tennessee</option>
-                  <option value="TX">Texas</option>
-                  <option value="UT">Utah</option>
-                  <option value="VT">Vermont</option>
-                  <option value="VA">Virginia</option>
-                  <option value="WA">Washington</option>
-                  <option value="WV">West Virginia</option>
-                  <option value="WI">Wisconsin</option>
-                  <option value="WY">Wyoming</option>
-                </select>
-                <input required value={this.state.websiteInput} type="text" name="Website URL" placeholder="Website URL" style={inputStyle} onChange={(e) => {this.setState({websiteInput: e.target.value})}}/>
-                <input required value={this.state.latitudeInput} type="text" name="Latitude" placeholder="Latitude" style={inputStyle} onChange={(e) => {this.setState({latitudeInput: e.target.value})}}/>
-                <input required value={this.state.longitudeInput} type="text" name="Longitude" placeholder="Longitude" style={inputStyle} onChange={(e) => {this.setState({longitudeInput: e.target.value})}}/>
-                <input required value={this.state.addressInput} type="text" name="Address" placeholder="Address" style={inputStyle} onChange={(e) => {this.setState({addressInput: e.target.value})}}/>
-                <input required value={this.state.photoURLInput} type="text" name="Photo URL" placeholder="Photo URL" style={inputStyle} onChange={(e) => {this.setState({photoURLInput: e.target.value})}} />
-
-                {this.state.errorOccurred ? 
-                  <p style={{ color: "red", fontSize: "14px", marginTop: "10px", margin: 'auto' }}>{this.state.errorMessage}</p>
-               : this.state.successOccurred ?
-                  <p style={{ color: "green", fontSize: "14px", marginTop: "10px", margin: 'auto' }}>{this.state.successMessage}</p>
-               : null
-                }
-               
-                 <button
-                   style={{
-                     backgroundColor: "#16435d",
-                     color: "#ffffff",
-                     padding: "0.5rem",
-                     border: "none",
-                     borderRadius: "0.5rem",
-                     fontSize: "1rem",
-                     cursor: "pointer",
-                     boxShadow: "0 2px 6px rgba(0, 0, 0, 0.1)",
-                     transition: "background-color 0.3s ease",
-                     width: "100px",  
-                     margin: "auto",       
-                   }}
-                   onClick={() => {
-                      this.attemptToPostResort();
-                   }}
-                 >
-                   Submit
-                 </button>
-               
-              </div>
+          <div style={{
+            display: "flex",
+            flexDirection: isMobile ? "column" : "row",
+            gap: isMobile ? "1rem" : "2rem",
+            alignItems: isMobile ? "stretch" : "flex-start",
+          }}>
+            <div style={{
+              ...cardStyle,
+              flex: isMobile ? 'none' : 1,
+              maxWidth: isMobile ? '100%' : '300px',
+              padding: isMobile ? '1rem' : '1.5rem'
+            }}>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                 {['Add Resort', 'Manage Users', 'Admin Analytics'].map(section => (
+                   <li key={section} style={{ marginBottom: '0.75rem' }}>
+                     <button
+                       onClick={() => this.setState({ selectedSection: section })}
+                       style={{
+                         width: '100%',
+                         padding: '0.75rem 1rem',
+                         border: 'none',
+                         borderRadius: '8px',
+                         backgroundColor: this.state.selectedSection === section ? '#e3f2fd' : 'transparent',
+                         color: this.state.selectedSection === section ? '#16435d' : '#4a6b82',
+                         textAlign: 'left',
+                         fontWeight: this.state.selectedSection === section ? '600' : '500',
+                         cursor: 'pointer',
+                         transition: 'background-color 0.2s ease'
+                       }}
+                        onMouseEnter={(e) => { if (this.state.selectedSection !== section) e.currentTarget.style.backgroundColor = '#f6f9fc'; }}
+                        onMouseLeave={(e) => { if (this.state.selectedSection !== section) e.currentTarget.style.backgroundColor = 'transparent'; }}
+                     >
+                       {section}
+                     </button>
+                   </li>
+                 ))}
+              </ul>
             </div>
-                      </div>
+
+            <div style={{
+              ...cardStyle,
+              flex: 3,
+              width: isMobile ? '100%' : 'auto'
+            }}>
+              {this.state.selectedSection === "Add Resort" && (
+                <div>
+                  <h2 style={{ fontSize: isMobile ? '1.2rem' : '1.5rem', color: '#16435d', marginBottom: '1.5rem' }}>Add New Resort</h2>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                      <input 
+                          required 
+                          value={this.state.resortNameInput} 
+                          type="text" 
+                          name="Resort Name" 
+                          placeholder="Resort Name" 
+                          style={{...inputStyle, width: '100%'}}
+                          onChange={(e) => {this.setState({resortNameInput: e.target.value})}}
+                      />
+                      <select 
+                          value={this.state.stateInput} 
+                          onChange={(e) => this.setState({ stateInput: e.target.value })} 
+                          style={{...inputStyle, width: '100%'}}
+                      >
+                        <option value="">Select State</option>
+                        <option value="AL">Alabama</option>
+                        <option value="AK">Alaska</option>
+                        <option value="AZ">Arizona</option>
+                        <option value="AR">Arkansas</option>
+                        <option value="CA">California</option>
+                        <option value="CO">Colorado</option>
+                        <option value="CT">Connecticut</option>
+                        <option value="DE">Delaware</option>
+                        <option value="FL">Florida</option>
+                        <option value="GA">Georgia</option>
+                        <option value="HI">Hawaii</option>
+                        <option value="ID">Idaho</option>
+                        <option value="IL">Illinois</option>
+                        <option value="IN">Indiana</option>
+                        <option value="IA">Iowa</option>
+                        <option value="KS">Kansas</option>
+                        <option value="KY">Kentucky</option>
+                        <option value="LA">Louisiana</option>
+                        <option value="ME">Maine</option>
+                        <option value="MD">Maryland</option>
+                        <option value="MA">Massachusetts</option>
+                        <option value="MI">Michigan</option>
+                        <option value="MN">Minnesota</option>
+                        <option value="MS">Mississippi</option>
+                        <option value="MO">Missouri</option>
+                        <option value="MT">Montana</option>
+                        <option value="NE">Nebraska</option>
+                        <option value="NV">Nevada</option>
+                        <option value="NH">New Hampshire</option>
+                        <option value="NJ">New Jersey</option>
+                        <option value="NM">New Mexico</option>
+                        <option value="NY">New York</option>
+                        <option value="NC">North Carolina</option>
+                        <option value="ND">North Dakota</option>
+                        <option value="OH">Ohio</option>
+                        <option value="OK">Oklahoma</option>
+                        <option value="OR">Oregon</option>
+                        <option value="PA">Pennsylvania</option>
+                        <option value="RI">Rhode Island</option>
+                        <option value="SC">South Carolina</option>
+                        <option value="SD">South Dakota</option>
+                        <option value="TN">Tennessee</option>
+                        <option value="TX">Texas</option>
+                        <option value="UT">Utah</option>
+                        <option value="VT">Vermont</option>
+                        <option value="VA">Virginia</option>
+                        <option value="WA">Washington</option>
+                        <option value="WV">West Virginia</option>
+                        <option value="WI">Wisconsin</option>
+                        <option value="WY">Wyoming</option>
+                      </select>
+                      <input 
+                          required 
+                          value={this.state.websiteInput} 
+                          type="text" 
+                          name="Website URL" 
+                          placeholder="Website URL" 
+                          style={{...inputStyle, width: '100%'}}
+                          onChange={(e) => {this.setState({websiteInput: e.target.value})}}
+                      />
+                       <input 
+                          required 
+                          value={this.state.latitudeInput} 
+                          type="text" 
+                          name="Latitude" 
+                          placeholder="Latitude" 
+                          style={{...inputStyle, width: '100%'}}
+                          onChange={(e) => {this.setState({latitudeInput: e.target.value})}}
+                      />
+                       <input 
+                          required 
+                          value={this.state.longitudeInput} 
+                          type="text" 
+                          name="Longitude" 
+                          placeholder="Longitude" 
+                          style={{...inputStyle, width: '100%'}}
+                          onChange={(e) => {this.setState({longitudeInput: e.target.value})}}
+                      />
+                      <input 
+                          required 
+                          value={this.state.addressInput} 
+                          type="text" 
+                          name="Address" 
+                          placeholder="Address" 
+                          style={{...inputStyle, width: '100%'}}
+                          onChange={(e) => {this.setState({addressInput: e.target.value})}}
+                      />
+                      <input 
+                          required 
+                          value={this.state.photoURLInput} 
+                          type="text" 
+                          name="Photo URL" 
+                          placeholder="Photo URL" 
+                          style={{...inputStyle, width: '100%'}}
+                          onChange={(e) => {this.setState({photoURLInput: e.target.value})}} 
+                      />
+                  </div>
                      
+                  <div style={{ marginTop: '1.5rem', textAlign: 'center' }}> 
+                       {this.state.errorOccurred ? 
+                        <p style={{ color: "red", fontSize: "14px", marginBottom: "1rem" }}>{this.state.errorMessage}</p>
+                       : this.state.successOccurred ?
+                        <p style={{ color: "green", fontSize: "14px", marginBottom: "1rem" }}>{this.state.successMessage}</p>
+                       : null
+                      }
+                      <button
+                        style={{
+                          backgroundColor: "#16435d",
+                          color: "#ffffff",
+                          padding: "0.75rem 1.5rem",
+                          border: "none",
+                          borderRadius: "0.5rem",
+                          fontSize: "1rem",
+                          cursor: "pointer",
+                          boxShadow: "0 2px 6px rgba(0, 0, 0, 0.1)",
+                          transition: "background-color 0.3s ease",
+                          width: "auto",
+                          minWidth: "120px"
+                        }}
+                        onClick={() => {
+                            this.attemptToPostResort();
+                        }}
+                      >
+                        Submit
+                      </button>
+                   </div>
+                </div>
+              )}
+
+              {this.state.selectedSection === "Manage Users" && (
+                <div>
+                  <h2 style={{ fontSize: isMobile ? '1.2rem' : '1.5rem', color: '#16435d', marginBottom: '1.5rem' }}>Manage Users</h2>
+                  <div style={{ overflowX: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <thead>
+                          <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Promote</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {this.state.users.map((user) => (
+                            <tr key={user.id}>
+                              <td>{user.first_name} {user.last_name}</td>
+                              <td>{user.email}</td>
+                              <td>
+                                <button
+                                  style={{
+                                    backgroundColor: user.is_admin === true ? "none" : "#16435d",
+                                    color: "#ffffff",
+                                    padding: "0.4rem 0.75rem",
+                                    border: "none",
+                                    borderRadius: "4px",
+                                    cursor: "pointer",
+                                    fontSize: "0.9rem"
+                                  }}
+                                  onClick={() => {this.setState({ confirmPromoteModal: true, selectedUser: user })}}
+                                >
+                                  {user.is_admin ? "Remove" : "Promote"}
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                    </table>
                   </div>
-                  :
-                  this.state.selectedSection === "manage_users" ?
-                 <div style={{ ...tabStyle, overflowY: "auto", maxHeight: "80vh" }}>
-                   <h2 style={{ textAlign: "center", color: "#6c757d", marginBottom: "1rem" }}>All Users</h2>
-                   <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
-                     {this.state.users.map((user) => (
-                       <li
-                         key={user.id}
-                         style={{
-                           display: "flex",
-                           justifyContent: "space-between",
-                           alignItems: "center",
-                           padding: "0.75rem 1rem",
-                           borderBottom: "1px solid #e0e6ed",
-                         }}
-                       >
-                         <div>
-                           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                             <p style={{ margin: 0, fontWeight: "bold" }}>{user.first_name} {user.last_name}</p>
-                             {/* {this.state.user?.email === user.email ? <span>(me)</span> : null} */}
-                             {user.is_admin && (
-                               <Icon path={mdiCrown} size={0.8} color="#ffc107" title="Admin" />
-                             )}
-                           </div>
-                           <p style={{ margin: 0, fontSize: "0.9rem", color: "#6c757d" }}>{user.email}</p>
+                </div>
+              )}
+
+              {this.state.selectedSection === "Admin Analytics" && (
+                <div>
+                   <h2 style={{ fontSize: isMobile ? '1.2rem' : '1.5rem', color: '#16435d', marginBottom: '1.5rem' }}>Admin Analytics</h2>
+                   <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(250px, 1fr))',
+                    gap: '1.5rem'
+                  }}>
+                       <div style={{ ...cardStyle, padding: '1rem' }}>
+                         <h3 style={{ color: "#16435d", fontSize: "1.1rem" }}>Total Users</h3>
+                         <p style={{ fontSize: "1.5rem", fontWeight: "bold" }}>{this.state.users.length}</p>
+                       </div>
+                       <div style={{ ...cardStyle, padding: '1rem' }}>
+                         <h3 style={{ color: "#16435d", fontSize: "1.1rem" }}>Total Resorts</h3>
+                         <p style={{ fontSize: "1.5rem", fontWeight: "bold" }}>{this.state.resorts.length}</p>
+                       </div>
+                       <div style={{ ...cardStyle, padding: '1rem' }}>
+                         <h3 style={{ color: "#16435d", fontSize: "1.1rem" }}>Total Reviews</h3>
+                         <p style={{ fontSize: "1.5rem", fontWeight: "bold" }}>{this.state.resortReviews.length}</p>
+                       </div>
+                       <div style={{ ...cardStyle, padding: '1rem' }}>
+                         <h3 style={{ color: "#16435d", fontSize: "1.1rem" }}>Average Rating</h3>
+                         <p style={{ fontSize: "1.5rem", fontWeight: "bold" }}>
+                           {this.state.resorts.length > 0 
+                             ? (this.state.resorts.reduce((sum, resort) => sum + resort.average_rating, 0) / this.state.resorts.length).toFixed(1)
+                             : "N/A"}
+                         </p>
+                       </div>
+                       <div style={{ ...cardStyle, padding: '1rem' }}>
+                         <h3 style={{ color: "#16435d", fontSize: "1.1rem" }}>Most Reviewed Resort</h3>
+                         <p style={{ fontSize: "1rem", fontWeight: "bold" }}>
+                           {(() => {
+                             const resortReviewCounts = this.state.resortReviews.reduce((acc, review) => {
+                               acc[review.resort_id] = (acc[review.resort_id] || 0) + 1;
+                               return acc;
+                             }, {} as { [key: string]: number });
+                             
+                             const mostReviewedId = Object.entries(resortReviewCounts).reduce((a, b) => a[1] > b[1] ? a : b)[0];
+                             const resort = this.state.resorts.find(r => r.id === mostReviewedId);
+                             return resort ? `${resort.name} (${resortReviewCounts[mostReviewedId]} reviews)` : "N/A";
+                           })()}
+                         </p>
+                       </div>
+                       <div style={{ ...cardStyle, padding: '1rem' }}>
+                         <h3 style={{ color: "#16435d", fontSize: "1.1rem" }}>Highest Rated Resort</h3>
+                         <p style={{ fontSize: "1rem", fontWeight: "bold" }}>
+                           {this.state.resorts.length > 0 
+                             ? `${this.state.resorts.reduce((prev, curr) => prev.average_rating > curr.average_rating ? prev : curr).name} (${this.state.resorts.reduce((prev, curr) => prev.average_rating > curr.average_rating ? prev : curr).average_rating.toFixed(1)})`
+                             : "N/A"}
+                         </p>
+                       </div>
+                       <div style={{ ...cardStyle, padding: '1rem' }}>
+                         <h3 style={{ color: "#16435d", fontSize: "1.1rem" }}>Lowest Rated Resort</h3>
+                         <p style={{ fontSize: "1rem", fontWeight: "bold" }}>
+                           {this.state.resorts.length > 0 
+                             ? `${this.state.resorts.reduce((prev, curr) => prev.average_rating < curr.average_rating ? prev : curr).name} (${this.state.resorts.reduce((prev, curr) => prev.average_rating < curr.average_rating ? prev : curr).average_rating.toFixed(1)})`
+                             : "N/A"}
+                         </p>
+                       </div>
+                       <div style={{ ...cardStyle, padding: '1rem' }}>
+                         <h3 style={{ color: "#16435d", fontSize: "1.1rem" }}>Review Distribution</h3>
+                         <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                           {[5, 4, 3, 2, 1].map((rating) => {
+                             const count = this.state.resortReviews.filter(r => r.rating === rating).length;
+                             const percentage = (count / this.state.resortReviews.length * 100).toFixed(1);
+                             return (
+                               <div key={rating} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                                 <div style={{ width: "60px" }}>{rating} Stars</div>
+                                 <div style={{ flex: 1, height: "20px", backgroundColor: "#e9ecef", borderRadius: "10px", overflow: "hidden" }}>
+                                   <div style={{ 
+                                     width: `${percentage}%`, 
+                                     height: "100%", 
+                                     backgroundColor: rating >= 4 ? "#28a745" : rating >= 3 ? "#ffc107" : "#dc3545",
+                                     transition: "width 0.5s ease"
+                                   }} />
+                                 </div>
+                                 <div style={{ width: "50px", textAlign: "right" }}>{percentage}%</div>
+                               </div>
+                             );
+                           })}
                          </div>
-                         <button
-                           style={{
-                            display: user.is_admin === true ? "none" : "",
-                             backgroundColor: "#16435d",
-                             color: "#ffffff",
-                             padding: "0.4rem 0.75rem",
-                             border: "none",
-                             borderRadius: "4px",
-                             cursor: "pointer",
-                             fontSize: "0.9rem"
-                           }}
-                           onClick={() => {this.setState({ confirmPromoteModal: true, selectedUser: user })}}
-                         >
-                           Promote
-                         </button>
-                       </li>
-                     ))}
-                   </ul>
-                 </div>
-                  :
-                  this.state.selectedSection === "admin_analytics" ?
-                  <div style={tabStyle}>
-                    <h2 style={{ textAlign: "center", color: "#16435d", marginBottom: "1.5rem" }}>Admin Analytics</h2>
-         
-                    <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap", marginBottom: "1.5rem" }}>
-                      <div style={{ flex: "1", minWidth: "200px", backgroundColor: "#f8f9fa", padding: "1rem", borderRadius: "8px", boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)" }}>
-                        <h3 style={{ color: "#16435d", fontSize: "1.1rem" }}>Total Users</h3>
-                        <p style={{ fontSize: "1.5rem", fontWeight: "bold" }}>{this.state.users.length}</p>
-                      </div>
-           
-                      <div style={{ flex: "1", minWidth: "200px", backgroundColor: "#f8f9fa", padding: "1rem", borderRadius: "8px", boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)" }}>
-                        <h3 style={{ color: "#16435d", fontSize: "1.1rem" }}>Total Resorts</h3>
-                        <p style={{ fontSize: "1.5rem", fontWeight: "bold" }}>{this.state.resorts.length}</p>
-                      </div>
-           
-                      <div style={{ flex: "1", minWidth: "200px", backgroundColor: "#f8f9fa", padding: "1rem", borderRadius: "8px", boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)" }}>
-                        <h3 style={{ color: "#16435d", fontSize: "1.1rem" }}>Total Reviews</h3>
-                        <p style={{ fontSize: "1.5rem", fontWeight: "bold" }}>{this.state.resortReviews.length}</p>
-                      </div>
-
-                      <div style={{ flex: "1", minWidth: "200px", backgroundColor: "#f8f9fa", padding: "1rem", borderRadius: "8px", boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)" }}>
-                        <h3 style={{ color: "#16435d", fontSize: "1.1rem" }}>Average Rating</h3>
-                        <p style={{ fontSize: "1.5rem", fontWeight: "bold" }}>
-                          {this.state.resorts.length > 0 
-                            ? (this.state.resorts.reduce((sum, resort) => sum + resort.average_rating, 0) / this.state.resorts.length).toFixed(1)
-                            : "N/A"}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap", marginBottom: "1.5rem" }}>
-                      <div style={{ flex: "1", minWidth: "200px", backgroundColor: "#f8f9fa", padding: "1rem", borderRadius: "8px", boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)" }}>
-                        <h3 style={{ color: "#16435d", fontSize: "1.1rem" }}>Most Reviewed Resort</h3>
-                        <p style={{ fontSize: "1rem", fontWeight: "bold" }}>
-                          {(() => {
-                            const resortReviewCounts = this.state.resortReviews.reduce((acc, review) => {
-                              acc[review.resort_id] = (acc[review.resort_id] || 0) + 1;
-                              return acc;
-                            }, {} as { [key: string]: number });
-                            
-                            const mostReviewedId = Object.entries(resortReviewCounts).reduce((a, b) => a[1] > b[1] ? a : b)[0];
-                            const resort = this.state.resorts.find(r => r.id === mostReviewedId);
-                            return resort ? `${resort.name} (${resortReviewCounts[mostReviewedId]} reviews)` : "N/A";
-                          })()}
-                        </p>
-                      </div>
-
-                      <div style={{ flex: "1", minWidth: "200px", backgroundColor: "#f8f9fa", padding: "1rem", borderRadius: "8px", boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)" }}>
-                        <h3 style={{ color: "#16435d", fontSize: "1.1rem" }}>Highest Rated Resort</h3>
-                        <p style={{ fontSize: "1rem", fontWeight: "bold" }}>
-                          {this.state.resorts.length > 0 
-                            ? `${this.state.resorts.reduce((prev, curr) => prev.average_rating > curr.average_rating ? prev : curr).name} (${this.state.resorts.reduce((prev, curr) => prev.average_rating > curr.average_rating ? prev : curr).average_rating.toFixed(1)})`
-                            : "N/A"}
-                        </p>
-                      </div>
-
-                      <div style={{ flex: "1", minWidth: "200px", backgroundColor: "#f8f9fa", padding: "1rem", borderRadius: "8px", boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)" }}>
-                        <h3 style={{ color: "#16435d", fontSize: "1.1rem" }}>Lowest Rated Resort</h3>
-                        <p style={{ fontSize: "1rem", fontWeight: "bold" }}>
-                          {this.state.resorts.length > 0 
-                            ? `${this.state.resorts.reduce((prev, curr) => prev.average_rating < curr.average_rating ? prev : curr).name} (${this.state.resorts.reduce((prev, curr) => prev.average_rating < curr.average_rating ? prev : curr).average_rating.toFixed(1)})`
-                            : "N/A"}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap", marginBottom: "1.5rem" }}>
-                      <div style={{ flex: "1", minWidth: "300px", backgroundColor: "#f8f9fa", padding: "1rem", borderRadius: "8px", boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)" }}>
-                        <h3 style={{ color: "#16435d", fontSize: "1.1rem", marginBottom: "1rem" }}>Review Distribution</h3>
-                        <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                          {[5, 4, 3, 2, 1].map((rating) => {
-                            const count = this.state.resortReviews.filter(r => r.rating === rating).length;
-                            const percentage = (count / this.state.resortReviews.length * 100).toFixed(1);
-                            return (
-                              <div key={rating} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                                <div style={{ width: "60px" }}>{rating} Stars</div>
-                                <div style={{ flex: 1, height: "20px", backgroundColor: "#e9ecef", borderRadius: "10px", overflow: "hidden" }}>
-                                  <div style={{ 
-                                    width: `${percentage}%`, 
-                                    height: "100%", 
-                                    backgroundColor: rating >= 4 ? "#28a745" : rating >= 3 ? "#ffc107" : "#dc3545",
-                                    transition: "width 0.5s ease"
-                                  }} />
-                                </div>
-                                <div style={{ width: "50px", textAlign: "right" }}>{percentage}%</div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-
-                      <div style={{ flex: "1", minWidth: "300px", backgroundColor: "#f8f9fa", padding: "1rem", borderRadius: "8px", boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)" }}>
-                        <h3 style={{ color: "#16435d", fontSize: "1.1rem", marginBottom: "1rem" }}>Resorts by State</h3>
-                        <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                          {(() => {
-                            const stateCounts = this.state.resorts.reduce((acc, resort) => {
-                              acc[resort.state] = (acc[resort.state] || 0) + 1;
-                              return acc;
-                            }, {} as { [key: string]: number });
-                            
-                            return Object.entries(stateCounts)
-                              .sort((a, b) => b[1] - a[1])
-                              .map(([state, count]) => (
-                                <div key={state} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                                  <div style={{ width: "60px" }}>{state}</div>
-                                  <div style={{ flex: 1, height: "20px", backgroundColor: "#e9ecef", borderRadius: "10px", overflow: "hidden" }}>
-                                    <div style={{ 
-                                      width: `${(count / this.state.resorts.length * 100).toFixed(1)}%`, 
-                                      height: "100%", 
-                                      backgroundColor: "#2196f3",
-                                      transition: "width 0.5s ease"
-                                    }} />
-                                  </div>
-                                  <div style={{ width: "50px", textAlign: "right" }}>{count}</div>
-                                </div>
-                              ));
-                          })()}
-                        </div>
-                      </div>
-                    </div>
+                       </div>
+                       <div style={{ ...cardStyle, padding: '1rem' }}>
+                         <h3 style={{ color: "#16435d", fontSize: "1.1rem" }}>Resorts by State</h3>
+                         <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                           {(() => {
+                             const stateCounts = this.state.resorts.reduce((acc, resort) => {
+                               acc[resort.state] = (acc[resort.state] || 0) + 1;
+                               return acc;
+                             }, {} as { [key: string]: number });
+                             
+                             return Object.entries(stateCounts)
+                               .sort((a, b) => b[1] - a[1])
+                               .map(([state, count]) => (
+                                 <div key={state} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                                   <div style={{ width: "60px" }}>{state}</div>
+                                   <div style={{ flex: 1, height: "20px", backgroundColor: "#e9ecef", borderRadius: "10px", overflow: "hidden" }}>
+                                     <div style={{ 
+                                       width: `${(count / this.state.resorts.length * 100).toFixed(1)}%`, 
+                                       height: "100%", 
+                                       backgroundColor: "#2196f3",
+                                       transition: "width 0.5s ease"
+                                     }} />
+                                   </div>
+                                   <div style={{ width: "50px", textAlign: "right" }}>{count}</div>
+                                 </div>
+                               ));
+                           })()}
+                         </div>
+                       </div>
+                   </div>
+                </div>
+              )}
+               {!this.state.selectedSection && (
+                  <div style={{ textAlign: 'center', padding: '2rem', color: '#6c757d' }}>
+                    <p>Select a section from the left to get started.</p>
                   </div>
-                  :
-                  null
-              }
+               )}
             </div>
           </div>
+        </div>
 
-          <Modal show={this.state.confirmPromoteModal}>
-    <div
-      style={{
-        textAlign: "center",
-        backgroundColor: "#fff",
-        padding: "2rem",
-        borderRadius: "0.5rem",
-        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
-        maxWidth: "400px",
-        margin: "0 auto"
-      }}
-    >
-      <h3 style={{ color: "#16435d", marginBottom: "1rem" }}>Confirm Promotion</h3>
-      <p style={{ color: "#4a6b82", marginBottom: "2rem" }}>
-        Are you sure you want to promote {this.state.selectedUser?.first_name} {this.state.selectedUser?.last_name} to admin?
-      </p>
-      <div style={{ display: "flex", justifyContent: "space-between" }}>
-        <button
-          onClick={() => this.setState({ confirmPromoteModal: false })}
-          style={{
-            backgroundColor: "#6c757d",
-            color: "#fff",
-            padding: "0.5rem 1rem",
-            border: "none",
-            borderRadius: "4px",
-            cursor: "pointer"
-          }}
-        >
-          Cancel
-        </button>
-        <button
-          onClick={() => {
-            this.promoteUser();
-          }}
-          style={{
-            backgroundColor: "#28a745",
-            color: "#fff",
-            padding: "0.5rem 1rem",
-            border: "none",
-            borderRadius: "4px",
-            cursor: "pointer"
-          }}
-        >
-          Confirm
-        </button>
-      </div>
-    </div>
-  </Modal>
+        <Modal show={this.state.confirmPromoteModal}>
+          <div
+            style={{
+              textAlign: "center",
+              backgroundColor: "#fff",
+              padding: "2rem",
+              borderRadius: "0.5rem",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+              maxWidth: "400px",
+              margin: "0 auto"
+            }}
+          >
+            <h3 style={{ color: "#16435d", marginBottom: "1rem" }}>Confirm Promotion</h3>
+            <p style={{ color: "#4a6b82", marginBottom: "2rem" }}>
+              Are you sure you want to promote {this.state.selectedUser?.first_name} {this.state.selectedUser?.last_name} to admin?
+            </p>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <button
+                onClick={() => this.setState({ confirmPromoteModal: false })}
+                style={{
+                  backgroundColor: "#6c757d",
+                  color: "#fff",
+                  padding: "0.5rem 1rem",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer"
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  this.promoteUser();
+                }}
+                style={{
+                  backgroundColor: "#28a745",
+                  color: "#fff",
+                  padding: "0.5rem 1rem",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer"
+                }}
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </Modal>
 
-  <Modal show={this.state.successModal}>
-    <div
-      style={{
-        position: "relative",
-        textAlign: "center",
-        backgroundColor: "#eafaf1",
-        padding: "2rem",
-        borderRadius: "0.5rem",
-        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-        maxWidth: "400px",
-        margin: "0 auto",
-        color: "#155724",
-        fontSize: "1.2rem",
-        fontWeight: "bold",
-      }}
-    >
-      <button
-        onClick={() => this.setState({ successModal: false })}
-        style={{
-          position: "absolute",
-          top: "0.5rem",
-          right: "0.75rem",
-          background: "transparent",
-          border: "none",
-          fontSize: "1.25rem",
-          cursor: "pointer",
-          color: "#155724"
-        }}
-      >
-        &times;
-      </button>
-      {this.state.successMessage}
-    </div>
-  </Modal>
+        <Modal show={this.state.successModal}>
+          <div
+            style={{
+              position: "relative",
+              textAlign: "center",
+              backgroundColor: "#eafaf1",
+              padding: "2rem",
+              borderRadius: "0.5rem",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+              maxWidth: "400px",
+              margin: "0 auto",
+              color: "#155724",
+              fontSize: "1.2rem",
+              fontWeight: "bold",
+            }}
+          >
+            <button
+              onClick={() => this.setState({ successModal: false })}
+              style={{
+                position: "absolute",
+                top: "0.5rem",
+                right: "0.75rem",
+                background: "transparent",
+                border: "none",
+                fontSize: "1.25rem",
+                cursor: "pointer",
+                color: "#155724"
+              }}
+            >
+              &times;
+            </button>
+            {this.state.successMessage}
+          </div>
+        </Modal>
 
-
-          <div className="snowfall-container"></div>
-
-          <style jsx global>{`
+        <style jsx>{`
             @keyframes fall {
-              0% {
-                transform: translateY(0) rotate(0deg);
-              }
-              100% {
-                transform: translateY(100vh) rotate(360deg);
-              }
+              0% { transform: translateY(-10vh) rotate(0deg); }
+              100% { transform: translateY(100vh) rotate(360deg); }
+            }
+            td, th {
+              padding: ${isMobile ? '0.5rem' : '0.75rem'};
+              text-align: left;
+              border-bottom: 1px solid #eee;
+            }
+            th {
+              background-color: #f6f9fc;
+              color: #16435d;
+              font-weight: 600;
+            }
+            tr:hover {
+              background-color: #f6f9fc;
             }
           `}</style>
-        </div>
       </div>
     );
   }
