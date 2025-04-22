@@ -124,7 +124,7 @@ class Dashboard extends Component<PropsType, StateType> {
   constructor(props: PropsType) {
     super(props);
     this.state = {
-      screenSize: typeof window !== "undefined" ? window.innerWidth : 851,
+      screenSize: typeof window !== "undefined" ? window.innerWidth : 0,
       user: null,
       adminView: false,
 
@@ -429,18 +429,16 @@ class Dashboard extends Component<PropsType, StateType> {
   componentDidMount() {
     this.fetchEverything();
 
-    window.addEventListener("resize", this.handleResize);
-    setTimeout(() => {
+    // Set initial size and add listener immediately
       this.setState({ screenSize: window.innerWidth });
-    }, 1000);
-
+    window.addEventListener("resize", this.handleResize);
   }
 
   componentWillUnmount() {
     window.removeEventListener("resize", this.handleResize);
   }
 
-  isMobileView = () => this.state.screenSize < 850;
+  isMobileView = () => this.state.screenSize < 768;
 
   async getCurrentUser() {
     try {
@@ -499,7 +497,7 @@ class Dashboard extends Component<PropsType, StateType> {
             <div
               key={i}
               className="absolute animate-fall"
-              style={{
+        style={{
                 left: `${Math.random() * 100}%`,
                 animationDelay: `${Math.random() * 5}s`,
                 opacity: Math.random() * 0.5 + 0.3
@@ -512,266 +510,266 @@ class Dashboard extends Component<PropsType, StateType> {
 
         {/* Main Content */}
         <div className="relative" style={{ zIndex: 10 }}>
-          <div
-            style={{
-              display: "flex",
+        <div
+          style={{
+            display: "flex",
               flexDirection: isMobile ? "column" : "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-              textAlign: "center",
+            justifyContent: "space-between",
+            alignItems: "center",
+            textAlign: "center",
               padding: isMobile ? "1rem" : "2rem",
-              width: "100%",
+            width: "100%",
               boxSizing: "border-box",
               gap: isMobile ? "1rem" : "0"
-            }}
-          >
-            {/* Left Column - Resort List or Detail Page */}
-            {!this.state.resortDetailPage ? (
-              <div
-                style={{
-                  padding: "1rem",
-                  backgroundColor: "white",
-                  borderRadius: "0.5rem",
-                  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+          }}
+        >
+          {/* Left Column - Resort List or Detail Page */}
+          {!this.state.resortDetailPage ? (
+            <div
+              style={{
+                padding: "1rem",
+                backgroundColor: "white",
+                borderRadius: "0.5rem",
+                boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
                   width: isMobile ? "100%" : "54%",
                   height: isMobile ? "auto" : "80vh",
-                  overflowY: "auto"
-                }}
-              >
-                  {/* ADD SEARCH HERE */}
-                  <div style={{ position: "relative", marginBottom: "1rem" }}>
-                    <input 
-                      placeholder="Search resorts..."
-                      style={{
-                        width: "100%",
-                        padding: "0.5rem 2.5rem 0.5rem 0.5rem", // right padding for icon space
-                        border: "1px solid #ccc",
-                        borderRadius: "0.5rem",
-                      }}
-                      value={this.state.searchField}
-                      onChange={(e) => {
-                        this.setState({
-                          searchField: e.target.value,
-                        })
-                      }}
-                    />
-                  
-                    <div 
-                      style={{
-                        position: "absolute",
-                        right: "0.5rem",
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        cursor: "pointer",
-                        transition: "transform 0.1s ease-in-out"
-                      }}
-                      onMouseDown={e => e.currentTarget.style.transform = "translateY(-50%) scale(0.9)"}
-                      onMouseUp={e => e.currentTarget.style.transform = "translateY(-50%)"}
-                      onMouseLeave={e => e.currentTarget.style.transform = "translateY(-50%)"}
-                      // clear all filters
-                      onClick={() => this.setState({ searchField: "", sortFilter: "", stateFilter: "", myReviews: [] })}
-                    >
-                      <Icon path={mdiCloseCircle} size={1} color="#6c757d" />
-                    </div>
-                   
+                overflowY: "auto"
+              }}
+            >
+                {/* ADD SEARCH HERE */}
+                <div style={{ position: "relative", marginBottom: "1rem" }}>
+                  <input 
+                    placeholder="Search resorts..."
+                    style={{
+                      width: "100%",
+                      padding: "0.5rem 2.5rem 0.5rem 0.5rem", // right padding for icon space
+                      border: "1px solid #ccc",
+                      borderRadius: "0.5rem",
+                    }}
+                    value={this.state.searchField}
+                    onChange={(e) => {
+                      this.setState({
+                        searchField: e.target.value,
+                      })
+                    }}
+                  />
+                
+                  <div 
+                    style={{
+                      position: "absolute",
+                      right: "0.5rem",
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      cursor: "pointer",
+                      transition: "transform 0.1s ease-in-out"
+                    }}
+                    onMouseDown={e => e.currentTarget.style.transform = "translateY(-50%) scale(0.9)"}
+                    onMouseUp={e => e.currentTarget.style.transform = "translateY(-50%)"}
+                    onMouseLeave={e => e.currentTarget.style.transform = "translateY(-50%)"}
+                    // clear all filters
+                    onClick={() => this.setState({ searchField: "", sortFilter: "", stateFilter: "", myReviews: [] })}
+                  >
+                    <Icon path={mdiCloseCircle} size={1} color="#6c757d" />
                   </div>
+                 
+                </div>
 
-                  <div style={{display: 'flex', width: '100%', justifyContent: 'space-between', margin: '1rem 0'}}>
-                    <select value={this.state.stateFilter} onChange={(e) => this.setState({ stateFilter: e.target.value })} style={inputStyle}>
-                      <option value="">Filter by State</option>
-                      <option value="UT">Utah</option>
-                      <option value="CO">Colorado</option>
-                      <option value="CA">California</option>
-                      <option value="NY">New York</option>
-                      <option value="VT">Vermont</option>
+                <div style={{display: 'flex', width: '100%', justifyContent: 'space-between', margin: '1rem 0'}}>
+                  <select value={this.state.stateFilter} onChange={(e) => this.setState({ stateFilter: e.target.value })} style={inputStyle}>
+                    <option value="">Filter by State</option>
+                    <option value="UT">Utah</option>
+                    <option value="CO">Colorado</option>
+                    <option value="CA">California</option>
+                    <option value="NY">New York</option>
+                    <option value="VT">Vermont</option>
 
-                    </select>
+                  </select>
 
-                    <select value={this.state.sortFilter} onChange={(e) => this.setState({ sortFilter: e.target.value })} style={inputStyle}>
-                      <option value="">Sort by</option>
-                      <option value="highest">Rating (high)</option>
-                      <option value="lowest">Rating (low)</option>
-                      {/* temperature */}
-                      <option value="temperatureHighest">Temperature (high)</option>
-                      <option value="temperatureLowest">Temperature (low)</option>
-                      {/* <option value="nearest">Nearest to Me</option> */}
-                    </select>
-
-
-
-                  </div>
+                  <select value={this.state.sortFilter} onChange={(e) => this.setState({ sortFilter: e.target.value })} style={inputStyle}>
+                    <option value="">Sort by</option>
+                    <option value="highest">Rating (high)</option>
+                    <option value="lowest">Rating (low)</option>
+                    {/* temperature */}
+                    <option value="temperatureHighest">Temperature (high)</option>
+                    <option value="temperatureLowest">Temperature (low)</option>
+                    {/* <option value="nearest">Nearest to Me</option> */}
+                  </select>
 
 
-                {/* <p style={{position: "sticky"}}>hi</p> */}
+
+                </div>
+
+
+              {/* <p style={{position: "sticky"}}>hi</p> */}
                 {!this.state.resortsLoading ? (
-                  <ul style={{ listStyleType: "none", padding: 0 }}>
-                    {resorts
-                      .filter((resort) => {
-                        const matchesSearch = resort.name.toLowerCase().includes(this.state.searchField.toLowerCase());
-                        const matchesState = this.state.stateFilter === "" || resort.state === this.state.stateFilter;
-                        return matchesSearch && matchesState;
-                      })
-                      .sort((a, b) => {
-                        if (this.state.sortFilter === "highest") {
-                          return b.average_rating - a.average_rating;
-                        } else if (this.state.sortFilter === "lowest") {
-                          return a.average_rating - b.average_rating;
-                        } else if (this.state.sortFilter === "temperatureHighest") {
-                          return (b.weather?.temperature || 0) - (a.weather?.temperature || 0);
-                        } else if (this.state.sortFilter === "temperatureLowest") {
-                          return (a.weather?.temperature || 0) - (b.weather?.temperature || 0);
-                        } else if (this.state.sortFilter === "nearest" && this.state.user?.zip_code) {
-                          // placeholder for now
-                        }
-                        return 0;
-                      })
-                      .map((resort) => (
-                        <div
-                          key={resort.id}
-                          onClick={() => {
-                            const existingReview = this.state.myReviews.find(
-                              (review) => review.resort_id === resort.id
-                            );
+                <ul style={{ listStyleType: "none", padding: 0 }}>
+                  {resorts
+                    .filter((resort) => {
+                      const matchesSearch = resort.name.toLowerCase().includes(this.state.searchField.toLowerCase());
+                      const matchesState = this.state.stateFilter === "" || resort.state === this.state.stateFilter;
+                      return matchesSearch && matchesState;
+                    })
+                    .sort((a, b) => {
+                      if (this.state.sortFilter === "highest") {
+                        return b.average_rating - a.average_rating;
+                      } else if (this.state.sortFilter === "lowest") {
+                        return a.average_rating - b.average_rating;
+                      } else if (this.state.sortFilter === "temperatureHighest") {
+                        return (b.weather?.temperature || 0) - (a.weather?.temperature || 0);
+                      } else if (this.state.sortFilter === "temperatureLowest") {
+                        return (a.weather?.temperature || 0) - (b.weather?.temperature || 0);
+                      } else if (this.state.sortFilter === "nearest" && this.state.user?.zip_code) {
+                        // placeholder for now
+                      }
+                      return 0;
+                    })
+                    .map((resort) => (
+                      <div
+                        key={resort.id}
+                        onClick={() => {
+                          const existingReview = this.state.myReviews.find(
+                            (review) => review.resort_id === resort.id
+                          );
 
-                            const updatedResort = this.state.resorts.find(r => r.id === resort.id) || resort;
+                          const updatedResort = this.state.resorts.find(r => r.id === resort.id) || resort;
 
-                            this.setState({
-                              resortDetailPage: true,
-                              selectedResort: updatedResort,
-                              reviewInput: existingReview?.review || "",
-                              ratingInput: existingReview?.rating || 0,
-                            });
-                            this.fetchResortReviews(resort.id);
-                          }}
-                          style={{
-                            backgroundColor: "#ffffff",
-                            border: "1px solid #d4e3f0",
-                            padding: "1rem",
-                            marginBottom: "1rem",
-                            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
-                            color: "#4a6b82",
-                            cursor: "pointer",
-                            transition: "transform 0.2s ease-in-out",
-                            textAlign: "left",
-                          }}
-                          onMouseEnter={e => e.currentTarget.style.transform = "scale(1.01)"}
-                          onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
-                        >
-                          <div style={{ display: "flex", alignItems: "center", marginBottom: "0.5rem", justifyContent: "space-between" }}>
-                            <div style={{display: "flex", justifyContent: "center", alignItems: "center"}}>
-                              <img
-                                src={resort.photoURL}
-                                alt="resort photo"
-                                style={{
-                                  width: "45px",
-                                  height: "45px",
-                                  borderRadius: "8px",
-                                }}
-                              />
-                              <div style={{ fontWeight: "bold", fontSize: "1.1rem", color: "#16435d", justifyContent: "center", marginLeft: "0.5rem" }}>
-                                {resort.name}
-                              </div>
-                            </div>
-                            <div
-                              onMouseEnter={(e) => {
-                                e.currentTarget.style.transform = "scale(1.2)";
-                              }}
-                              onMouseLeave={(e) => {
-                                e.currentTarget.style.transform = "scale(1)";
-                              }}
+                          this.setState({
+                            resortDetailPage: true,
+                            selectedResort: updatedResort,
+                            reviewInput: existingReview?.review || "",
+                            ratingInput: existingReview?.rating || 0,
+                          });
+                          this.fetchResortReviews(resort.id);
+                        }}
+                        style={{
+                          backgroundColor: "#ffffff",
+                          border: "1px solid #d4e3f0",
+                          padding: "1rem",
+                          marginBottom: "1rem",
+                          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
+                          color: "#4a6b82",
+                          cursor: "pointer",
+                          transition: "transform 0.2s ease-in-out",
+                          textAlign: "left",
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.transform = "scale(1.01)"}
+                        onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", marginBottom: "0.5rem", justifyContent: "space-between" }}>
+                          <div style={{display: "flex", justifyContent: "center", alignItems: "center"}}>
+                            <img
+                              src={resort.photoURL}
+                              alt="resort photo"
                               style={{
-                                transition: "transform 0.2s ease-in-out",
-                                cursor: "pointer",
-                                display: "flex",
-                                alignItems: "center"
+                                width: "45px",
+                                height: "45px",
+                                borderRadius: "8px",
                               }}
-                            >
-                              <div style={{display: this.state.adminView ? '' : 'none'}} onClick={(e) => {
-                                e.stopPropagation();
-                                this.setState({ confirmDeleteModal: true, selectedResort: resort });
-                              }}><Icon path={mdiDelete} size={1} color="#dc3545"/></div>
+                            />
+                            <div style={{ fontWeight: "bold", fontSize: "1.1rem", color: "#16435d", justifyContent: "center", marginLeft: "0.5rem" }}>
+                              {resort.name}
                             </div>
                           </div>
-                          <div style={{ display: "flex", alignItems: "center", margin: "0.5rem 0", color: "#6c757d" }}>
-                            <Icon path={mdiThermometer} size={1} color="#6c757d" />
-                            <span style={{ marginLeft: "0.5rem" }}>
-                              {resort.weather?.temperature !== undefined ? `${resort.weather.temperature}°F` : "N/A"}
-                            </span>
-                            {resort.weather?.description && (
-                              <>
-                                <span style={{ margin: "0 0.5rem" }}>|</span>
-                                <Icon
-                                  path={weatherIconMap[(resort.weather.description || "").toLowerCase()] || mdiWeatherCloudy}
-                                  size={1}
-                                  color="#6c757d"
-                                />
-                                <span style={{ marginLeft: "0.5rem" }}>
-                                  {resort.weather.description.charAt(0).toUpperCase() + resort.weather.description.slice(1)}
-                                </span>
-                              </>
-                            )}
+                          <div
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.transform = "scale(1.2)";
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.transform = "scale(1)";
+                            }}
+                            style={{
+                              transition: "transform 0.2s ease-in-out",
+                              cursor: "pointer",
+                              display: "flex",
+                              alignItems: "center"
+                            }}
+                          >
+                            <div style={{display: this.state.adminView ? '' : 'none'}} onClick={(e) => {
+                              e.stopPropagation();
+                              this.setState({ confirmDeleteModal: true, selectedResort: resort });
+                            }}><Icon path={mdiDelete} size={1} color="#dc3545"/></div>
                           </div>
-                          <div style={{ color: "#6c757d" }}></div>
-                        <hr style={{margin: '10px 0'}}/>
-                        <div style={{ color: "#6c757d" }}>
-                          {resort.average_rating != 0 ? <div style={{ display: "flex", gap: "0.25rem" }}>
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <Icon
-                              key={star}
-                              path={resort.average_rating >= star ? mdiStar : mdiStarOutline}
-                              size={1}
-                              color="#FFD700"
-                            />
-                          ))}
-                        </div> :  "No reviews yet"
-                        }
-                          </div>
-                        
-                      </div>
-                    ))}
-                  </ul>
-                ) : (
-                  <SkeletonLoader />
-                )}
-              </div>
-            ) : (
-              // resort detail section
-              <div
-                style={{
-                  position: "relative",
-                  padding: "1rem",
-                  background: "#ffffff",
-                  border: "1px solid #d4e3f0",
-                  borderRadius: "0.5rem",
-                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
+                        </div>
+                        <div style={{ display: "flex", alignItems: "center", margin: "0.5rem 0", color: "#6c757d" }}>
+                          <Icon path={mdiThermometer} size={1} color="#6c757d" />
+                          <span style={{ marginLeft: "0.5rem" }}>
+                            {resort.weather?.temperature !== undefined ? `${resort.weather.temperature}°F` : "N/A"}
+                          </span>
+                          {resort.weather?.description && (
+                            <>
+                              <span style={{ margin: "0 0.5rem" }}>|</span>
+                              <Icon
+                                path={weatherIconMap[(resort.weather.description || "").toLowerCase()] || mdiWeatherCloudy}
+                                size={1}
+                                color="#6c757d"
+                              />
+                              <span style={{ marginLeft: "0.5rem" }}>
+                                {resort.weather.description.charAt(0).toUpperCase() + resort.weather.description.slice(1)}
+                              </span>
+                            </>
+                          )}
+                        </div>
+                        <div style={{ color: "#6c757d" }}></div>
+                      <hr style={{margin: '10px 0'}}/>
+                      <div style={{ color: "#6c757d" }}>
+                        {resort.average_rating != 0 ? <div style={{ display: "flex", gap: "0.25rem" }}>
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Icon
+                            key={star}
+                            path={resort.average_rating >= star ? mdiStar : mdiStarOutline}
+                            size={1}
+                            color="#FFD700"
+                          />
+                        ))}
+                      </div> :  "No reviews yet"
+                      }
+                        </div>
+                      
+                    </div>
+                  ))}
+                </ul>
+              ) : (
+                <SkeletonLoader />
+              )}
+            </div>
+          ) : (
+            // resort detail section
+            <div
+              style={{
+                position: "relative",
+                padding: "1rem",
+                background: "#ffffff",
+                border: "1px solid #d4e3f0",
+                borderRadius: "0.5rem",
+                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
                   width: isMobile ? "100%" : "52%",
                   height: isMobile ? "auto" : "80vh",
-                  overflowY: "auto",
-                  alignItems: "center",
-                }}
-              >
+                overflowY: "auto",
+                alignItems: "center",
+              }}
+            >
                {/* close button */}
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "1rem",
-                    right: "1rem",
-                    cursor: "pointer",
-                    zIndex: 1
-                  }}
-                  onClick={() =>
-                    this.setState({
-                      resortDetailPage: false,
-                      selectedResort: null,
-                      errorOccurred: false,
-                      successOccurred: false,
-                      errorMessage: "",
-                      successMessage: ""
-                    })
-                  }
-                >
-                  <Icon path={mdiCloseCircle} size={1.5} color="#6c757d" />
-                </div>
+               <div
+                 style={{
+                   position: "absolute",
+                   top: "1rem",
+                   right: "1rem",
+                   cursor: "pointer",
+                   zIndex: 1
+                 }}
+                 onClick={() =>
+                   this.setState({
+                     resortDetailPage: false,
+                     selectedResort: null,
+                     errorOccurred: false,
+                     successOccurred: false,
+                     errorMessage: "",
+                     successMessage: ""
+                   })
+                 }
+               >
+                 <Icon path={mdiCloseCircle} size={1.5} color="#6c757d" />
+               </div>
                 <div
                   style={{
                     background: 'linear-gradient(145deg, #f6f9fc, #ffffff)',
@@ -783,10 +781,10 @@ class Dashboard extends Component<PropsType, StateType> {
                     position: 'relative'
                   }}
                 >
-                  <img
-                    src={this.state.selectedResort?.photoURL}
+              <img
+                          src={this.state.selectedResort?.photoURL}
                     alt="resort logo"
-                    style={{
+                          style={{
                       width: '120px',
                       height: '120px',
                       borderRadius: '12px',
@@ -803,10 +801,10 @@ class Dashboard extends Component<PropsType, StateType> {
                     color: '#16435d',
                     fontWeight: 'bold'
                   }}>{this.state.selectedResort?.name}</h2>
-                  <a
-                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(this.state.selectedResort?.address || "")}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
+              <a
+                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(this.state.selectedResort?.address || "")}`}
+                target="_blank"
+                rel="noopener noreferrer"
                     style={{ 
                       color: '#4a6b82',
                       fontSize: '1.1rem',
@@ -816,33 +814,33 @@ class Dashboard extends Component<PropsType, StateType> {
                       alignItems: 'center',
                       gap: '0.5rem'
                     }}
-                    onMouseEnter={e => {
+                  onMouseEnter={e => {
                       e.currentTarget.style.color = "#2a5f9e";
-                      e.currentTarget.style.textDecoration = "underline";
+                    e.currentTarget.style.textDecoration = "underline";
                     }}
                     onMouseLeave={e => {
                       e.currentTarget.style.color = "#4a6b82";
-                      e.currentTarget.style.textDecoration = "none";
-                    }}
-                  >
-                    <Icon path={mdiMapMarker} size={1} />
-                    {this.state.selectedResort?.address}
-                  </a>
-                </div>
-                {/* add website here */}
-                  <p style={{ display: 'flex', color: "#6c757d", marginBottom: "0.5rem", alignItems: "center", fontSize: "16px", justifyContent: "center" }} onMouseEnter={e => {
-                    e.currentTarget.style.fontWeight = "bold";
-                    e.currentTarget.style.cursor = "pointer";
-                    e.currentTarget.style.textDecoration = "underline";
-                    }} onMouseLeave={e => {
-                    e.currentTarget.style.fontWeight = "normal";
                     e.currentTarget.style.textDecoration = "none";
-                    e.currentTarget.style.cursor = "default";
-                    }}>
-                  <a
-                    href={this.state.selectedResort?.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  }}
+              >
+                    <Icon path={mdiMapMarker} size={1} />
+                {this.state.selectedResort?.address}
+              </a>
+                </div>
+              {/* add website here */}
+                <p style={{ display: 'flex', color: "#6c757d", marginBottom: "0.5rem", alignItems: "center", fontSize: "16px", justifyContent: "center" }} onMouseEnter={e => {
+                  e.currentTarget.style.fontWeight = "bold";
+                  e.currentTarget.style.cursor = "pointer";
+                  e.currentTarget.style.textDecoration = "underline";
+                  }} onMouseLeave={e => {
+                  e.currentTarget.style.fontWeight = "normal";
+                  e.currentTarget.style.textDecoration = "none";
+                  e.currentTarget.style.cursor = "default";
+                  }}>
+                <a
+                  href={this.state.selectedResort?.website}
+                  target="_blank"
+                  rel="noopener noreferrer"
                     style={{
                       display: 'inline-flex',
                       alignItems: 'center',
@@ -859,7 +857,7 @@ class Dashboard extends Component<PropsType, StateType> {
                       border: '1px solid #d4e3f0',
                       margin: '0.5rem 0 0.5rem 0'
                     }}
-                    onMouseEnter={e => {
+                  onMouseEnter={e => {
                       e.currentTarget.style.backgroundColor = '#f6f9fc';
                       e.currentTarget.style.transform = 'translateY(-1px)';
                       e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
@@ -871,14 +869,14 @@ class Dashboard extends Component<PropsType, StateType> {
                     }}
                   >
                     Visit Resort Website
-                    <Icon
-                      path={mdiOpenInNew}
-                      size={0.9}
+                <Icon
+                  path={mdiOpenInNew}
+                  size={0.9}
                       color="#2a5f9e"
-                    />
+                />
                   </a>
-                  </p>
-                {this.state.selectedResort?.weather && (
+                </p>
+              {this.state.selectedResort?.weather && (
                   <>
                     {/* Current Weather Section */}
                     <div style={{
@@ -901,12 +899,12 @@ class Dashboard extends Component<PropsType, StateType> {
                         <Icon path={mdiThermometer} size={1.2} color="#2a5f9e" />
                         <h4 style={{ margin: '0.5rem 0', color: '#16435d', fontSize: '0.9rem' }}>Temperature</h4>
                         <p style={{ fontSize: '1.25rem', color: '#2a5f9e', fontWeight: 'bold', margin: 0 }}>
-                          {this.state.selectedResort.weather.temperature}°F
+                      {this.state.selectedResort.weather.temperature}°F
                         </p>
                         <p style={{ fontSize: '0.9rem', color: '#6c757d', margin: '0.25rem 0 0 0' }}>
                           Feels like {this.state.selectedResort.weather.feelsLike}°F
                         </p>
-                      </div>
+                  </div>
 
                       <div style={{ 
                         textAlign: 'center',
@@ -923,7 +921,7 @@ class Dashboard extends Component<PropsType, StateType> {
                         <p style={{ fontSize: '0.9rem', color: '#6c757d', margin: '0.25rem 0 0 0' }}>
                           Humidity: {this.state.selectedResort.weather.humidity}%
                         </p>
-                      </div>
+                  </div>
 
                       <div style={{ 
                         textAlign: 'center',
@@ -945,7 +943,7 @@ class Dashboard extends Component<PropsType, StateType> {
                         <p style={{ fontSize: '0.9rem', color: '#6c757d', margin: '0.25rem 0 0 0' }}>
                           Visibility: {Math.round(this.state.selectedResort.weather.visibility / 1609)} mi
                         </p>
-                      </div>
+                  </div>
 
                       <div style={{ 
                         textAlign: 'center',
@@ -962,7 +960,7 @@ class Dashboard extends Component<PropsType, StateType> {
                         <p style={{ fontSize: '0.9rem', color: '#6c757d', margin: '0.25rem 0 0 0' }}>
                           Pressure: {this.state.selectedResort.weather.pressure} hPa
                         </p>
-                      </div>
+                </div>
 
                       <div style={{ 
                         textAlign: 'center',
@@ -1074,8 +1072,8 @@ class Dashboard extends Component<PropsType, StateType> {
                 )}
 
 
-                  <div style={{ 
-                      textAlign: "left",
+                <div style={{ 
+                    textAlign: "left",
                       marginTop: '1.5rem'
                   }}>
                     <div style={{
@@ -1117,10 +1115,10 @@ class Dashboard extends Component<PropsType, StateType> {
                       )}
                     </div>
 
-                    {this.state.resortReviewsLoading ? (
-                      <SkeletonLoader />
-                    ) : 
-                    this.state.resortReviews.length === 0 ? (
+                {this.state.resortReviewsLoading ? (
+                  <SkeletonLoader />
+                ) : 
+                this.state.resortReviews.length === 0 ? (
                       <div style={{
                         textAlign: 'center',
                         padding: '2rem',
@@ -1144,7 +1142,7 @@ class Dashboard extends Component<PropsType, StateType> {
                               backgroundColor: "#ffffff",
                               border: "1px solid #e0eaf5",
                               padding: "1.25rem",
-                              boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
                             }}
                           >
                             <div style={{ 
@@ -1188,39 +1186,39 @@ class Dashboard extends Component<PropsType, StateType> {
                                   }}
                                   onMouseLeave={e => {
                                     (e.target as HTMLElement).style.transform = "scale(1)";
-                                  }}
-                                  onClick={() => {
-                                    this.setState({ confirmDeleteReviewModal: true, selectedReview: review });
-                                  }}
-                                >
+                          }}
+                          onClick={() => {
+                            this.setState({ confirmDeleteReviewModal: true, selectedReview: review });
+                          }}
+                          >
                                   <Icon 
                                     path={mdiDelete} 
                                     size={1} 
                                     color="#dc3545"
                                   />
-                                </div>
+                        </div>
                               )}
                             </div>
                             <div style={{ display: "flex", gap: "0.25rem", marginBottom: '0.75rem' }}>
-                              {[1, 2, 3, 4, 5].map((star) => (
-                                <Icon
-                                  key={star}
-                                  path={review.rating >= star ? mdiStar : mdiStarOutline}
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Icon
+                            key={star}
+                            path={review.rating >= star ? mdiStar : mdiStarOutline}
                                   size={0.9}
-                                  color="#FFD700"
-                                />
-                              ))}
-                            </div>
+                            color="#FFD700"
+                          />
+                        ))}
+                      </div>
                             <div style={{
                               color: '#4a6b82',
                               lineHeight: '1.5'
                             }}>{review.review}</div>
-                          </div>
+                    </div>
                         ))}
                       </div>
-                    )}
-                  </div>
-                
+                )}
+              </div>
+              
                 {loggedIn && (
                   <div style={{
                     backgroundColor: '#f6f9fc',
@@ -1251,9 +1249,9 @@ class Dashboard extends Component<PropsType, StateType> {
                           gap: '0.5rem',
                           marginBottom: '0.5rem'
                         }}>
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <div
-                              key={star}
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <div
+                    key={star}
                               style={{
                                 cursor: 'pointer',
                                 transition: 'transform 0.2s ease'
@@ -1274,17 +1272,17 @@ class Dashboard extends Component<PropsType, StateType> {
                                   (s as HTMLElement).style.transform = 'scale(1)';
                                 });
                               }}
-                              onClick={() => this.setState({ ratingInput: star })}
-                            >
-                              <Icon
+                    onClick={() => this.setState({ ratingInput: star })}
+                  >
+                    <Icon
                                 className="rating-star"
-                                path={this.state.ratingInput >= star ? mdiStar : mdiStarOutline}
-                                size={1.5}
-                                color="#FFD700"
-                              />
-                            </div>
-                          ))}
-                        </div>
+                      path={this.state.ratingInput >= star ? mdiStar : mdiStarOutline}
+                      size={1.5}
+                      color="#FFD700"
+                    />
+                  </div>
+                ))}
+              </div>
                       </div>
 
                       <div style={{ position: 'relative' }}>
@@ -1330,10 +1328,10 @@ class Dashboard extends Component<PropsType, StateType> {
                         alignItems: 'center',
                         marginTop: '0.5rem'
                       }}>
-                        <Button
-                          style={{
-                            backgroundColor: "#0d6efd",
-                            color: "white",
+                <Button
+                  style={{
+                    backgroundColor: "#0d6efd",
+                    color: "white",
                             padding: "0.75rem 1.5rem",
                             borderRadius: "8px",
                             border: 'none',
@@ -1341,13 +1339,13 @@ class Dashboard extends Component<PropsType, StateType> {
                             cursor: 'pointer',
                             transition: 'all 0.2s ease',
                             boxShadow: '0 2px 4px rgba(13, 110, 253, 0.2)'
-                          }}
-                          onClick={() => {
-                            this.attemptToSubmitReview();
-                          }}
-                        >
-                          Submit Review
-                        </Button>
+                  }}
+                  onClick={() => {
+                    this.attemptToSubmitReview();
+                  }}
+                >
+                  Submit Review
+                </Button>
 
                         {(this.state.errorOccurred || this.state.successOccurred) && (
                           <div style={{
@@ -1386,7 +1384,7 @@ class Dashboard extends Component<PropsType, StateType> {
                       successMessage: "", 
                       myReviews: [] 
                     })}
-                    style={{
+                  style={{
                       display: 'flex',
                       alignItems: 'center',
                       gap: '0.5rem',
@@ -1415,162 +1413,162 @@ class Dashboard extends Component<PropsType, StateType> {
                     <Icon path={mdiArrowLeft} size={1} color="#2a5f9e" />
                     Back to Resorts
                   </button>
-                </div>
               </div>
-            )}
+            </div>
+          )}
 
-            {/* Right Column - Map */}
-            <div style={{ 
+          {/* Right Column - Map */}
+          <div style={{ 
               width: isMobile ? "100%" : "45%",
               height: isMobile ? "50vh" : "80vh",
               overflow: "hidden", 
               boxSizing: "border-box"
-            }}>
-              <Map
-                zip={this.state.user?.zip_code}
-                stateFilter={this.state.stateFilter}
-                selectedResort={
-                  this.state.selectedResort
-                    ? `${this.state.selectedResort.latitude},${this.state.selectedResort.longitude}`
-                    : ""
-                }
-              />  
+              }}>
+            <Map
+            zip={this.state.user?.zip_code}
+            stateFilter={this.state.stateFilter}
+              selectedResort={
+                this.state.selectedResort
+                  ? `${this.state.selectedResort.latitude},${this.state.selectedResort.longitude}`
+                  : ""
+              }
+            />  
             </div>
           </div>
 
           {/* Modals */}
-          <Modal show={this.state.confirmDeleteModal}>
-            <div
-              style={{
-                textAlign: "center",
-                backgroundColor: "#fff",
-                padding: "2rem",
-                borderRadius: "0.5rem",
-                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
-                maxWidth: "400px",
-                margin: "0 auto"
-              }}
-            >
-              <h3 style={{ color: "#16435d", marginBottom: "1rem" }}>Confirm Delete</h3>
-              <p style={{ color: "#4a6b82", marginBottom: "2rem" }}>
-                Are you sure you want to delete this resort?
-              </p>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <button
-                  onClick={() => this.setState({ confirmDeleteModal: false })}
-                  style={{
-                    backgroundColor: "#6c757d",
-                    color: "#fff",
-                    padding: "0.5rem 1rem",
-                    border: "none",
-                    borderRadius: "4px",
-                    cursor: "pointer"
-                  }}
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={() => {
-                    this.deleteResort();
-                  }}
-                  style={{
-                    backgroundColor: "#dc3545",
-                    color: "#fff",
-                    padding: "0.5rem 1rem",
-                    border: "none",
-                    borderRadius: "4px",
-                    cursor: "pointer"
-                  }}
-                >
-                  Confirm Delete
-                </button>
-              </div>
-            </div>
-          </Modal>
+<Modal show={this.state.confirmDeleteModal}>
+  <div
+    style={{
+      textAlign: "center",
+      backgroundColor: "#fff",
+      padding: "2rem",
+      borderRadius: "0.5rem",
+      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+      maxWidth: "400px",
+      margin: "0 auto"
+    }}
+  >
+    <h3 style={{ color: "#16435d", marginBottom: "1rem" }}>Confirm Delete</h3>
+    <p style={{ color: "#4a6b82", marginBottom: "2rem" }}>
+      Are you sure you want to delete this resort?
+    </p>
+    <div style={{ display: "flex", justifyContent: "space-between" }}>
+      <button
+        onClick={() => this.setState({ confirmDeleteModal: false })}
+        style={{
+          backgroundColor: "#6c757d",
+          color: "#fff",
+          padding: "0.5rem 1rem",
+          border: "none",
+          borderRadius: "4px",
+          cursor: "pointer"
+        }}
+      >
+        Cancel
+      </button>
+      <button
+        onClick={() => {
+          this.deleteResort();
+        }}
+        style={{
+          backgroundColor: "#dc3545",
+          color: "#fff",
+          padding: "0.5rem 1rem",
+          border: "none",
+          borderRadius: "4px",
+          cursor: "pointer"
+        }}
+      >
+        Confirm Delete
+      </button>
+    </div>
+  </div>
+</Modal>
 
-          <Modal show={this.state.confirmDeleteReviewModal}>
-            <div
-              style={{
-                textAlign: "center",
-                backgroundColor: "#fff",
-                padding: "2rem",
-                borderRadius: "0.5rem",
-                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
-                maxWidth: "400px",
-                margin: "0 auto"
-              }}
-            >
-              <h3 style={{ color: "#16435d", marginBottom: "1rem" }}>Confirm Deletion</h3>
-              <p style={{ color: "#4a6b82", marginBottom: "2rem" }}>
-                Are you sure you want to delete this review?
-              </p>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <button
-                  onClick={() => this.setState({ confirmDeleteReviewModal: false })}
-                  style={{
-                    backgroundColor: "#6c757d",
-                    color: "#fff",
-                    padding: "0.5rem 1rem",
-                    border: "none",
-                    borderRadius: "4px",
-                    cursor: "pointer"
-                  }}
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={() => {
-                    this.deleteReview();
-                  }}
-                  style={{
-                    backgroundColor: "#dc3545",
-                    color: "#fff",
-                    padding: "0.5rem 1rem",
-                    border: "none",
-                    borderRadius: "4px",
-                    cursor: "pointer"
-                  }}
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          </Modal>
+<Modal show={this.state.confirmDeleteReviewModal}>
+  <div
+    style={{
+      textAlign: "center",
+      backgroundColor: "#fff",
+      padding: "2rem",
+      borderRadius: "0.5rem",
+      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+      maxWidth: "400px",
+      margin: "0 auto"
+    }}
+  >
+    <h3 style={{ color: "#16435d", marginBottom: "1rem" }}>Confirm Deletion</h3>
+    <p style={{ color: "#4a6b82", marginBottom: "2rem" }}>
+      Are you sure you want to delete this review?
+    </p>
+    <div style={{ display: "flex", justifyContent: "space-between" }}>
+      <button
+        onClick={() => this.setState({ confirmDeleteReviewModal: false })}
+        style={{
+          backgroundColor: "#6c757d",
+          color: "#fff",
+          padding: "0.5rem 1rem",
+          border: "none",
+          borderRadius: "4px",
+          cursor: "pointer"
+        }}
+      >
+        Cancel
+      </button>
+      <button
+        onClick={() => {
+          this.deleteReview();
+        }}
+        style={{
+          backgroundColor: "#dc3545",
+          color: "#fff",
+          padding: "0.5rem 1rem",
+          border: "none",
+          borderRadius: "4px",
+          cursor: "pointer"
+        }}
+      >
+        Delete
+      </button>
+    </div>
+  </div>
+</Modal>
 
-          <Modal show={this.state.successModal}>
-            <div
-              style={{
-                position: "relative",
-                textAlign: "center",
-                backgroundColor: "#eafaf1",
-                padding: "2rem",
-                borderRadius: "0.5rem",
-                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-                maxWidth: "400px",
-                margin: "0 auto",
-                color: "#155724",
-                fontSize: "1.2rem",
-                fontWeight: "bold",
-              }}
-            >
-              <button
-                onClick={() => this.setState({ successModal: false, successOccurred: false, successMessage: "" })}
-                style={{
-                  position: "absolute",
-                  top: "0.5rem",
-                  right: "0.75rem",
-                  background: "transparent",
-                  border: "none",
-                  fontSize: "1.25rem",
-                  cursor: "pointer",
-                  color: "#155724"
-                }}
-              >
-                &times;
-              </button>
-              {this.state.successMessage}
-            </div>
-          </Modal>
+<Modal show={this.state.successModal}>
+  <div
+    style={{
+      position: "relative",
+      textAlign: "center",
+      backgroundColor: "#eafaf1",
+      padding: "2rem",
+      borderRadius: "0.5rem",
+      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+      maxWidth: "400px",
+      margin: "0 auto",
+      color: "#155724",
+      fontSize: "1.2rem",
+      fontWeight: "bold",
+    }}
+  >
+    <button
+      onClick={() => this.setState({ successModal: false, successOccurred: false, successMessage: "" })}
+      style={{
+        position: "absolute",
+        top: "0.5rem",
+        right: "0.75rem",
+        background: "transparent",
+        border: "none",
+        fontSize: "1.25rem",
+        cursor: "pointer",
+        color: "#155724"
+      }}
+    >
+      &times;
+    </button>
+    {this.state.successMessage}
+  </div>
+</Modal>
         </div>
 
         <Footer />
@@ -1581,8 +1579,8 @@ class Dashboard extends Component<PropsType, StateType> {
           @keyframes fall {
             0% {
               transform: translateY(-10vh) rotate(0deg);
-            }
-            100% {
+              }
+              100% {
               transform: translateY(100vh) rotate(360deg);
             }
           }

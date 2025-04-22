@@ -469,7 +469,7 @@ class NavLink extends Component<{ href: string, active: boolean, children: React
         textDecoration: 'none',
         fontSize: isMobile ? '1rem' : '0.9rem',
         fontWeight: '500',
-        padding: isMobile ? '1rem 1.5rem' : '0.5rem 0',
+        padding: isMobile ? '1rem' : '0.5rem',
         borderBottom: !isMobile && active ? '2px solid #2196f3' : 'none',
         transition: 'all 0.2s ease',
         display: 'block',
@@ -484,7 +484,8 @@ class NavLink extends Component<{ href: string, active: boolean, children: React
             e.currentTarget.style.borderBottom = '2px solid #e3f2fd';
           }
         } else {
-           e.currentTarget.style.backgroundColor = '#f0f0f0';
+          // Remove mobile background hover effect
+          // e.currentTarget.style.backgroundColor = '#f0f0f0';
         }
       }}
       onMouseLeave={(e) => {
@@ -494,7 +495,8 @@ class NavLink extends Component<{ href: string, active: boolean, children: React
             e.currentTarget.style.borderBottom = '2px solid transparent';
           }
         } else {
-           e.currentTarget.style.backgroundColor = 'transparent';
+          // Remove mobile background hover leave effect
+          // e.currentTarget.style.backgroundColor = 'transparent';
         }
       }}
       >
