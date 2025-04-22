@@ -1,9 +1,18 @@
-
-
 import React from "react";
 
-const SkeletonLoader: React.FC = () => {
+interface SkeletonLoaderProps {
+  isDarkMode: boolean;
+}
+
+const SkeletonLoader: React.FC<SkeletonLoaderProps> = ({ isDarkMode }) => {
   const placeholders = Array.from({ length: 3 });
+
+  const theme = {
+    cardBackground: isDarkMode ? '#2d3748' : '#ffffff',
+    borderColor: isDarkMode ? '#4a5568' : '#d4e3f0',
+    skeletonColor: isDarkMode ? '#4a5568' : '#e0e0e0',
+    textColor: isDarkMode ? '#a0aec0' : '#4a6b82',
+  };
 
   return (
     <div>
@@ -11,13 +20,12 @@ const SkeletonLoader: React.FC = () => {
         <div
           key={index}
           style={{
-            backgroundColor: "#ffffff",
-            border: "1px solid #d4e3f0",
+            backgroundColor: theme.cardBackground,
+            border: `1px solid ${theme.borderColor}`,
             padding: "1rem",
             marginBottom: "1rem",
-            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
+            boxShadow: isDarkMode ? "0 4px 12px rgba(0, 0, 0, 0.3)" : "0 4px 12px rgba(0, 0, 0, 0.05)",
             borderRadius: "8px",
-            color: "#4a6b82",
           }}
         >
           <div style={{ display: "flex", alignItems: "center", marginBottom: "0.5rem" }}>
@@ -26,7 +34,7 @@ const SkeletonLoader: React.FC = () => {
                 width: "45px",
                 height: "45px",
                 borderRadius: "8px",
-                backgroundColor: "#d4e3f0",
+                backgroundColor: theme.skeletonColor,
                 marginRight: "0.5rem",
               }}
             />
@@ -34,7 +42,7 @@ const SkeletonLoader: React.FC = () => {
               style={{
                 width: "150px",
                 height: "20px",
-                backgroundColor: "#d4e3f0",
+                backgroundColor: theme.skeletonColor,
                 borderRadius: "4px",
               }}
             />
@@ -43,7 +51,7 @@ const SkeletonLoader: React.FC = () => {
             style={{
               width: "100px",
               height: "20px",
-              backgroundColor: "#d4e3f0",
+              backgroundColor: theme.skeletonColor,
               borderRadius: "4px",
               marginBottom: "0.5rem",
             }}
@@ -52,7 +60,7 @@ const SkeletonLoader: React.FC = () => {
             style={{
               width: "70%",
               height: "16px",
-              backgroundColor: "#d4e3f0",
+              backgroundColor: theme.skeletonColor,
               borderRadius: "4px",
               marginBottom: "1rem",
             }}
@@ -64,7 +72,7 @@ const SkeletonLoader: React.FC = () => {
                 style={{
                   width: "20px",
                   height: "20px",
-                  backgroundColor: "#d4e3f0",
+                  backgroundColor: theme.skeletonColor,
                   borderRadius: "50%",
                 }}
               />

@@ -447,7 +447,7 @@ class AdminPage extends Component<PropsType, StateType> {
                 marginBottom: '1.5rem',
                 borderBottom: `1px solid ${theme.borderColor}`,
                 paddingBottom: '0.75rem'
-              }}>Sections</h2>
+              }}>Admin Menu</h2>
               <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                  {['Add Resort', 'Manage Users', 'Admin Analytics'].map(section => (
                    <li key={section} style={{ marginBottom: '0.75rem' }}>
@@ -642,10 +642,17 @@ class AdminPage extends Component<PropsType, StateType> {
                         </thead>
                         <tbody>
                           {this.state.users.map((user) => (
-                            <tr key={user.id} className="table-row-hover" style={{ borderBottom: `1px solid ${theme.borderColor}` }}>
-                              <td style={{ backgroundColor: theme.inputBg }}>{user.first_name} {user.last_name}</td>
-                              <td style={{ backgroundColor: theme.inputBg }}>{user.email}</td>
-                              <td>
+                            <tr 
+                              key={user.id} 
+                              className="table-row-hover" 
+                              style={{
+                                borderBottom: `1px solid ${theme.borderColor}`,
+                                backgroundColor: theme.cardBackground
+                              }}
+                            >
+                              <td style={{ color: theme.textColor }}>{user.first_name} {user.last_name}</td>
+                              <td style={{ color: theme.textColor }}>{user.email}</td>
+                              <td style={{ textAlign: 'center' }}>
                                 <button
                                   style={{
                                     backgroundColor: user.is_admin === true ? "transparent" : theme.textColor,
@@ -653,8 +660,9 @@ class AdminPage extends Component<PropsType, StateType> {
                                     padding: "0.4rem 0.75rem",
                                     border: user.is_admin ? `1px solid ${theme.secondaryTextColor}` : "none",
                                     borderRadius: "4px",
-                                    cursor: "pointer",
-                                    fontSize: "0.9rem"
+                                    cursor: user.is_admin ? "not-allowed" : "pointer",
+                                    fontSize: "0.9rem",
+                                    minWidth: '70px'
                                   }}
                                   onClick={() => {this.setState({ confirmPromoteModal: true, selectedUser: user })}}
                                   disabled={user.is_admin}

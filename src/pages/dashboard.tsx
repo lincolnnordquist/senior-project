@@ -775,7 +775,7 @@ class Dashboard extends Component<PropsType, StateType> {
                   ))}
                 </ul>
               ) : (
-                <SkeletonLoader />
+                <SkeletonLoader isDarkMode={isDarkMode} />
               )}
             </div>
           ) : (
@@ -1160,7 +1160,7 @@ class Dashboard extends Component<PropsType, StateType> {
                     </div>
 
                 {this.state.resortReviewsLoading ? (
-                  <SkeletonLoader/>
+                  <SkeletonLoader isDarkMode/>
                 ) : 
                 this.state.resortReviews.length === 0 ? (
                       <div style={{
