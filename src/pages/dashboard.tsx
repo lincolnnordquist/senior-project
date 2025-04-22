@@ -5,7 +5,7 @@ import Head from 'next/head';
 import Map from "../components/SkiResortsMap";
 import Button from '@mui/material/Button';
 import Icon from '@mdi/react';
-import { mdiStar, mdiStarOutline } from '@mdi/js';
+import { mdiStar, mdiStarOutline, mdiWeatherLightning } from '@mdi/js';
 import { mdiWeatherCloudy, mdiWeatherSnowy, mdiWeatherSunny, mdiWeatherFog, mdiWeatherPartlyCloudy, mdiWeatherRainy, mdiThermometer, mdiWeatherWindy, mdiDelete, mdiOpenInNew, mdiMapMarker, mdiArrowLeft, mdiSnowflake } from '@mdi/js';
 import { mdiCloseCircle } from '@mdi/js';
 import Modal from "../components/Modal";
@@ -76,11 +76,11 @@ type ReviewType = {
 type StateType = {
   screenSize: number;
   user: User | null;
+
   adminView: boolean;
-
   searchField: string;
-
   resorts: SkiResort[];
+
   resortDetailPage: boolean;
   selectedResort: SkiResort | null;
 
@@ -94,11 +94,13 @@ type StateType = {
 
   myReviews: ReviewType[];
   resortReviews: ReviewType[];
+
   resortReviewsLoading: boolean;
   resortsLoading: boolean;
 
   confirmDeleteModal: boolean;
   successModal: boolean;
+
   selectedReview: ReviewType | null;
   confirmDeleteReviewModal: boolean;
 
@@ -118,6 +120,8 @@ interface User {
 }
 
 interface PropsType {
+  isDarkMode: boolean;
+  user?: User | null;
 }
 
 class Dashboard extends Component<PropsType, StateType> {
@@ -125,9 +129,8 @@ class Dashboard extends Component<PropsType, StateType> {
     super(props);
     this.state = {
       screenSize: typeof window !== "undefined" ? window.innerWidth : 0,
-      user: null,
+      user: props.user || null,
       adminView: false,
-
       searchField: "",
 
       resorts: [],
@@ -145,14 +148,14 @@ class Dashboard extends Component<PropsType, StateType> {
 
       myReviews: [],
       resortReviews: [],
+
       resortReviewsLoading: true,
-
       confirmDeleteModal: false,
+
       successModal: false,
-
       selectedReview: null,
-      confirmDeleteReviewModal: false,
 
+      confirmDeleteReviewModal: false,
       stateFilter: "",
       sortFilter: "",
     };
@@ -429,7 +432,6 @@ class Dashboard extends Component<PropsType, StateType> {
   componentDidMount() {
     this.fetchEverything();
 
-    // Set initial size and add listener immediately
       this.setState({ screenSize: window.innerWidth });
     window.addEventListener("resize", this.handleResize);
   }
@@ -461,8 +463,10 @@ class Dashboard extends Component<PropsType, StateType> {
 
   render() {
     const { resorts, screenSize } = this.state;
+    const { isDarkMode } = this.props;
     const loggedIn = this.state.user !== null;
     const isMobile = this.isMobileView();
+
     const weatherIconMap: { [key: string]: string } = {
       "scattered clouds": mdiWeatherCloudy,
       "broken clouds": mdiWeatherCloudy,
@@ -472,26 +476,67 @@ class Dashboard extends Component<PropsType, StateType> {
       "overcast clouds": mdiWeatherPartlyCloudy,
       "few clouds": mdiWeatherPartlyCloudy,
       "light rain": mdiWeatherRainy,
-      "mist": mdiWeatherFog
+      "mist": mdiWeatherFog,
+      "thunderstorm": mdiWeatherLightning,
+      "rain": mdiWeatherRainy,
+      "clear": mdiWeatherSunny,
+      "clouds": mdiWeatherCloudy,
+      "haze": mdiWeatherFog,
+      "fog": mdiWeatherFog,
+      // add more later
+    };
+
+    const theme = {
+      pageBackground: isDarkMode ? '#1a202c' : '#f8f9fa',
+      cardBackground: isDarkMode ? '#2d3748' : '#ffffff',
+
+      textColor: isDarkMode ? '#e2e8f0' : '#16435d',
+      secondaryTextColor: isDarkMode ? '#a0aec0' : '#6c757d',
+
+      borderColor: isDarkMode ? '#4a5568' : '#d4e3f0',
+
+      inputBg: isDarkMode ? '#4a5568' : '#f8fafd',
+      inputColor: isDarkMode ? '#e2e8f0' : '#16435d',
+      inputPlaceholderColor: isDarkMode ? '#a0aec0' : '#6c757d',
+
+      buttonBg: isDarkMode ? '#4a5568' : '#f6f9fc',
+      buttonColor: isDarkMode ? '#e2e8f0' : '#2a5f9e',
+      buttonHoverBg: isDarkMode ? '#718096' : '#ffffff',
+
+      linkBlue: isDarkMode ? '#63b3ed' : '#0d6efd',
+      starColor: isDarkMode ? '#ecc94b' : '#FFD700',
+
+      skeletonBg: isDarkMode ? '#4a5568' : '#e0e0e0',
+      skeletonHighlight: isDarkMode ? '#718096' : '#f5f5f5',
+      snowColor: isDarkMode ? '#bee3f8' : '#2196f3',
+
+      successColor: isDarkMode ? '#68d391' : '#2f855a',
+      errorColor: isDarkMode ? '#fc8181' : '#dc3545',
+
+      modalBg: isDarkMode ? '#2d3748' : '#fff',
+      confirmButtonBg: isDarkMode ? '#38a169' : '#28a745',
     };
 
     const inputStyle: React.CSSProperties = {
           padding: "0.75rem",
           borderRadius: "0.5rem",
-          border: "1px solid #d4e3f0",
-          backgroundColor: "#f8fafd",
-          color: "#16435d",
+          border: `1px solid ${theme.borderColor}`,
+          backgroundColor: theme.inputBg,
+          color: theme.inputColor,
           fontSize: "1rem",
           width: "48%",
         }
 
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div style={{ 
+          minHeight: '100vh', 
+          backgroundColor: theme.pageBackground,
+          color: theme.textColor
+       }}>
         <Head>
           <title>SkiScape | Dashboard</title>
         </Head>
 
-        {/* snowfall */}
         {!isMobile && (
           <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 20 }}>
             {[...Array(20)].map((_, i) => (
@@ -504,13 +549,12 @@ class Dashboard extends Component<PropsType, StateType> {
                   opacity: Math.random() * 0.5 + 0.3
                 }}
               >
-                <Icon path={mdiSnowflake} size={0.5} color="#2196f3" />
+                <Icon path={mdiSnowflake} size={0.5} color={theme.snowColor} />
               </div>
             ))}
           </div>
         )}
 
-        {/* Main Content */}
         <div className="relative" style={{ zIndex: 10 }}>
         <div
           style={{
@@ -525,28 +569,29 @@ class Dashboard extends Component<PropsType, StateType> {
               gap: isMobile ? "1rem" : "0"
           }}
         >
-          {/* Left Column - Resort List or Detail Page */}
           {!this.state.resortDetailPage ? (
             <div
               style={{
                 padding: "1rem",
-                backgroundColor: "white",
+                backgroundColor: theme.cardBackground,
                 borderRadius: "0.5rem",
-                boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+                boxShadow: isDarkMode ? "0 2px 8px rgba(0, 0, 0, 0.4)" : "0 2px 8px rgba(0, 0, 0, 0.1)",
                   width: isMobile ? "100%" : "54%",
                   height: isMobile ? "auto" : "80vh",
-                overflowY: "auto"
+                overflowY: "auto",
+                color: theme.textColor
               }}
             >
-                {/* ADD SEARCH HERE */}
                 <div style={{ position: "relative", marginBottom: "1rem" }}>
                   <input 
                     placeholder="Search resorts..."
                     style={{
                       width: "100%",
-                      padding: "0.5rem 2.5rem 0.5rem 0.5rem", // right padding for icon space
-                      border: "1px solid #ccc",
+                      padding: "0.5rem 2.5rem 0.5rem 0.5rem",
+                      border: `1px solid ${theme.borderColor}`,
                       borderRadius: "0.5rem",
+                      backgroundColor: theme.inputBg,
+                      color: theme.inputColor,
                     }}
                     value={this.state.searchField}
                     onChange={(e) => {
@@ -568,10 +613,9 @@ class Dashboard extends Component<PropsType, StateType> {
                     onMouseDown={e => e.currentTarget.style.transform = "translateY(-50%) scale(0.9)"}
                     onMouseUp={e => e.currentTarget.style.transform = "translateY(-50%)"}
                     onMouseLeave={e => e.currentTarget.style.transform = "translateY(-50%)"}
-                    // clear all filters
                     onClick={() => this.setState({ searchField: "", sortFilter: "", stateFilter: "", myReviews: [] })}
                   >
-                    <Icon path={mdiCloseCircle} size={1} color="#6c757d" />
+                    <Icon path={mdiCloseCircle} size={1} color={theme.secondaryTextColor} />
                   </div>
                  
                 </div>
@@ -591,18 +635,12 @@ class Dashboard extends Component<PropsType, StateType> {
                     <option value="">Sort by</option>
                     <option value="highest">Rating (high)</option>
                     <option value="lowest">Rating (low)</option>
-                    {/* temperature */}
                     <option value="temperatureHighest">Temperature (high)</option>
                     <option value="temperatureLowest">Temperature (low)</option>
-                    {/* <option value="nearest">Nearest to Me</option> */}
                   </select>
-
-
 
                 </div>
 
-
-              {/* <p style={{position: "sticky"}}>hi</p> */}
                 {!this.state.resortsLoading ? (
                 <ul style={{ listStyleType: "none", padding: 0 }}>
                   {resorts
@@ -644,18 +682,25 @@ class Dashboard extends Component<PropsType, StateType> {
                           this.fetchResortReviews(resort.id);
                         }}
                         style={{
-                          backgroundColor: "#ffffff",
-                          border: "1px solid #d4e3f0",
+                          backgroundColor: theme.cardBackground,
+                          border: `1px solid ${theme.borderColor}`,
                           padding: "1rem",
                           marginBottom: "1rem",
-                          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
-                          color: "#4a6b82",
+                          boxShadow: isDarkMode ? "0 4px 12px rgba(0, 0, 0, 0.3)" : "0 4px 12px rgba(0, 0, 0, 0.05)",
+                          color: theme.secondaryTextColor,
                           cursor: "pointer",
-                          transition: "transform 0.2s ease-in-out",
+                          transition: "transform 0.2s ease-in-out, background-color 0.2s",
                           textAlign: "left",
+                          borderRadius: '8px'
                         }}
-                        onMouseEnter={e => e.currentTarget.style.transform = "scale(1.01)"}
-                        onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
+                        onMouseEnter={e => {
+                               e.currentTarget.style.transform = "scale(1.01)";
+                               e.currentTarget.style.backgroundColor = isDarkMode ? '#4a5568' : '#f8fafd';
+                           }}
+                          onMouseLeave={e => {
+                              e.currentTarget.style.transform = "scale(1)";
+                              e.currentTarget.style.backgroundColor = theme.cardBackground;
+                          }}
                       >
                         <div style={{ display: "flex", alignItems: "center", marginBottom: "0.5rem", justifyContent: "space-between" }}>
                           <div style={{display: "flex", justifyContent: "center", alignItems: "center"}}>
@@ -668,7 +713,7 @@ class Dashboard extends Component<PropsType, StateType> {
                                 borderRadius: "8px",
                               }}
                             />
-                            <div style={{ fontWeight: "bold", fontSize: "1.1rem", color: "#16435d", justifyContent: "center", marginLeft: "0.5rem" }}>
+                            <div style={{ fontWeight: "bold", fontSize: "1.1rem", color: theme.textColor, marginLeft: "0.5rem" }}>
                               {resort.name}
                             </div>
                           </div>
@@ -689,11 +734,11 @@ class Dashboard extends Component<PropsType, StateType> {
                             <div style={{display: this.state.adminView ? '' : 'none'}} onClick={(e) => {
                               e.stopPropagation();
                               this.setState({ confirmDeleteModal: true, selectedResort: resort });
-                            }}><Icon path={mdiDelete} size={1} color="#dc3545"/></div>
+                            }}><Icon path={mdiDelete} size={1} color={isDarkMode ? '#e53e3e' : "#dc3545"}/></div>
                           </div>
                         </div>
-                        <div style={{ display: "flex", alignItems: "center", margin: "0.5rem 0", color: "#6c757d" }}>
-                          <Icon path={mdiThermometer} size={1} color="#6c757d" />
+                        <div style={{ display: "flex", alignItems: "center", margin: "0.5rem 0", color: theme.secondaryTextColor }}>
+                          <Icon path={mdiThermometer} size={1} color={theme.secondaryTextColor} />
                           <span style={{ marginLeft: "0.5rem" }}>
                             {resort.weather?.temperature !== undefined ? `${resort.weather.temperature}°F` : "N/A"}
                           </span>
@@ -703,7 +748,7 @@ class Dashboard extends Component<PropsType, StateType> {
                               <Icon
                                 path={weatherIconMap[(resort.weather.description || "").toLowerCase()] || mdiWeatherCloudy}
                                 size={1}
-                                color="#6c757d"
+                                color={theme.secondaryTextColor}
                               />
                               <span style={{ marginLeft: "0.5rem" }}>
                                 {resort.weather.description.charAt(0).toUpperCase() + resort.weather.description.slice(1)}
@@ -711,20 +756,19 @@ class Dashboard extends Component<PropsType, StateType> {
                             </>
                           )}
                         </div>
-                        <div style={{ color: "#6c757d" }}></div>
-                      <hr style={{margin: '10px 0'}}/>
-                      <div style={{ color: "#6c757d" }}>
-                        {resort.average_rating != 0 ? <div style={{ display: "flex", gap: "0.25rem" }}>
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <Icon
-                            key={star}
-                            path={resort.average_rating >= star ? mdiStar : mdiStarOutline}
-                            size={1}
-                            color="#FFD700"
-                          />
-                        ))}
-                      </div> :  "No reviews yet"
-                      }
+                        <hr style={{margin: '10px 0', borderColor: theme.borderColor}}/>
+                        <div style={{ color: theme.secondaryTextColor }}>
+                          {resort.average_rating != 0 ? <div style={{ display: "flex", gap: "0.25rem" }}>
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <Icon
+                              key={star}
+                              path={resort.average_rating >= star ? mdiStar : mdiStarOutline}
+                              size={1}
+                              color={theme.starColor}
+                            />
+                          ))}
+                        </div> :  "No reviews yet"
+                        }
                         </div>
                       
                     </div>
@@ -735,22 +779,20 @@ class Dashboard extends Component<PropsType, StateType> {
               )}
             </div>
           ) : (
-            // resort detail section
             <div
               style={{
                 position: "relative",
                 padding: "1rem",
-                background: "#ffffff",
-                border: "1px solid #d4e3f0",
+                background: theme.cardBackground,
+                border: `1px solid ${theme.borderColor}`,
                 borderRadius: "0.5rem",
-                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
+                boxShadow: isDarkMode ? "0 4px 12px rgba(0, 0, 0, 0.3)" : "0 4px 12px rgba(0, 0, 0, 0.05)",
                   width: isMobile ? "100%" : "52%",
                   height: isMobile ? "auto" : "80vh",
                 overflowY: "auto",
                 alignItems: "center",
               }}
             >
-               {/* close button */}
                <div
                  style={{
                    position: "absolute",
@@ -770,67 +812,68 @@ class Dashboard extends Component<PropsType, StateType> {
                    })
                  }
                >
-                 <Icon path={mdiCloseCircle} size={1.5} color="#6c757d" />
+                 <Icon path={mdiCloseCircle} size={1.5} color={theme.secondaryTextColor} />
                </div>
                 <div
                   style={{
-                    background: 'linear-gradient(145deg, #f6f9fc, #ffffff)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '1.5rem',
                     borderRadius: '12px',
-                    padding: '2rem',
+                    padding: '1.5rem',
                     marginBottom: '1.5rem',
-                    textAlign: 'center',
-                    boxShadow: '0 4px 15px rgba(0,0,0,0.05)',
+                    boxShadow: isDarkMode ? 'inset 0 1px 3px rgba(0,0,0,0.3)' : '0 2px 8px rgba(0,0,0,0.06)',
                     position: 'relative'
                   }}
                 >
-              <img
-                          src={this.state.selectedResort?.photoURL}
+                  <img
+                    src={this.state.selectedResort?.photoURL}
                     alt="resort logo"
-                          style={{
-                      width: '120px',
-                      height: '120px',
-                      borderRadius: '12px',
-                      marginBottom: '1rem',
-                      objectFit: 'contain',
-                      backgroundColor: 'white',
-                      padding: '0.5rem',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                    style={{
+                      width: '80px',
+                      height: '80px',
+                      borderRadius: '50%',
+                      backgroundColor: 'transparent',
+                      padding: '0',
+                      flexShrink: 0
                     }}
                   />
-                  <h2 style={{ 
-                    fontSize: '2.5rem',
-                    marginBottom: '0.75rem',
-                    color: '#16435d',
-                    fontWeight: 'bold'
-                  }}>{this.state.selectedResort?.name}</h2>
-              <a
-                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(this.state.selectedResort?.address || "")}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                    style={{ 
-                      color: '#4a6b82',
-                      fontSize: '1.1rem',
-                      textDecoration: 'none',
-                      transition: 'all 0.2s ease',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '0.5rem'
-                    }}
-                  onMouseEnter={e => {
-                      e.currentTarget.style.color = "#2a5f9e";
-                    e.currentTarget.style.textDecoration = "underline";
-                    }}
-                    onMouseLeave={e => {
-                      e.currentTarget.style.color = "#4a6b82";
-                    e.currentTarget.style.textDecoration = "none";
-                  }}
-              >
-                    <Icon path={mdiMapMarker} size={1} />
-                {this.state.selectedResort?.address}
-              </a>
+                  <div style={{ textAlign: 'left' }}>
+                    <h2 style={{ 
+                      fontSize: '2rem',
+                      marginBottom: '0.5rem',
+                      color: theme.textColor,
+                      fontWeight: 'bold',
+                      marginTop: 0
+                    }}>{this.state.selectedResort?.name}</h2>
+                    <a
+                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(this.state.selectedResort?.address || "")}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ 
+                        color: theme.secondaryTextColor,
+                        fontSize: '1rem',
+                        textDecoration: 'none',
+                        transition: 'all 0.2s ease',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.5rem'
+                      }}
+                      onMouseEnter={e => {
+                        e.currentTarget.style.color = theme.linkBlue;
+                        e.currentTarget.style.textDecoration = "underline";
+                      }}
+                      onMouseLeave={e => {
+                        e.currentTarget.style.color = theme.secondaryTextColor;
+                        e.currentTarget.style.textDecoration = "none";
+                      }}
+                    >
+                      <Icon path={mdiMapMarker} size={1} />
+                      {this.state.selectedResort?.address}
+                    </a>
+                  </div>
                 </div>
-              {/* add website here */}
-                <p style={{ display: 'flex', color: "#6c757d", marginBottom: "0.5rem", alignItems: "center", fontSize: "16px", justifyContent: "center" }} onMouseEnter={e => {
+                <p style={{ display: 'flex', color: theme.secondaryTextColor, marginBottom: "0.5rem", alignItems: "center", fontSize: "16px", justifyContent: "center" }} onMouseEnter={e => {
                   e.currentTarget.style.fontWeight = "bold";
                   e.currentTarget.style.cursor = "pointer";
                   e.currentTarget.style.textDecoration = "underline";
@@ -848,62 +891,61 @@ class Dashboard extends Component<PropsType, StateType> {
                       alignItems: 'center',
                       gap: '0.5rem',
                       padding: '0.75rem 1.5rem',
-                      backgroundColor: 'white',
-                      color: '#2a5f9e',
+                      backgroundColor: theme.cardBackground,
+                      color: theme.linkBlue,
                       borderRadius: '8px',
                       textDecoration: 'none',
                       fontSize: '1rem',
                       fontWeight: '500',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                      boxShadow: isDarkMode ? 'none' : '0 2px 8px rgba(0,0,0,0.05)',
                       transition: 'all 0.2s ease',
-                      border: '1px solid #d4e3f0',
+                      border: `1px solid ${theme.borderColor}`,
                       margin: '0.5rem 0 0.5rem 0'
                     }}
                   onMouseEnter={e => {
-                      e.currentTarget.style.backgroundColor = '#f6f9fc';
+                      e.currentTarget.style.backgroundColor = isDarkMode ? theme.inputBg : '#f6f9fc';
                       e.currentTarget.style.transform = 'translateY(-1px)';
-                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+                      e.currentTarget.style.boxShadow = isDarkMode ? '0 2px 6px rgba(0,0,0,0.3)' : '0 4px 12px rgba(0,0,0,0.1)';
                     }}
                     onMouseLeave={e => {
-                      e.currentTarget.style.backgroundColor = 'white';
+                      e.currentTarget.style.backgroundColor = theme.cardBackground;
                       e.currentTarget.style.transform = 'translateY(0)';
-                      e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.05)';
+                      e.currentTarget.style.boxShadow = isDarkMode ? 'none' : '0 2px 8px rgba(0,0,0,0.05)';
                     }}
                   >
                     Visit Resort Website
                 <Icon
                   path={mdiOpenInNew}
                   size={0.9}
-                      color="#2a5f9e"
+                      color={theme.linkBlue}
                 />
                   </a>
                 </p>
               {this.state.selectedResort?.weather && (
                   <>
-                    {/* Current Weather Section */}
                     <div style={{
                       display: 'grid',
                       gridTemplateColumns: 'repeat(3, 1fr)',
                       gap: '1rem',
                       padding: '1.5rem',
-                      background: 'linear-gradient(145deg, #f6f9fc, #ffffff)',
+                      background: isDarkMode ? '#4a5568' : 'linear-gradient(145deg, #f6f9fc, #ffffff)',
                       borderRadius: '12px',
-                      boxShadow: '0 4px 15px rgba(0,0,0,0.05)',
+                      boxShadow: isDarkMode ? 'inset 0 2px 4px rgba(0,0,0,0.2)' : '0 4px 15px rgba(0,0,0,0.05)',
                       marginBottom: '2rem'
                     }}>
                       <div style={{ 
                         textAlign: 'center',
                         padding: '1rem',
                         borderRadius: '8px',
-                        backgroundColor: 'white',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+                        backgroundColor: theme.cardBackground,
+                        boxShadow: isDarkMode ? 'none' : '0 2px 8px rgba(0,0,0,0.05)'
                       }}>
-                        <Icon path={mdiThermometer} size={1.2} color="#2a5f9e" />
-                        <h4 style={{ margin: '0.5rem 0', color: '#16435d', fontSize: '0.9rem' }}>Temperature</h4>
-                        <p style={{ fontSize: '1.25rem', color: '#2a5f9e', fontWeight: 'bold', margin: 0 }}>
+                        <Icon path={mdiThermometer} size={1.2} color={theme.linkBlue} />
+                        <h4 style={{ margin: '0.5rem 0', color: theme.textColor, fontSize: '0.9rem' }}>Temperature</h4>
+                        <p style={{ fontSize: '1.25rem', color: theme.linkBlue, fontWeight: 'bold', margin: 0 }}>
                       {this.state.selectedResort.weather.temperature}°F
                         </p>
-                        <p style={{ fontSize: '0.9rem', color: '#6c757d', margin: '0.25rem 0 0 0' }}>
+                        <p style={{ fontSize: '0.9rem', color: theme.secondaryTextColor, margin: '0.25rem 0 0 0' }}>
                           Feels like {this.state.selectedResort.weather.feelsLike}°F
                         </p>
                   </div>
@@ -912,15 +954,15 @@ class Dashboard extends Component<PropsType, StateType> {
                         textAlign: 'center',
                         padding: '1rem',
                         borderRadius: '8px',
-                        backgroundColor: 'white',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+                        backgroundColor: theme.cardBackground,
+                        boxShadow: isDarkMode ? 'none' : '0 2px 8px rgba(0,0,0,0.05)'
                       }}>
-                        <Icon path={mdiWeatherWindy} size={1.2} color="#2a5f9e" />
-                        <h4 style={{ margin: '0.5rem 0', color: '#16435d', fontSize: '0.9rem' }}>Wind & Humidity</h4>
-                        <p style={{ fontSize: '1.25rem', color: '#2a5f9e', fontWeight: 'bold', margin: 0 }}>
+                        <Icon path={mdiWeatherWindy} size={1.2} color={theme.linkBlue} />
+                        <h4 style={{ margin: '0.5rem 0', color: theme.textColor, fontSize: '0.9rem' }}>Wind & Humidity</h4>
+                        <p style={{ fontSize: '1.25rem', color: theme.linkBlue, fontWeight: 'bold', margin: 0 }}>
                           {this.state.selectedResort.weather.windSpeed} mph
                         </p>
-                        <p style={{ fontSize: '0.9rem', color: '#6c757d', margin: '0.25rem 0 0 0' }}>
+                        <p style={{ fontSize: '0.9rem', color: theme.secondaryTextColor, margin: '0.25rem 0 0 0' }}>
                           Humidity: {this.state.selectedResort.weather.humidity}%
                         </p>
                   </div>
@@ -929,20 +971,20 @@ class Dashboard extends Component<PropsType, StateType> {
                         textAlign: 'center',
                         padding: '1rem',
                         borderRadius: '8px',
-                        backgroundColor: 'white',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+                        backgroundColor: theme.cardBackground,
+                        boxShadow: isDarkMode ? 'none' : '0 2px 8px rgba(0,0,0,0.05)'
                       }}>
                         <Icon 
                           path={weatherIconMap[this.state.selectedResort.weather.description.toLowerCase()] || mdiWeatherCloudy}
                           size={1.2}
-                          color="#2a5f9e"
+                          color={theme.linkBlue}
                         />
-                        <h4 style={{ margin: '0.5rem 0', color: '#16435d', fontSize: '0.9rem' }}>Conditions</h4>
-                        <p style={{ fontSize: '1.25rem', color: '#2a5f9e', fontWeight: 'bold', margin: 0 }}>
+                        <h4 style={{ margin: '0.5rem 0', color: theme.textColor, fontSize: '0.9rem' }}>Conditions</h4>
+                        <p style={{ fontSize: '1.25rem', color: theme.linkBlue, fontWeight: 'bold', margin: 0 }}>
                           {this.state.selectedResort.weather.description.charAt(0).toUpperCase() + 
                            this.state.selectedResort.weather.description.slice(1)}
                         </p>
-                        <p style={{ fontSize: '0.9rem', color: '#6c757d', margin: '0.25rem 0 0 0' }}>
+                        <p style={{ fontSize: '0.9rem', color: theme.secondaryTextColor, margin: '0.25rem 0 0 0' }}>
                           Visibility: {Math.round(this.state.selectedResort.weather.visibility / 1609)} mi
                         </p>
                   </div>
@@ -951,15 +993,15 @@ class Dashboard extends Component<PropsType, StateType> {
                         textAlign: 'center',
                         padding: '1rem',
                         borderRadius: '8px',
-                        backgroundColor: 'white',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+                        backgroundColor: theme.cardBackground,
+                        boxShadow: isDarkMode ? 'none' : '0 2px 8px rgba(0,0,0,0.05)'
                       }}>
-                        <Icon path={mdiSnowflake} size={1.2} color="#2a5f9e" />
-                        <h4 style={{ margin: '0.5rem 0', color: '#16435d', fontSize: '0.9rem' }}>UV Index</h4>
-                        <p style={{ fontSize: '1.25rem', color: '#2a5f9e', fontWeight: 'bold', margin: 0 }}>
+                        <Icon path={mdiSnowflake} size={1.2} color={theme.linkBlue} />
+                        <h4 style={{ margin: '0.5rem 0', color: theme.textColor, fontSize: '0.9rem' }}>UV Index</h4>
+                        <p style={{ fontSize: '1.25rem', color: theme.linkBlue, fontWeight: 'bold', margin: 0 }}>
                           {this.state.selectedResort.weather.uvIndex}
                         </p>
-                        <p style={{ fontSize: '0.9rem', color: '#6c757d', margin: '0.25rem 0 0 0' }}>
+                        <p style={{ fontSize: '0.9rem', color: theme.secondaryTextColor, margin: '0.25rem 0 0 0' }}>
                           Pressure: {this.state.selectedResort.weather.pressure} hPa
                         </p>
                 </div>
@@ -968,12 +1010,12 @@ class Dashboard extends Component<PropsType, StateType> {
                         textAlign: 'center',
                         padding: '1rem',
                         borderRadius: '8px',
-                        backgroundColor: 'white',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+                        backgroundColor: theme.cardBackground,
+                        boxShadow: isDarkMode ? 'none' : '0 2px 8px rgba(0,0,0,0.05)'
                       }}>
-                        <Icon path={mdiWeatherSunny} size={1.2} color="#2a5f9e" />
-                        <h4 style={{ margin: '0.5rem 0', color: '#16435d', fontSize: '0.9rem' }}>Sunrise</h4>
-                        <p style={{ fontSize: '1.25rem', color: '#2a5f9e', fontWeight: 'bold', margin: 0 }}>
+                        <Icon path={mdiWeatherSunny} size={1.2} color={theme.linkBlue} />
+                        <h4 style={{ margin: '0.5rem 0', color: theme.textColor, fontSize: '0.9rem' }}>Sunrise</h4>
+                        <p style={{ fontSize: '1.25rem', color: theme.linkBlue, fontWeight: 'bold', margin: 0 }}>
                           {new Date(this.state.selectedResort.weather.sunrise * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </p>
                       </div>
@@ -982,26 +1024,25 @@ class Dashboard extends Component<PropsType, StateType> {
                         textAlign: 'center',
                         padding: '1rem',
                         borderRadius: '8px',
-                        backgroundColor: 'white',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+                        backgroundColor: theme.cardBackground,
+                        boxShadow: isDarkMode ? 'none' : '0 2px 8px rgba(0,0,0,0.05)'
                       }}>
-                        <Icon path={mdiWeatherSunny} size={1.2} color="#2a5f9e" />
-                        <h4 style={{ margin: '0.5rem 0', color: '#16435d', fontSize: '0.9rem' }}>Sunset</h4>
-                        <p style={{ fontSize: '1.25rem', color: '#2a5f9e', fontWeight: 'bold', margin: 0 }}>
+                        <Icon path={mdiWeatherSunny} size={1.2} color={theme.linkBlue} />
+                        <h4 style={{ margin: '0.5rem 0', color: theme.textColor, fontSize: '0.9rem' }}>Sunset</h4>
+                        <p style={{ fontSize: '1.25rem', color: theme.linkBlue, fontWeight: 'bold', margin: 0 }}>
                           {new Date(this.state.selectedResort.weather.sunset * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </p>
                       </div>
                     </div>
 
-                    {/* Daily Forecast Section */}
                     <div style={{
                       padding: '1.5rem',
-                      background: 'linear-gradient(145deg, #f6f9fc, #ffffff)',
+                      background: isDarkMode ? '#4a5568' : 'linear-gradient(145deg, #f6f9fc, #ffffff)',
                       borderRadius: '12px',
-                      boxShadow: '0 4px 15px rgba(0,0,0,0.05)',
+                      boxShadow: isDarkMode ? 'inset 0 2px 4px rgba(0,0,0,0.2)' : '0 4px 15px rgba(0,0,0,0.05)',
                       marginBottom: '2rem'
                     }}>
-                      <h3 style={{ color: '#16435d', marginBottom: '1rem' }}>8-Day Forecast</h3>
+                      <h3 style={{ color: theme.textColor, marginBottom: '1rem' }}>8-Day Forecast</h3>
                       <div style={{
                         display: 'grid',
                         gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
@@ -1013,12 +1054,12 @@ class Dashboard extends Component<PropsType, StateType> {
                             textAlign: 'center',
                             padding: '1rem',
                             borderRadius: '8px',
-                            backgroundColor: 'white',
-                            boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+                            backgroundColor: theme.cardBackground,
+                            boxShadow: isDarkMode ? 'none' : '0 2px 8px rgba(0,0,0,0.05)'
                           }}>
                             <p style={{ 
                               fontSize: '0.9rem', 
-                              color: '#6c757d', 
+                              color: theme.secondaryTextColor, 
                               marginBottom: '0.5rem' 
                             }}>
                               {new Date(day.date * 1000).toLocaleDateString([], { weekday: 'short' })}
@@ -1026,12 +1067,12 @@ class Dashboard extends Component<PropsType, StateType> {
                             <Icon 
                               path={weatherIconMap[day.weather.description.toLowerCase()] || mdiWeatherCloudy}
                               size={1.2}
-                              color="#2a5f9e"
+                              color={theme.linkBlue}
                             />
                             <div style={{ marginTop: '0.5rem' }}>
                               <p style={{ 
                                 fontSize: '1.1rem', 
-                                color: '#2a5f9e', 
+                                color: theme.linkBlue, 
                                 fontWeight: 'bold', 
                                 margin: 0 
                               }}>
@@ -1039,7 +1080,7 @@ class Dashboard extends Component<PropsType, StateType> {
                               </p>
                               <p style={{ 
                                 fontSize: '0.9rem', 
-                                color: '#6c757d', 
+                                color: theme.secondaryTextColor, 
                                 margin: '0.25rem 0 0 0' 
                               }}>
                                 {Math.round(day.temp.min)}°F
@@ -1048,7 +1089,7 @@ class Dashboard extends Component<PropsType, StateType> {
                             {day.snow && (
                               <p style={{ 
                                 fontSize: '0.8rem', 
-                                color: '#2196f3', 
+                                color: theme.snowColor, 
                                 margin: '0.25rem 0 0 0' 
                               }}>
                                 {day.snow} in
@@ -1059,20 +1100,21 @@ class Dashboard extends Component<PropsType, StateType> {
                       </div>
                     </div>
 
-                    {/* forecast section */}
                     <div style={{
                       padding: '1.5rem',
-                      background: 'linear-gradient(145deg, #f6f9fc, #ffffff)',
+                      background: isDarkMode ? '#4a5568' : 'linear-gradient(145deg, #f6f9fc, #ffffff)',
                       borderRadius: '12px',
-                      boxShadow: '0 4px 15px rgba(0,0,0,0.05)',
+                      boxShadow: isDarkMode ? 'inset 0 2px 4px rgba(0,0,0,0.2)' : '0 4px 15px rgba(0,0,0,0.05)',
                       marginBottom: '2rem'
                     }}>
-                      <h3 style={{ color: '#16435d', marginBottom: '1rem' }}>24-Hour Forecast</h3>
-                      <SlideGroup hourlyForecast={this.state.selectedResort.weather.hourlyForecast} />
+                      <h3 style={{ color: theme.textColor, marginBottom: '1rem' }}>24-Hour Forecast</h3>
+                      <SlideGroup 
+                        hourlyForecast={this.state.selectedResort.weather.hourlyForecast} 
+                        isDarkMode={isDarkMode} 
+                      />  
                     </div>
                   </>
                 )}
-
 
                 <div style={{ 
                     textAlign: "left",
@@ -1086,7 +1128,7 @@ class Dashboard extends Component<PropsType, StateType> {
                     }}>
                       <h3 style={{ 
                         fontWeight: "bold", 
-                        color: "#16435d", 
+                        color: theme.textColor, 
                         margin: 0,
                         fontSize: '1.5rem'
                       }}>Reviews</h3>
@@ -1095,10 +1137,10 @@ class Dashboard extends Component<PropsType, StateType> {
                           display: 'flex',
                           alignItems: 'center',
                           gap: '0.5rem',
-                          backgroundColor: '#f6f9fc',
+                          backgroundColor: theme.inputBg,
                           padding: '0.5rem 1rem',
                           borderRadius: '8px',
-                          color: '#2a5f9e'
+                          color: theme.linkBlue
                         }}>
                           <div style={{ display: "flex", gap: "0.25rem" }}>
                             {[1, 2, 3, 4, 5].map((star) => (
@@ -1106,7 +1148,7 @@ class Dashboard extends Component<PropsType, StateType> {
                                 key={star}
                                 path={this.state.selectedResort?.average_rating || 0 >= star ? mdiStar : mdiStarOutline}
                                 size={0.8}
-                                color="#FFD700"
+                                color={theme.starColor}
                               />
                             ))}
                           </div>
@@ -1118,15 +1160,15 @@ class Dashboard extends Component<PropsType, StateType> {
                     </div>
 
                 {this.state.resortReviewsLoading ? (
-                  <SkeletonLoader />
+                  <SkeletonLoader/>
                 ) : 
                 this.state.resortReviews.length === 0 ? (
                       <div style={{
                         textAlign: 'center',
                         padding: '2rem',
-                        backgroundColor: '#f8f9fa',
+                        backgroundColor: theme.inputBg,
                         borderRadius: '8px',
-                        color: '#6c757d'
+                        color: theme.secondaryTextColor
                       }}>
                         No reviews yet
                       </div>
@@ -1141,10 +1183,10 @@ class Dashboard extends Component<PropsType, StateType> {
                             key={review.id} 
                             style={{ 
                               borderRadius: "8px",
-                              backgroundColor: "#ffffff",
-                              border: "1px solid #e0eaf5",
+                              backgroundColor: theme.cardBackground,
+                              border: `1px solid ${theme.borderColor}`,
                               padding: "1.25rem",
-                    boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
+                    boxShadow: isDarkMode ? 'none' : "0 2px 6px rgba(0,0,0,0.05)",
                             }}
                           >
                             <div style={{ 
@@ -1162,7 +1204,7 @@ class Dashboard extends Component<PropsType, StateType> {
                                   width: '32px',
                                   height: '32px',
                                   borderRadius: '50%',
-                                  backgroundColor: '#2a5f9e',
+                                  backgroundColor: theme.linkBlue,
                                   color: 'white',
                                   display: 'flex',
                                   alignItems: 'center',
@@ -1173,7 +1215,7 @@ class Dashboard extends Component<PropsType, StateType> {
                                   {review.users.first_name[0].toUpperCase()}
                                 </div>
                                 <span style={{
-                                  color: '#16435d',
+                                  color: theme.textColor,
                                   fontWeight: '500'
                                 }}>{review.users.first_name}</span>
                               </div>
@@ -1196,7 +1238,7 @@ class Dashboard extends Component<PropsType, StateType> {
                                   <Icon 
                                     path={mdiDelete} 
                                     size={1} 
-                                    color="#dc3545"
+                                    color={isDarkMode ? '#e53e3e' : "#dc3545"}
                                   />
                         </div>
                               )}
@@ -1207,12 +1249,12 @@ class Dashboard extends Component<PropsType, StateType> {
                             key={star}
                             path={review.rating >= star ? mdiStar : mdiStarOutline}
                                   size={0.9}
-                            color="#FFD700"
+                            color={theme.starColor}
                           />
                         ))}
                       </div>
                             <div style={{
-                              color: '#4a6b82',
+                              color: theme.secondaryTextColor,
                               lineHeight: '1.5'
                             }}>{review.review}</div>
                     </div>
@@ -1223,14 +1265,14 @@ class Dashboard extends Component<PropsType, StateType> {
               
                 {loggedIn && (
                   <div style={{
-                    backgroundColor: '#f6f9fc',
+                    backgroundColor: theme.inputBg,
                     padding: '1.5rem',
                     borderRadius: '12px',
                     marginTop: '2rem',
-                    border: '1px solid #e0eaf5'
+                    border: `1px solid ${theme.borderColor}`
                   }}>
                     <h3 style={{
-                      color: '#16435d',
+                      color: theme.textColor,
                       fontSize: '1.25rem',
                       fontWeight: '600',
                       marginTop: 0,
@@ -1259,7 +1301,6 @@ class Dashboard extends Component<PropsType, StateType> {
                                 transition: 'transform 0.2s ease'
                               }}
                               onMouseEnter={() => {
-                                // Highlight all stars up to this one
                                 const stars = document.querySelectorAll('.rating-star');
                                 stars.forEach((s, index) => {
                                   if (index < star) {
@@ -1268,7 +1309,6 @@ class Dashboard extends Component<PropsType, StateType> {
                                 });
                               }}
                               onMouseLeave={() => {
-                                // Reset all stars
                                 const stars = document.querySelectorAll('.rating-star');
                                 stars.forEach((s) => {
                                   (s as HTMLElement).style.transform = 'scale(1)';
@@ -1280,7 +1320,7 @@ class Dashboard extends Component<PropsType, StateType> {
                                 className="rating-star"
                       path={this.state.ratingInput >= star ? mdiStar : mdiStarOutline}
                       size={1.5}
-                      color="#FFD700"
+                      color={theme.starColor}
                     />
                   </div>
                 ))}
@@ -1297,27 +1337,27 @@ class Dashboard extends Component<PropsType, StateType> {
                             minHeight: '120px',
                             padding: '1rem',
                             borderRadius: '8px',
-                            border: '1px solid #d4e3f0',
-                            backgroundColor: 'white',
+                            border: `1px solid ${theme.borderColor}`,
+                            backgroundColor: theme.cardBackground,
                             fontSize: '1rem',
-                            color: '#16435d',
+                            color: theme.textColor,
                             resize: 'vertical',
                             boxSizing: 'border-box',
                             transition: 'border-color 0.2s ease',
                             outline: 'none'
                           }}
                           onFocus={(e) => {
-                            e.target.style.borderColor = '#2a5f9e';
+                            e.target.style.borderColor = theme.linkBlue;
                           }}
                           onBlur={(e) => {
-                            e.target.style.borderColor = '#d4e3f0';
+                            e.target.style.borderColor = theme.borderColor;
                           }}
                         />
                         <div style={{
                           position: 'absolute',
                           bottom: '0.5rem',
                           right: '0.5rem',
-                          color: '#6c757d',
+                          color: theme.secondaryTextColor,
                           fontSize: '0.875rem'
                         }}>
                           {this.state.reviewInput.length}/500
@@ -1332,7 +1372,7 @@ class Dashboard extends Component<PropsType, StateType> {
                       }}>
                 <Button
                   style={{
-                    backgroundColor: "#0d6efd",
+                    backgroundColor: theme.linkBlue,
                     color: "white",
                             padding: "0.75rem 1.5rem",
                             borderRadius: "8px",
@@ -1353,8 +1393,8 @@ class Dashboard extends Component<PropsType, StateType> {
                           <div style={{
                             padding: '0.5rem 1rem',
                             borderRadius: '8px',
-                            backgroundColor: this.state.errorOccurred ? '#fff5f5' : '#f0fff4',
-                            color: this.state.errorOccurred ? '#dc3545' : '#2f855a',
+                            backgroundColor: this.state.errorOccurred ? (isDarkMode ? '#e53e3e20' : '#fff5f5') : (isDarkMode ? '#38a16920' : '#f0fff4'),
+                            color: this.state.errorOccurred ? (isDarkMode ? '#fc8181' : '#dc3545') : (isDarkMode ? '#68d391' : '#2f855a'),
                             fontSize: '0.875rem',
                             display: 'flex',
                             alignItems: 'center',
@@ -1368,13 +1408,12 @@ class Dashboard extends Component<PropsType, StateType> {
                   </div>
                 )}
 
-                {/* Add back button at the bottom */}
                 <div style={{
                   display: 'flex',
                   justifyContent: 'center',
                   marginTop: '2rem',
                   paddingTop: '1rem',
-                  borderTop: '1px solid #e0eaf5'
+                  borderTop: `1px solid ${theme.borderColor}`
                 }}>
                   <button
                     onClick={() => this.setState({ 
@@ -1391,9 +1430,9 @@ class Dashboard extends Component<PropsType, StateType> {
                       alignItems: 'center',
                       gap: '0.5rem',
                       padding: '0.75rem 2rem',
-                      backgroundColor: '#f6f9fc',
-                      color: '#2a5f9e',
-                      border: '1px solid #d4e3f0',
+                      backgroundColor: theme.buttonBg,
+                      color: theme.buttonColor,
+                      border: `1px solid ${theme.borderColor}`,
                       borderRadius: '8px',
                       cursor: 'pointer',
                       fontSize: '1rem',
@@ -1402,31 +1441,29 @@ class Dashboard extends Component<PropsType, StateType> {
                       boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = '#ffffff';
-                      e.currentTarget.style.transform = 'translateY(-1px)';
-                      e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
+                      e.currentTarget.style.backgroundColor = theme.buttonHoverBg;
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = '#f6f9fc';
-                      e.currentTarget.style.transform = 'translateY(0)';
-                      e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)';
+                      e.currentTarget.style.backgroundColor = theme.buttonBg;
                     }}
                   >
-                    <Icon path={mdiArrowLeft} size={1} color="#2a5f9e" />
+                    <Icon path={mdiArrowLeft} size={1} color={theme.buttonColor} />
                     Back to Resorts
                   </button>
               </div>
             </div>
           )}
 
-          {/* Right Column - Map */}
           <div style={{ 
               width: isMobile ? "100%" : "45%",
               height: isMobile ? "50vh" : "80vh",
               overflow: "hidden", 
-              boxSizing: "border-box"
-              }}>
+              boxSizing: "border-box",
+              borderRadius: '8px',
+              border: isDarkMode ? `1px solid ${theme.borderColor}` : 'none'
+            }}>
             <Map
+            isDarkMode={isDarkMode}
             zip={this.state.user?.zip_code}
             stateFilter={this.state.stateFilter}
               selectedResort={
@@ -1437,143 +1474,9 @@ class Dashboard extends Component<PropsType, StateType> {
             />  
             </div>
           </div>
-
-          {/* Modals */}
-<Modal show={this.state.confirmDeleteModal}>
-  <div
-    style={{
-      textAlign: "center",
-      backgroundColor: "#fff",
-      padding: "2rem",
-      borderRadius: "0.5rem",
-      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
-      maxWidth: "400px",
-      margin: "0 auto"
-    }}
-  >
-    <h3 style={{ color: "#16435d", marginBottom: "1rem" }}>Confirm Delete</h3>
-    <p style={{ color: "#4a6b82", marginBottom: "2rem" }}>
-      Are you sure you want to delete this resort?
-    </p>
-    <div style={{ display: "flex", justifyContent: "space-between" }}>
-      <button
-        onClick={() => this.setState({ confirmDeleteModal: false })}
-        style={{
-          backgroundColor: "#6c757d",
-          color: "#fff",
-          padding: "0.5rem 1rem",
-          border: "none",
-          borderRadius: "4px",
-          cursor: "pointer"
-        }}
-      >
-        Cancel
-      </button>
-      <button
-        onClick={() => {
-          this.deleteResort();
-        }}
-        style={{
-          backgroundColor: "#dc3545",
-          color: "#fff",
-          padding: "0.5rem 1rem",
-          border: "none",
-          borderRadius: "4px",
-          cursor: "pointer"
-        }}
-      >
-        Confirm Delete
-      </button>
-    </div>
-  </div>
-</Modal>
-
-<Modal show={this.state.confirmDeleteReviewModal}>
-  <div
-    style={{
-      textAlign: "center",
-      backgroundColor: "#fff",
-      padding: "2rem",
-      borderRadius: "0.5rem",
-      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
-      maxWidth: "400px",
-      margin: "0 auto"
-    }}
-  >
-    <h3 style={{ color: "#16435d", marginBottom: "1rem" }}>Confirm Deletion</h3>
-    <p style={{ color: "#4a6b82", marginBottom: "2rem" }}>
-      Are you sure you want to delete this review?
-    </p>
-    <div style={{ display: "flex", justifyContent: "space-between" }}>
-      <button
-        onClick={() => this.setState({ confirmDeleteReviewModal: false })}
-        style={{
-          backgroundColor: "#6c757d",
-          color: "#fff",
-          padding: "0.5rem 1rem",
-          border: "none",
-          borderRadius: "4px",
-          cursor: "pointer"
-        }}
-      >
-        Cancel
-      </button>
-      <button
-        onClick={() => {
-          this.deleteReview();
-        }}
-        style={{
-          backgroundColor: "#dc3545",
-          color: "#fff",
-          padding: "0.5rem 1rem",
-          border: "none",
-          borderRadius: "4px",
-          cursor: "pointer"
-        }}
-      >
-        Delete
-      </button>
-    </div>
-  </div>
-</Modal>
-
-<Modal show={this.state.successModal}>
-  <div
-    style={{
-      position: "relative",
-      textAlign: "center",
-      backgroundColor: "#eafaf1",
-      padding: "2rem",
-      borderRadius: "0.5rem",
-      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-      maxWidth: "400px",
-      margin: "0 auto",
-      color: "#155724",
-      fontSize: "1.2rem",
-      fontWeight: "bold",
-    }}
-  >
-    <button
-      onClick={() => this.setState({ successModal: false, successOccurred: false, successMessage: "" })}
-      style={{
-        position: "absolute",
-        top: "0.5rem",
-        right: "0.75rem",
-        background: "transparent",
-        border: "none",
-        fontSize: "1.25rem",
-        cursor: "pointer",
-        color: "#155724"
-      }}
-    >
-      &times;
-    </button>
-    {this.state.successMessage}
-  </div>
-</Modal>
         </div>
 
-        <Footer />
+        <Footer/>
 
         <div className="snowfall-container"></div>
 
@@ -1590,6 +1493,138 @@ class Dashboard extends Component<PropsType, StateType> {
             animation: fall 10s linear infinite;
           }
         `}</style>
+
+        {/* modals here */}
+
+        {/* confirm delete modal */}
+        <Modal show={this.state.confirmDeleteModal} isDarkMode={isDarkMode}>
+          <div style={{ 
+              textAlign: "center",
+              backgroundColor: theme.cardBackground,
+              padding: "2rem",
+              borderRadius: "0.5rem",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+              maxWidth: "400px",
+              margin: "0 auto"
+           }}>
+            <h3 style={{ color: theme.textColor, marginBottom: "1rem" }}>Confirm Delete</h3>
+            <p style={{ color: theme.secondaryTextColor, marginBottom: "2rem" }}>
+              Are you sure you want to delete this resort?
+            </p>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <button
+                onClick={() => this.setState({ confirmDeleteModal: false })}
+                style={{
+                  backgroundColor: theme.secondaryTextColor,
+                  color: theme.pageBackground,
+                  padding: "0.5rem 1rem",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer"
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => { this.deleteResort(); }}
+                style={{
+                  backgroundColor: isDarkMode ? '#c53030' : '#dc3545',
+                  color: "#fff",
+                  padding: "0.5rem 1rem",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer"
+                }}
+              >
+                Confirm Delete
+              </button>
+            </div>
+          </div>
+        </Modal>
+
+        {/* confirm delete review modal */}
+        <Modal show={this.state.confirmDeleteReviewModal} isDarkMode={isDarkMode}>
+          <div style={{ 
+              textAlign: "center",
+              backgroundColor: theme.cardBackground,
+              padding: "2rem",
+              borderRadius: "0.5rem",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+              maxWidth: "400px",
+              margin: "0 auto"
+           }}>
+            <h3 style={{ color: theme.textColor, marginBottom: "1rem" }}>Confirm Deletion</h3>
+            <p style={{ color: theme.secondaryTextColor, marginBottom: "2rem" }}>
+              Are you sure you want to delete this review?
+            </p>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <button
+                onClick={() => this.setState({ confirmDeleteReviewModal: false })}
+                style={{
+                  backgroundColor: theme.secondaryTextColor,
+                  color: theme.pageBackground,
+                  padding: "0.5rem 1rem",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer"
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => { this.deleteReview(); }}
+                style={{
+                  backgroundColor: isDarkMode ? '#c53030' : '#dc3545',
+                  color: "#fff",
+                  padding: "0.5rem 1rem",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer"
+                }}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </Modal>
+
+        {/* success modal */}
+        <Modal show={this.state.successModal} isDarkMode={isDarkMode}>
+          <div
+            style={{
+              position: "relative",
+              textAlign: "center",
+              backgroundColor: isDarkMode ? '#2d3748' : '#eafaf1',
+              padding: "2rem",
+              borderRadius: "0.5rem",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+              maxWidth: "400px",
+              margin: "0 auto",
+              color: isDarkMode ? theme.successColor : '#155724',
+              fontSize: "1.2rem",
+              fontWeight: "bold",
+              border: isDarkMode ? `1px solid ${theme.successColor}`: 'none'
+            }}
+          >
+            <button
+              onClick={() => this.setState({ successModal: false, successOccurred: false, successMessage: "" })}
+              style={{
+                position: "absolute",
+                top: "0.5rem",
+                right: "0.75rem",
+                background: "transparent",
+                border: "none",
+                fontSize: "1.25rem",
+                cursor: "pointer",
+                color: isDarkMode ? theme.successColor : '#155724'
+              }}
+            >
+              &times;
+            </button>
+            {this.state.successMessage}
+          </div>
+        </Modal>
+
       </div>
     );
   }
@@ -1599,6 +1634,7 @@ export default Dashboard;
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   return {
-    props: {},
+    props: {
+    },
   };
 };

@@ -108,13 +108,15 @@ type StateType = {
 };
 
 interface PropsType {
+  isDarkMode: boolean;
+  user?: User | null;
 }
 
-class Dashboard extends Component<PropsType, StateType> {
+class AdminPage extends Component<PropsType, StateType> {
   constructor(props: PropsType) {
     super(props);
     this.state = {
-        user: null,
+        user: props.user || null,
         resorts: [],
         screenSize: typeof window !== "undefined" ? window.innerWidth : 0,
         errorOccurred: false,
@@ -313,14 +315,40 @@ class Dashboard extends Component<PropsType, StateType> {
   }
 
   render() {
+    const { isDarkMode } = this.props;
+    const isMobile = this.isMobileView();
+
+    const theme = {
+      pageBackground: isDarkMode ? '#1a202c' : '#f4f7fc',
+      cardBackground: isDarkMode ? '#2d3748' : 'white',
+      textColor: isDarkMode ? '#e2e8f0' : '#16435d',
+      secondaryTextColor: isDarkMode ? '#a0aec0' : '#4a6b82',
+      borderColor: isDarkMode ? '#4a5568' : '#e0eaf5',
+      inputBg: isDarkMode ? '#4a5568' : '#f8fafd',
+      inputColor: isDarkMode ? '#e2e8f0' : '#16435d',
+      buttonBg: isDarkMode ? '#4a5568' : '#f6f9fc',
+      buttonColor: isDarkMode ? '#e2e8f0' : '#2a5f9e',
+      buttonHoverBg: isDarkMode ? '#718096' : '#ffffff',
+      activeButtonBg: isDarkMode ? '#4a5568' : '#e3f2fd',
+      activeButtonColor: isDarkMode ? '#ffffff' : '#16435d',
+      tableHeaderBg: isDarkMode ? '#4a5568' : '#f6f9fc',
+      tableRowHoverBg: isDarkMode ? '#4a5568' : '#f6f9fc',
+      snowColor: isDarkMode ? '#bee3f8' : '#2196f3',
+      successColor: isDarkMode ? '#68d391' : 'green',
+      errorColor: isDarkMode ? '#fc8181' : 'red',
+      modalBg: isDarkMode ? '#2d3748' : '#fff',
+      confirmButtonBg: isDarkMode ? '#38a169' : '#28a745',
+    };
+
     const inputStyle: React.CSSProperties = {
       padding: "0.75rem",
       borderRadius: "0.5rem",
-      border: "1px solid #d4e3f0",
-      backgroundColor: "#f8fafd",
-      color: "#16435d",
-      fontSize: "1rem"
-    }
+      border: `1px solid ${theme.borderColor}`,
+      backgroundColor: theme.inputBg,
+      color: theme.inputColor,
+      fontSize: "1rem",
+      width: '100%',
+    };
 
     const containerStyle: React.CSSProperties = {
       display: "flex",
@@ -348,13 +376,12 @@ class Dashboard extends Component<PropsType, StateType> {
       fontSize: "1.2rem"
     };
 
-    const isMobile = this.isMobileView();
-
     const cardStyle: React.CSSProperties = {
-      backgroundColor: "white",
+      backgroundColor: theme.cardBackground,
+      color: theme.textColor,
       borderRadius: "12px",
       padding: isMobile ? "1rem" : "2rem",
-      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
+      boxShadow: isDarkMode ? "0 4px 12px rgba(0, 0, 0, 0.3)" : "0 4px 12px rgba(0, 0, 0, 0.08)",
       flex: 1,
       minWidth: isMobile ? "100%" : "300px",
       marginBottom: isMobile ? "1rem" : "0",
@@ -363,7 +390,7 @@ class Dashboard extends Component<PropsType, StateType> {
     return (
       <div style={{
         minHeight: "100vh",
-        backgroundColor: "#f4f7fc",
+        backgroundColor: theme.pageBackground,
         padding: isMobile ? "1rem" : "2rem",
         position: 'relative',
         overflow: 'hidden'
@@ -372,7 +399,6 @@ class Dashboard extends Component<PropsType, StateType> {
           <title>SkiScape | Admin</title>
         </Head>
         
-        {/* snowfall */}
         {!isMobile && (
            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, pointerEvents: 'none', zIndex: 0 }}>
                {[...Array(20)].map((_, i) => (
@@ -386,7 +412,7 @@ class Dashboard extends Component<PropsType, StateType> {
                    opacity: Math.random() * 0.5 + 0.3,
                    }}
                >
-                   <Icon path={mdiSnowflake} size={0.5} color="#2196f3" />
+                   <Icon path={mdiSnowflake} size={0.5} color={theme.snowColor} />
                </div>
                ))}
            </div>
@@ -395,7 +421,7 @@ class Dashboard extends Component<PropsType, StateType> {
         <div style={{ maxWidth: "1400px", margin: "0 auto", position: 'relative', zIndex: 1 }}>
           <h1 style={{
             fontSize: isMobile ? "1.8rem" : "2.5rem",
-            color: "#16435d",
+            color: theme.textColor,
             marginBottom: "2rem",
             textAlign: "center",
             fontWeight: "bold",
@@ -415,6 +441,13 @@ class Dashboard extends Component<PropsType, StateType> {
               maxWidth: isMobile ? '100%' : '300px',
               padding: isMobile ? '1rem' : '1.5rem'
             }}>
+              <h2 style={{ 
+                fontSize: isMobile ? '1.2rem' : '1.5rem', 
+                color: theme.textColor, 
+                marginBottom: '1.5rem',
+                borderBottom: `1px solid ${theme.borderColor}`,
+                paddingBottom: '0.75rem'
+              }}>Sections</h2>
               <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                  {['Add Resort', 'Manage Users', 'Admin Analytics'].map(section => (
                    <li key={section} style={{ marginBottom: '0.75rem' }}>
@@ -425,14 +458,14 @@ class Dashboard extends Component<PropsType, StateType> {
                          padding: '0.75rem 1rem',
                          border: 'none',
                          borderRadius: '8px',
-                         backgroundColor: this.state.selectedSection === section ? '#e3f2fd' : 'transparent',
-                         color: this.state.selectedSection === section ? '#16435d' : '#4a6b82',
+                         backgroundColor: this.state.selectedSection === section ? theme.activeButtonBg : 'transparent',
+                         color: this.state.selectedSection === section ? theme.activeButtonColor : theme.secondaryTextColor,
                          textAlign: 'left',
                          fontWeight: this.state.selectedSection === section ? '600' : '500',
                          cursor: 'pointer',
                          transition: 'background-color 0.2s ease'
                        }}
-                        onMouseEnter={(e) => { if (this.state.selectedSection !== section) e.currentTarget.style.backgroundColor = '#f6f9fc'; }}
+                        onMouseEnter={(e) => { if (this.state.selectedSection !== section) e.currentTarget.style.backgroundColor = isDarkMode ? '#4a5568' : '#f6f9fc'; }}
                         onMouseLeave={(e) => { if (this.state.selectedSection !== section) e.currentTarget.style.backgroundColor = 'transparent'; }}
                      >
                        {section}
@@ -449,7 +482,7 @@ class Dashboard extends Component<PropsType, StateType> {
             }}>
               {this.state.selectedSection === "Add Resort" && (
                 <div>
-                  <h2 style={{ fontSize: isMobile ? '1.2rem' : '1.5rem', color: '#16435d', marginBottom: '1.5rem' }}>Add New Resort</h2>
+                  <h2 style={{ fontSize: isMobile ? '1.2rem' : '1.5rem', color: theme.textColor, marginBottom: '1.5rem' }}>Add New Resort</h2>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                       <input 
                           required 
@@ -566,15 +599,15 @@ class Dashboard extends Component<PropsType, StateType> {
                      
                   <div style={{ marginTop: '1.5rem', textAlign: 'center' }}> 
                        {this.state.errorOccurred ? 
-                        <p style={{ color: "red", fontSize: "14px", marginBottom: "1rem" }}>{this.state.errorMessage}</p>
+                        <p style={{ color: theme.errorColor, fontSize: "14px", marginBottom: "1rem" }}>{this.state.errorMessage}</p>
                        : this.state.successOccurred ?
-                        <p style={{ color: "green", fontSize: "14px", marginBottom: "1rem" }}>{this.state.successMessage}</p>
+                        <p style={{ color: theme.successColor, fontSize: "14px", marginBottom: "1rem" }}>{this.state.successMessage}</p>
                        : null
                       }
                       <button
                         style={{
-                          backgroundColor: "#16435d",
-                          color: "#ffffff",
+                          backgroundColor: theme.textColor,
+                          color: theme.cardBackground,
                           padding: "0.75rem 1.5rem",
                           border: "none",
                           borderRadius: "0.5rem",
@@ -597,35 +630,36 @@ class Dashboard extends Component<PropsType, StateType> {
 
               {this.state.selectedSection === "Manage Users" && (
                 <div>
-                  <h2 style={{ fontSize: isMobile ? '1.2rem' : '1.5rem', color: '#16435d', marginBottom: '1.5rem' }}>Manage Users</h2>
+                  <h2 style={{ fontSize: isMobile ? '1.2rem' : '1.5rem', color: theme.textColor, marginBottom: '1.5rem' }}>Manage Users</h2>
                   <div style={{ overflowX: 'auto' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <thead>
-                          <tr>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Promote</th>
+                          <tr style={{ borderBottom: `1px solid ${theme.borderColor}` }}>
+                            <th style={{ backgroundColor: theme.tableHeaderBg, color: theme.textColor }}>Name</th>
+                            <th style={{ backgroundColor: theme.tableHeaderBg, color: theme.textColor }}>Email</th>
+                            <th style={{ backgroundColor: theme.tableHeaderBg, color: theme.textColor }}>Promote</th>
                           </tr>
                         </thead>
                         <tbody>
                           {this.state.users.map((user) => (
-                            <tr key={user.id}>
-                              <td>{user.first_name} {user.last_name}</td>
-                              <td>{user.email}</td>
+                            <tr key={user.id} className="table-row-hover" style={{ borderBottom: `1px solid ${theme.borderColor}` }}>
+                              <td style={{ backgroundColor: theme.inputBg }}>{user.first_name} {user.last_name}</td>
+                              <td style={{ backgroundColor: theme.inputBg }}>{user.email}</td>
                               <td>
                                 <button
                                   style={{
-                                    backgroundColor: user.is_admin === true ? "none" : "#16435d",
-                                    color: "#ffffff",
+                                    backgroundColor: user.is_admin === true ? "transparent" : theme.textColor,
+                                    color: user.is_admin === true ? theme.secondaryTextColor : theme.cardBackground,
                                     padding: "0.4rem 0.75rem",
-                                    border: "none",
+                                    border: user.is_admin ? `1px solid ${theme.secondaryTextColor}` : "none",
                                     borderRadius: "4px",
                                     cursor: "pointer",
                                     fontSize: "0.9rem"
                                   }}
                                   onClick={() => {this.setState({ confirmPromoteModal: true, selectedUser: user })}}
+                                  disabled={user.is_admin}
                                 >
-                                  {user.is_admin ? "Remove" : "Promote"}
+                                  {user.is_admin ? "Admin" : "Promote"}
                                 </button>
                               </td>
                             </tr>
@@ -638,35 +672,35 @@ class Dashboard extends Component<PropsType, StateType> {
 
               {this.state.selectedSection === "Admin Analytics" && (
                 <div>
-                   <h2 style={{ fontSize: isMobile ? '1.2rem' : '1.5rem', color: '#16435d', marginBottom: '1.5rem' }}>Admin Analytics</h2>
+                   <h2 style={{ fontSize: isMobile ? '1.2rem' : '1.5rem', color: theme.textColor, marginBottom: '1.5rem' }}>Admin Analytics</h2>
                    <div style={{
                     display: 'grid',
                     gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(250px, 1fr))',
                     gap: '1.5rem'
                   }}>
-                       <div style={{ ...cardStyle, padding: '1rem' }}>
-                         <h3 style={{ color: "#16435d", fontSize: "1.1rem" }}>Total Users</h3>
-                         <p style={{ fontSize: "1.5rem", fontWeight: "bold" }}>{this.state.users.length}</p>
+                       <div style={{ ...cardStyle, padding: '1rem', backgroundColor: theme.inputBg }}>
+                         <h3 style={{ color: theme.textColor, fontSize: "1.1rem" }}>Total Users</h3>
+                         <p style={{ fontSize: "1.5rem", fontWeight: "bold", color: theme.textColor }}>{this.state.users.length}</p>
                        </div>
-                       <div style={{ ...cardStyle, padding: '1rem' }}>
-                         <h3 style={{ color: "#16435d", fontSize: "1.1rem" }}>Total Resorts</h3>
-                         <p style={{ fontSize: "1.5rem", fontWeight: "bold" }}>{this.state.resorts.length}</p>
+                       <div style={{ ...cardStyle, padding: '1rem', backgroundColor: theme.inputBg }}>
+                         <h3 style={{ color: theme.textColor, fontSize: "1.1rem" }}>Total Resorts</h3>
+                         <p style={{ fontSize: "1.5rem", fontWeight: "bold", color: theme.textColor }}>{this.state.resorts.length}</p>
                        </div>
-                       <div style={{ ...cardStyle, padding: '1rem' }}>
-                         <h3 style={{ color: "#16435d", fontSize: "1.1rem" }}>Total Reviews</h3>
-                         <p style={{ fontSize: "1.5rem", fontWeight: "bold" }}>{this.state.resortReviews.length}</p>
+                       <div style={{ ...cardStyle, padding: '1rem', backgroundColor: theme.inputBg }}>
+                         <h3 style={{ color: theme.textColor, fontSize: "1.1rem" }}>Total Reviews</h3>
+                         <p style={{ fontSize: "1.5rem", fontWeight: "bold", color: theme.textColor }}>{this.state.resortReviews.length}</p>
                        </div>
-                       <div style={{ ...cardStyle, padding: '1rem' }}>
-                         <h3 style={{ color: "#16435d", fontSize: "1.1rem" }}>Average Rating</h3>
-                         <p style={{ fontSize: "1.5rem", fontWeight: "bold" }}>
+                       <div style={{ ...cardStyle, padding: '1rem', backgroundColor: theme.inputBg }}>
+                         <h3 style={{ color: theme.textColor, fontSize: "1.1rem" }}>Average Rating</h3>
+                         <p style={{ fontSize: "1.5rem", fontWeight: "bold", color: theme.textColor }}>
                            {this.state.resorts.length > 0 
                              ? (this.state.resorts.reduce((sum, resort) => sum + resort.average_rating, 0) / this.state.resorts.length).toFixed(1)
                              : "N/A"}
                          </p>
                        </div>
-                       <div style={{ ...cardStyle, padding: '1rem' }}>
-                         <h3 style={{ color: "#16435d", fontSize: "1.1rem" }}>Most Reviewed Resort</h3>
-                         <p style={{ fontSize: "1rem", fontWeight: "bold" }}>
+                       <div style={{ ...cardStyle, padding: '1rem', backgroundColor: theme.inputBg }}>
+                         <h3 style={{ color: theme.textColor, fontSize: "1.1rem" }}>Most Reviewed Resort</h3>
+                         <p style={{ fontSize: "1rem", fontWeight: "bold", color: theme.textColor }}>
                            {(() => {
                              const resortReviewCounts = this.state.resortReviews.reduce((acc, review) => {
                                acc[review.resort_id] = (acc[review.resort_id] || 0) + 1;
@@ -679,24 +713,24 @@ class Dashboard extends Component<PropsType, StateType> {
                            })()}
                          </p>
                        </div>
-                       <div style={{ ...cardStyle, padding: '1rem' }}>
-                         <h3 style={{ color: "#16435d", fontSize: "1.1rem" }}>Highest Rated Resort</h3>
-                         <p style={{ fontSize: "1rem", fontWeight: "bold" }}>
+                       <div style={{ ...cardStyle, padding: '1rem', backgroundColor: theme.inputBg }}>
+                         <h3 style={{ color: theme.textColor, fontSize: "1.1rem" }}>Highest Rated Resort</h3>
+                         <p style={{ fontSize: "1rem", fontWeight: "bold", color: theme.textColor }}>
                            {this.state.resorts.length > 0 
                              ? `${this.state.resorts.reduce((prev, curr) => prev.average_rating > curr.average_rating ? prev : curr).name} (${this.state.resorts.reduce((prev, curr) => prev.average_rating > curr.average_rating ? prev : curr).average_rating.toFixed(1)})`
                              : "N/A"}
                          </p>
                        </div>
-                       <div style={{ ...cardStyle, padding: '1rem' }}>
-                         <h3 style={{ color: "#16435d", fontSize: "1.1rem" }}>Lowest Rated Resort</h3>
-                         <p style={{ fontSize: "1rem", fontWeight: "bold" }}>
+                       <div style={{ ...cardStyle, padding: '1rem', backgroundColor: theme.inputBg }}>
+                         <h3 style={{ color: theme.textColor, fontSize: "1.1rem" }}>Lowest Rated Resort</h3>
+                         <p style={{ fontSize: "1rem", fontWeight: "bold", color: theme.textColor }}>
                            {this.state.resorts.length > 0 
                              ? `${this.state.resorts.reduce((prev, curr) => prev.average_rating < curr.average_rating ? prev : curr).name} (${this.state.resorts.reduce((prev, curr) => prev.average_rating < curr.average_rating ? prev : curr).average_rating.toFixed(1)})`
                              : "N/A"}
                          </p>
                        </div>
-                       <div style={{ ...cardStyle, padding: '1rem' }}>
-                         <h3 style={{ color: "#16435d", fontSize: "1.1rem" }}>Review Distribution</h3>
+                       <div style={{ ...cardStyle, padding: '1rem', backgroundColor: theme.inputBg }}>
+                         <h3 style={{ color: theme.textColor, fontSize: "1.1rem" }}>Review Distribution</h3>
                          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                            {[5, 4, 3, 2, 1].map((rating) => {
                              const count = this.state.resortReviews.filter(r => r.rating === rating).length;
@@ -718,8 +752,8 @@ class Dashboard extends Component<PropsType, StateType> {
                            })}
                          </div>
                        </div>
-                       <div style={{ ...cardStyle, padding: '1rem' }}>
-                         <h3 style={{ color: "#16435d", fontSize: "1.1rem" }}>Resorts by State</h3>
+                       <div style={{ ...cardStyle, padding: '1rem', backgroundColor: theme.inputBg }}>
+                         <h3 style={{ color: theme.textColor, fontSize: "1.1rem" }}>Resorts by State</h3>
                          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                            {(() => {
                              const stateCounts = this.state.resorts.reduce((acc, resort) => {
@@ -750,7 +784,7 @@ class Dashboard extends Component<PropsType, StateType> {
                 </div>
               )}
                {!this.state.selectedSection && (
-                  <div style={{ textAlign: 'center', padding: '2rem', color: '#6c757d' }}>
+                  <div style={{ textAlign: 'center', padding: '2rem', color: theme.secondaryTextColor }}>
                     <p>Select a section from the left to get started.</p>
                   </div>
                )}
@@ -758,28 +792,26 @@ class Dashboard extends Component<PropsType, StateType> {
           </div>
         </div>
 
-        <Modal show={this.state.confirmPromoteModal}>
-          <div
-            style={{
-              textAlign: "center",
-              backgroundColor: "#fff",
-              padding: "2rem",
-              borderRadius: "0.5rem",
-              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
-              maxWidth: "400px",
-              margin: "0 auto"
-            }}
-          >
-            <h3 style={{ color: "#16435d", marginBottom: "1rem" }}>Confirm Promotion</h3>
-            <p style={{ color: "#4a6b82", marginBottom: "2rem" }}>
+        <Modal show={this.state.confirmPromoteModal} isDarkMode={isDarkMode}>
+          <div style={{
+            textAlign: "center",
+            backgroundColor: theme.modalBg,
+            padding: "2rem",
+            borderRadius: "0.5rem",
+            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+            maxWidth: "400px",
+            margin: "0 auto"
+          }}>
+            <h3 style={{ color: theme.textColor, marginBottom: "1rem" }}>Confirm Promotion</h3>
+            <p style={{ color: theme.secondaryTextColor, marginBottom: "2rem" }}>
               Are you sure you want to promote {this.state.selectedUser?.first_name} {this.state.selectedUser?.last_name} to admin?
             </p>
             <div style={{ display: "flex", justifyContent: "space-between" }}>
               <button
                 onClick={() => this.setState({ confirmPromoteModal: false })}
                 style={{
-                  backgroundColor: "#6c757d",
-                  color: "#fff",
+                  backgroundColor: theme.secondaryTextColor,
+                  color: theme.pageBackground,
                   padding: "0.5rem 1rem",
                   border: "none",
                   borderRadius: "4px",
@@ -793,7 +825,7 @@ class Dashboard extends Component<PropsType, StateType> {
                   this.promoteUser();
                 }}
                 style={{
-                  backgroundColor: "#28a745",
+                  backgroundColor: theme.confirmButtonBg,
                   color: "#fff",
                   padding: "0.5rem 1rem",
                   border: "none",
@@ -807,18 +839,18 @@ class Dashboard extends Component<PropsType, StateType> {
           </div>
         </Modal>
 
-        <Modal show={this.state.successModal}>
+        <Modal show={this.state.successModal} isDarkMode={isDarkMode}>
           <div
             style={{
               position: "relative",
               textAlign: "center",
-              backgroundColor: "#eafaf1",
+              backgroundColor: isDarkMode ? '#2d3748' : '#eafaf1',
               padding: "2rem",
               borderRadius: "0.5rem",
               boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
               maxWidth: "400px",
               margin: "0 auto",
-              color: "#155724",
+              color: isDarkMode ? theme.successColor : '#155724',
               fontSize: "1.2rem",
               fontWeight: "bold",
             }}
@@ -833,7 +865,7 @@ class Dashboard extends Component<PropsType, StateType> {
                 border: "none",
                 fontSize: "1.25rem",
                 cursor: "pointer",
-                color: "#155724"
+                color: isDarkMode ? theme.successColor : '#155724'
               }}
             >
               &times;
@@ -850,15 +882,15 @@ class Dashboard extends Component<PropsType, StateType> {
             td, th {
               padding: ${isMobile ? '0.5rem' : '0.75rem'};
               text-align: left;
-              border-bottom: 1px solid #eee;
+              border-bottom: 1px solid ${theme.borderColor};
             }
             th {
-              background-color: #f6f9fc;
-              color: #16435d;
+              background-color: ${theme.tableHeaderBg};
+              color: ${theme.textColor};
               font-weight: 600;
             }
-            tr:hover {
-              background-color: #f6f9fc;
+            .table-row-hover:hover {
+              background-color: ${theme.tableRowHoverBg} !important;
             }
           `}</style>
       </div>
@@ -866,7 +898,7 @@ class Dashboard extends Component<PropsType, StateType> {
   }
 }
 
-export default Dashboard;
+export default AdminPage;
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
 

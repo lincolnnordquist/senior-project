@@ -11,7 +11,7 @@ import { mdiSki, mdiMapMarker, mdiSnowflake } from '@mdi/js';
 type PropsType = {}
 
 type StateType = {
-  screenSize: number; // Add screen size to state
+  screenSize: number;
 }
 
 class HomePage extends Component<PropsType, StateType> {
@@ -58,63 +58,180 @@ class HomePage extends Component<PropsType, StateType> {
   render(): React.ReactNode {
     const isMobile = this.isMobileView();
 
+    const heroSectionStyle: React.CSSProperties = {
+      backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${Background.src})`,
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+      backgroundAttachment: "fixed",
+      minHeight: "100vh",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      color: "white",
+      position: "relative",
+      overflow: "hidden",
+    };
+
+    const logoStyle: React.CSSProperties = {
+        width: isMobile ? "10rem" : "12rem",
+        margin: "0 auto 2rem auto",
+    };
+
+    const headingStyle: React.CSSProperties = {
+        fontSize: isMobile ? "2.25rem" : "3.75rem",
+        fontWeight: "bold",
+        marginBottom: "1.5rem",
+    };
+
+    const paragraphStyle: React.CSSProperties = {
+        fontSize: isMobile ? "1.25rem" : "1.5rem",
+        marginBottom: "2rem",
+        color: "#e5e7eb",
+        maxWidth: "42rem",
+        margin: "0 auto 2rem auto"
+    };
+
+    const buttonContainerStyle: React.CSSProperties = {
+      display: "flex",
+      flexDirection: isMobile ? "column" : "row",
+      gap: "1rem",
+      justifyContent: "center",
+    };
+
+    const baseButtonStyle: React.CSSProperties = {
+      padding: "0.75rem 2rem",
+      borderRadius: "0.5rem",
+      fontWeight: 600,
+      fontSize: "1.125rem",
+      boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+      transition: "all 0.3s ease",
+      textDecoration: "none",
+      cursor: "pointer",
+      textAlign: "center",
+    };
+
+    const primaryButtonStyle: React.CSSProperties = {
+      ...baseButtonStyle,
+      backgroundColor: "#2563eb",
+      color: "white",
+    };
+
+    const secondaryButtonStyle: React.CSSProperties = {
+      ...baseButtonStyle,
+      backgroundColor: "white",
+      color: "#2563eb",
+    };
+
+    const guestLinkStyle: React.CSSProperties = {
+        display: "inline-block",
+        marginTop: "1.5rem",
+        color: "#e5e7eb",
+        transition: "color 0.3s ease",
+        textDecoration: 'none'
+    };
+
+    const featuresSectionStyle: React.CSSProperties = {
+        padding: "5rem 0",
+        backgroundColor: "white",
+    };
+
+    const featuresContainerStyle: React.CSSProperties = {
+        maxWidth: "72rem",
+        margin: "0 auto",
+        padding: "0 1rem",
+    };
+
+    const featuresHeadingStyle: React.CSSProperties = {
+        fontSize: isMobile ? "1.875rem" : "2.25rem",
+        fontWeight: "bold",
+        textAlign: "center",
+        marginBottom: "4rem",
+        color: "#111827",
+    };
+
+    const featuresGridStyle: React.CSSProperties = {
+        display: "grid",
+        gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)",
+        gap: "2rem",
+    };
+
+    const featureCardStyle: React.CSSProperties = {
+        backgroundColor: "#f9fafb",
+        padding: "1.5rem",
+        borderRadius: "0.75rem",
+        boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+        transition: "box-shadow 0.3s ease",
+    };
+
+    const featureIconContainerStyle: React.CSSProperties = {
+        display: "flex",
+        marginBottom: "1rem",
+    };
+
+    const featureTitleStyle: React.CSSProperties = {
+        fontSize: "1.25rem",
+        fontWeight: 600,
+        marginBottom: "0.5rem",
+        color: "#111827",
+    };
+
+    const featureDescriptionStyle: React.CSSProperties = {
+        color: "#4b5563",
+    };
+
     return (
-      <div className="min-h-screen">
+      <div style={{ minHeight: "100vh" }}>
         <Head>
           <title>SkiScape | Home</title>
           <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
         </Head>
 
-        {/* Hero Section */}
         <div
-          style={{
-            backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${Background.src})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundAttachment: "fixed",
-          }}
-          className="min-h-screen flex flex-col items-center justify-center text-white relative overflow-hidden"
+          style={heroSectionStyle}
         >
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="text-center z-10 px-4"
+            style={{ textAlign: "center", zIndex: 10, padding: "0 1rem" }}
           >
             <img
               src={Logo.src}
               alt="Ski Scape Logo"
-              className="w-40 md:w-48 mx-auto mb-8"
+              style={logoStyle}
             />
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">
+            <h1 style={headingStyle}>
               Welcome to SkiScape
             </h1>
-            <p className="text-xl md:text-2xl mb-8 text-gray-200 max-w-2xl mx-auto">
+            <p style={paragraphStyle}>
               Your all-in-one platform for discovering and reviewing ski resorts
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div style={buttonContainerStyle}>
               <motion.a
-                whileHover={{ scale: 1.05 }}
+                whileHover={{ scale: 1.05, backgroundColor: "#1d4ed8" }}
                 whileTap={{ scale: 0.95 }}
                 href="/signup"
-                className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold text-lg shadow-lg hover:bg-blue-700 transition duration-300"
+                style={primaryButtonStyle}
               >
                 Get Started
               </motion.a>
               <motion.a
-                whileHover={{ scale: 1.05 }}
+                whileHover={{ scale: 1.05, backgroundColor: "#f3f4f6" }}
                 whileTap={{ scale: 0.95 }}
                 href="/login"
-                className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold text-lg shadow-lg hover:bg-gray-100 transition duration-300"
+                style={secondaryButtonStyle}
               >
                 Login
               </motion.a>
             </div>
             <motion.a
-              whileHover={{ scale: 1.05 }}
+              whileHover={{ scale: 1.05, color: "white" }}
               whileTap={{ scale: 0.95 }}
               href="/dashboard"
-              className="inline-block mt-6 text-gray-200 hover:text-white transition duration-300"
+              style={guestLinkStyle}
+              onMouseEnter={e => (e.target as HTMLAnchorElement).style.color = 'white'}
+              onMouseLeave={e => (e.target as HTMLAnchorElement).style.color = '#e5e7eb'}
             >
               Continue as guest →
             </motion.a>
@@ -122,12 +239,13 @@ class HomePage extends Component<PropsType, StateType> {
 
           {/* snowfall */}
           {!isMobile && (
-            <div className="absolute inset-0 pointer-events-none">
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, pointerEvents: 'none' }}>
                 {[...Array(20)].map((_, i) => (
                 <div
                     key={i}
-                    className="absolute animate-fall"
+                    className="animate-fall"
                     style={{
+                    position: 'absolute',
                     left: `${Math.random() * 100}%`,
                     animationDelay: `${Math.random() * 5}s`,
                     opacity: Math.random() * 0.5 + 0.3
@@ -141,27 +259,28 @@ class HomePage extends Component<PropsType, StateType> {
         </div>
 
         {/* Features Section */}
-        <section className="py-20 bg-white">
-          <div className="max-w-6xl mx-auto px-4">
-            <h2 className="text-3xl md:text-4xl font-bold text-center mb-16 text-gray-900">
+        <section style={featuresSectionStyle}>
+          <div style={featuresContainerStyle}>
+            <h2 style={featuresHeadingStyle}>
               Why Choose SkiScape?
             </h2>
-            <div className="grid md:grid-cols-3 gap-8">
+            <div style={featuresGridStyle}>
               {this.features.map((feature, index) => (
                 <motion.div
                   key={index}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.2 }}
-                  className="bg-gray-50 p-6 rounded-xl shadow-md hover:shadow-lg transition duration-300"
+                  whileHover={{ boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)" }}
+                  transition={{ delay: index * 0.2, duration: 0.3 }}
+                  style={featureCardStyle}
                 >
-                  <div className="flex mb-4">
+                  <div style={featureIconContainerStyle}>
                     <Icon path={feature.icon} size={2} color="#2196f3" />
                   </div>
-                  <h3 className="text-xl font-semibold mb-2 text-gray-900">
+                  <h3 style={featureTitleStyle}>
                     {feature.title}
                   </h3>
-                  <p className="text-gray-600">{feature.description}</p>
+                  <p style={featureDescriptionStyle}>{feature.description}</p>
                 </motion.div>
               ))}
             </div>

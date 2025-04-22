@@ -13,15 +13,176 @@ interface MapProps {
   selectedResort?: string;
   stateFilter?: string;
 
-  // undefined when logged out
   zip?: string;
+  isDarkMode: boolean;
 }
 
 interface MapState {
   resorts: SkiResort[];
   zoom: number;
   center: { lat: number; lng: number };
+  mapInstance: google.maps.Map | null;
 }
+
+const darkTheme: google.maps.MapTypeStyle[] = [
+  { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
+  { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
+  { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
+  {
+    featureType: "administrative.locality",
+    elementType: "labels.text.fill",
+    stylers: [{ color: "#d59563" }],
+  },
+  {
+    featureType: "poi",
+    elementType: "labels.text.fill",
+    stylers: [{ color: "#d59563" }],
+  },
+  {
+    featureType: "poi.park",
+    elementType: "geometry",
+    stylers: [{ color: "#263c3f" }],
+  },
+  {
+    featureType: "poi.park",
+    elementType: "labels.text.fill",
+    stylers: [{ color: "#6b9a76" }],
+  },
+  {
+    featureType: "road",
+    elementType: "geometry",
+    stylers: [{ color: "#38414e" }],
+  },
+  {
+    featureType: "road",
+    elementType: "geometry.stroke",
+    stylers: [{ color: "#212a37" }],
+  },
+  {
+    featureType: "road",
+    elementType: "labels.text.fill",
+    stylers: [{ color: "#9ca5b3" }],
+  },
+  {
+    featureType: "road.highway",
+    elementType: "geometry",
+    stylers: [{ color: "#746855" }],
+  },
+  {
+    featureType: "road.highway",
+    elementType: "geometry.stroke",
+    stylers: [{ color: "#1f2835" }],
+  },
+  {
+    featureType: "road.highway",
+    elementType: "labels.text.fill",
+    stylers: [{ color: "#f3d19c" }],
+  },
+  {
+    featureType: "transit",
+    elementType: "geometry",
+    stylers: [{ color: "#2f3948" }],
+  },
+  {
+    featureType: "transit.station",
+    elementType: "labels.text.fill",
+    stylers: [{ color: "#d59563" }],
+  },
+  {
+    featureType: "water",
+    elementType: "geometry",
+    stylers: [{ color: "#17263c" }],
+  },
+  {
+    featureType: "water",
+    elementType: "labels.text.fill",
+    stylers: [{ color: "#515c6d" }],
+  },
+  {
+    featureType: "water",
+    elementType: "labels.text.stroke",
+    stylers: [{ color: "#17263c" }],
+  },
+];
+
+const lightTheme: google.maps.MapTypeStyle[] = [
+  { elementType: "geometry", stylers: [{ color: "#f5f5f5" }] },
+  { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
+  { elementType: "labels.text.fill", stylers: [{ color: "#616161" }] },
+  { elementType: "labels.text.stroke", stylers: [{ color: "#f5f5f5" }] },
+  {
+    featureType: "administrative.land_parcel",
+    elementType: "labels.text.fill",
+    stylers: [{ color: "#bdbdbd" }],
+  },
+  {
+    featureType: "poi",
+    elementType: "geometry",
+    stylers: [{ color: "#eeeeee" }],
+  },
+  {
+    featureType: "poi",
+    elementType: "labels.text.fill",
+    stylers: [{ color: "#757575" }],
+  },
+  {
+    featureType: "poi.park",
+    elementType: "geometry",
+    stylers: [{ color: "#e5e5e5" }],
+  },
+  {
+    featureType: "poi.park",
+    elementType: "labels.text.fill",
+    stylers: [{ color: "#9e9e9e" }],
+  },
+  {
+    featureType: "road",
+    elementType: "geometry",
+    stylers: [{ color: "#ffffff" }],
+  },
+  {
+    featureType: "road.arterial",
+    elementType: "labels.text.fill",
+    stylers: [{ color: "#757575" }],
+  },
+  {
+    featureType: "road.highway",
+    elementType: "geometry",
+    stylers: [{ color: "#dadada" }],
+  },
+  {
+    featureType: "road.highway",
+    elementType: "labels.text.fill",
+    stylers: [{ color: "#616161" }],
+  },
+  {
+    featureType: "road.local",
+    elementType: "labels.text.fill",
+    stylers: [{ color: "#9e9e9e" }],
+  },
+  {
+    featureType: "transit.line",
+    elementType: "geometry",
+    stylers: [{ color: "#e5e5e5" }],
+  },
+  {
+    featureType: "transit.station",
+    elementType: "geometry",
+    stylers: [{ color: "#eeeeee" }],
+  },
+  {
+    featureType: "water",
+    elementType: "geometry",
+    stylers: [{ color: "#c9c9c9" }],
+  },
+  {
+    featureType: "water",
+    elementType: "labels.text.fill",
+    stylers: [{ color: "#9e9e9e" }],
+  },
+];
+
+const lightMapStyle = lightTheme;
 
 class SkiResortsMap extends Component<MapProps, MapState> {
   constructor(props: MapProps) {
@@ -30,6 +191,7 @@ class SkiResortsMap extends Component<MapProps, MapState> {
       resorts: [],
       zoom: 6, 
       center: { lat: 39.5, lng: -108.5 },
+      mapInstance: null,
     };
   }
 
@@ -91,8 +253,7 @@ class SkiResortsMap extends Component<MapProps, MapState> {
   }
 
   componentDidMount() {
-
-      this.initializeMap();
+    this.initializeMap();
 
     fetch("/api/ski_resorts")
       .then((res) => res.ok ? res.json() : Promise.reject("Failed to fetch"))
@@ -117,6 +278,11 @@ class SkiResortsMap extends Component<MapProps, MapState> {
     if (this.props.stateFilter !== prevProps.stateFilter) {
       this.initializeMap();
     }
+
+    if (prevProps.isDarkMode !== this.props.isDarkMode && this.state.mapInstance) {
+        const newStyles = this.props.isDarkMode ? darkTheme : lightMapStyle;
+        this.state.mapInstance.setOptions({ styles: newStyles });
+    }
   }
 
   handleMarkerClick = (resort: SkiResort) => {
@@ -126,7 +292,16 @@ class SkiResortsMap extends Component<MapProps, MapState> {
     });
   };
 
+  onMapLoad = (map: google.maps.Map) => {
+    this.setState({ mapInstance: map });
+  };
+
   render() {
+    const mapOptions: google.maps.MapOptions = {
+        styles: this.props.isDarkMode ? darkTheme : lightMapStyle,
+        disableDefaultUI: false,
+    };
+
     return (
       <LoadScript googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ""}>
         <div
@@ -142,96 +317,8 @@ class SkiResortsMap extends Component<MapProps, MapState> {
             mapContainerStyle={{ width: "100%", height: "100%" }}
             center={this.state.center}
             zoom={this.state.zoom}
-            options={{
-              styles: [
-                {
-                  elementType: "geometry",
-                  stylers: [{ color: "#f5f5f5" }],
-                },
-                {
-                  elementType: "labels.icon",
-                  stylers: [{ visibility: "off" }],
-                },
-                {
-                  elementType: "labels.text.fill",
-                  stylers: [{ color: "#616161" }],
-                },
-                {
-                  elementType: "labels.text.stroke",
-                  stylers: [{ color: "#f5f5f5" }],
-                },
-                {
-                  featureType: "administrative.land_parcel",
-                  elementType: "labels.text.fill",
-                  stylers: [{ color: "#bdbdbd" }],
-                },
-                {
-                  featureType: "poi",
-                  elementType: "geometry",
-                  stylers: [{ color: "#eeeeee" }],
-                },
-                {
-                  featureType: "poi",
-                  elementType: "labels.text.fill",
-                  stylers: [{ color: "#757575" }],
-                },
-                {
-                  featureType: "poi.park",
-                  elementType: "geometry",
-                  stylers: [{ color: "#e5e5e5" }],
-                },
-                {
-                  featureType: "poi.park",
-                  elementType: "labels.text.fill",
-                  stylers: [{ color: "#9e9e9e" }],
-                },
-                {
-                  featureType: "road",
-                  elementType: "geometry",
-                  stylers: [{ color: "#ffffff" }],
-                },
-                {
-                  featureType: "road.arterial",
-                  elementType: "labels.text.fill",
-                  stylers: [{ color: "#757575" }],
-                },
-                {
-                  featureType: "road.highway",
-                  elementType: "geometry",
-                  stylers: [{ color: "#dadada" }],
-                },
-                {
-                  featureType: "road.highway",
-                  elementType: "labels.text.fill",
-                  stylers: [{ color: "#616161" }],
-                },
-                {
-                  featureType: "road.local",
-                  elementType: "labels.text.fill",
-                  stylers: [{ color: "#9e9e9e" }],
-                },
-                {
-                  featureType: "transit.line",
-                  elementType: "geometry",
-                  stylers: [{ color: "#e5e5e5" }],
-                },
-                {
-                  featureType: "transit.station",
-                  elementType: "geometry",
-                  stylers: [{ color: "#eeeeee" }],
-                },
-                {
-                  featureType: "water",
-                  elementType: "geometry",
-                  stylers: [{ color: "#c9c9c9" }],
-                },
-                {
-                  featureType: "water",
-                  elementType: "labels.text.fill",
-                  stylers: [{ color: "#9e9e9e" }],
-                },
-              ],
-            }}
+            options={mapOptions}
+            onLoad={this.onMapLoad}
           >
             {this.state.resorts.map((resort) => (
               <Marker

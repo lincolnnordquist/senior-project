@@ -1,36 +1,80 @@
-import type { AppProps } from "next/app";
-import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import App, { AppContext, AppInitialProps, AppProps } from "next/app";
+import React from "react";
+import { withRouter, Router } from "next/router";
 import NavBar from "../components/NavBar";
 import "../styles/globals.css";
 
-export default function App({ Component, pageProps }: AppProps) {
-  const router = useRouter();
-  const [user, setUser] = useState(null);
+interface MyAppProps extends AppProps {
+  router: Router;
+}
 
-  // Hide navbar on login and signup pages
-  const hideNavbar = ["/login", "/signup"].includes(router.pathname);
+interface MyAppState {
+  user: any | null;
+  isDarkMode: boolean;
+}
 
-  useEffect(() => {
-    // Fetch user data when the app loads
+class MyApp extends React.Component<MyAppProps, MyAppState> {
+  state: MyAppState = {
+    user: null,
+    isDarkMode: false,
+  };
+
+  componentDidMount() {
     fetch("/api/auth/user", {
       credentials: "include",
     })
-      .then((res) => res.json())
+      .then((res) => res.ok ? res.json() : Promise.reject('Failed to fetch user'))
       .then((data) => {
-        if (data.user) {
-          setUser(data.user);
+        if (data && data.user) {
+          this.setState({ user: data.user });
+        } else {
+          this.setState({ user: null });
         }
       })
       .catch((error) => {
         console.error("Failed to fetch user:", error);
+        this.setState({ user: null });
       });
-  }, []);
+  }
 
-  return (
-    <>
-      {!hideNavbar && <NavBar user={user} />}
-      <Component {...pageProps} user={user} />
-    </>
-  );
+  toggleDarkMode = () => {
+    this.setState(prevState => {
+        const newIsDarkMode = !prevState.isDarkMode;
+        this.applyDarkModeStyles(newIsDarkMode);
+        return { isDarkMode: newIsDarkMode };
+    });
+  };
+
+  applyDarkModeStyles = (isDark: boolean) => {
+      if (typeof document !== 'undefined') {
+        document.documentElement.classList.toggle('dark-mode', isDark); 
+        document.body.style.backgroundColor = isDark ? '#1a202c' : '#ffffff'; 
+      }
+  }
+
+  render() {
+    const { Component, pageProps, router } = this.props;
+    const { user, isDarkMode } = this.state;
+
+    const hideNavbar = ["/login", "/signup"].includes(router.pathname);
+
+    return (
+      <>
+        {!hideNavbar && (
+          <NavBar
+            user={user}
+            isDarkMode={isDarkMode}
+            toggleDarkMode={this.toggleDarkMode}
+          />
+        )}
+        <Component
+          {...pageProps}
+          user={user}
+          isDarkMode={isDarkMode}
+        />
+      </>
+    );
+  }
 }
+
+export default withRouter(MyApp);
