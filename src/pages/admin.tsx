@@ -371,22 +371,26 @@ class Dashboard extends Component<PropsType, StateType> {
         <Head>
           <title>SkiScape | Admin</title>
         </Head>
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, pointerEvents: 'none', zIndex: 0 }}>
-          {[...Array(20)].map((_, i) => (
-            <div
-              key={i}
-              style={{
-                position: 'absolute',
-                left: `${Math.random() * 100}%`,
-                animation: `fall ${Math.random() * 5 + 5}s linear infinite`,
-                animationDelay: `${Math.random() * 5}s`,
-                opacity: Math.random() * 0.5 + 0.3,
-              }}
-            >
-              <Icon path={mdiSnowflake} size={0.5} color="#2196f3" />
-            </div>
-          ))}
-        </div>
+        
+        {/* snowfall */}
+        {!isMobile && (
+           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, pointerEvents: 'none', zIndex: 0 }}>
+               {[...Array(20)].map((_, i) => (
+               <div
+                   key={i}
+                   style={{
+                   position: 'absolute',
+                   left: `${Math.random() * 100}%`,
+                   animation: `fall ${Math.random() * 5 + 5}s linear infinite`,
+                   animationDelay: `${Math.random() * 5}s`,
+                   opacity: Math.random() * 0.5 + 0.3,
+                   }}
+               >
+                   <Icon path={mdiSnowflake} size={0.5} color="#2196f3" />
+               </div>
+               ))}
+           </div>
+        )}
 
         <div style={{ maxWidth: "1400px", margin: "0 auto", position: 'relative', zIndex: 1 }}>
           <h1 style={{

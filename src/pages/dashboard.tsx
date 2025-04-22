@@ -491,22 +491,24 @@ class Dashboard extends Component<PropsType, StateType> {
           <title>SkiScape | Dashboard</title>
         </Head>
 
-        {/* Snowfall Effect */}
-        <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 20 }}>
-          {[...Array(20)].map((_, i) => (
-            <div
-              key={i}
-              className="absolute animate-fall"
-        style={{
-                left: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 5}s`,
-                opacity: Math.random() * 0.5 + 0.3
-              }}
-            >
-              <Icon path={mdiSnowflake} size={0.5} color="#2196f3" />
-            </div>
-          ))}
-        </div>
+        {/* snowfall */}
+        {!isMobile && (
+          <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 20 }}>
+            {[...Array(20)].map((_, i) => (
+              <div
+                key={i}
+                className="absolute animate-fall"
+                style={{
+                  left: `${Math.random() * 100}%`,
+                  animationDelay: `${Math.random() * 5}s`,
+                  opacity: Math.random() * 0.5 + 0.3
+                }}
+              >
+                <Icon path={mdiSnowflake} size={0.5} color="#2196f3" />
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Main Content */}
         <div className="relative" style={{ zIndex: 10 }}>

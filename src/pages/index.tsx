@@ -10,7 +10,9 @@ import { mdiSki, mdiMapMarker, mdiSnowflake } from '@mdi/js';
 
 type PropsType = {}
 
-type StateType = {}
+type StateType = {
+  screenSize: number; // Add screen size to state
+}
 
 class HomePage extends Component<PropsType, StateType> {
   private features = [
@@ -33,10 +35,29 @@ class HomePage extends Component<PropsType, StateType> {
 
   constructor(props: PropsType) {
     super(props);
-    this.state = {};
+    this.state = {
+      screenSize: typeof window !== "undefined" ? window.innerWidth : 0,
+    };
   }
 
+  componentDidMount() {
+    this.setState({ screenSize: window.innerWidth });
+    window.addEventListener("resize", this.handleResize);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("resize", this.handleResize);
+  }
+
+  handleResize = () => {
+    this.setState({ screenSize: window.innerWidth });
+  };
+
+  isMobileView = () => this.state.screenSize < 768;
+
   render(): React.ReactNode {
+    const isMobile = this.isMobileView();
+
     return (
       <div className="min-h-screen">
         <Head>
@@ -99,22 +120,24 @@ class HomePage extends Component<PropsType, StateType> {
             </motion.a>
           </motion.div>
 
-          {/* Animated snow effect */}
-          <div className="absolute inset-0 pointer-events-none">
-            {[...Array(20)].map((_, i) => (
-              <div
-                key={i}
-                className="absolute animate-fall"
-                style={{
-                  left: `${Math.random() * 100}%`,
-                  animationDelay: `${Math.random() * 5}s`,
-                  opacity: Math.random() * 0.5 + 0.3
-                }}
-              >
-                <Icon path={mdiSnowflake} size={1} color="white" />
-              </div>
-            ))}
-          </div>
+          {/* snowfall */}
+          {!isMobile && (
+            <div className="absolute inset-0 pointer-events-none">
+                {[...Array(20)].map((_, i) => (
+                <div
+                    key={i}
+                    className="absolute animate-fall"
+                    style={{
+                    left: `${Math.random() * 100}%`,
+                    animationDelay: `${Math.random() * 5}s`,
+                    opacity: Math.random() * 0.5 + 0.3
+                    }}
+                >
+                    <Icon path={mdiSnowflake} size={1} color="white" />
+                </div>
+                ))}
+            </div>
+          )}
         </div>
 
         {/* Features Section */}
