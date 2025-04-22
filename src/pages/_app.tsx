@@ -41,7 +41,7 @@ class MyApp extends React.Component<MyAppProps, MyAppState> {
     this.setState(prevState => {
         const newIsDarkMode = !prevState.isDarkMode;
         this.applyDarkModeStyles(newIsDarkMode);
-        return { isDarkMode: newIsDarkMode };
+        return { isDarkMode: newIsDarkMode }; 
     });
   };
 
